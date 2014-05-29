@@ -13,7 +13,11 @@
 /* interface source */
 struct libconfig_interface libconfig_s;
 
-
+/**
+ * Initializes config_t* and reads a configuration file 
+ *  Shows error and destroys config_t in case of failure
+ * @retval 1 in case of failure
+ **/
 int conf_read_file(config_t *config, const char *config_filename) {
 	libconfig->init(config);
 	if (!libconfig->read_file_src(config, config_filename)) {
@@ -113,6 +117,86 @@ int config_setting_copy(config_setting_t *parent, const config_setting_t *src) {
 	return CONFIG_TRUE;
 }
 
+/**
+ * Converts the value of a setting that is type CONFIG_TYPE_BOOL to bool
+ **/
+bool config_setting_get_bool_real( const config_setting_t *setting ) {
+	if( setting == NULL || setting->type != CONFIG_TYPE_BOOL )
+		return false;
+
+	return ( (setting->value.ival) ? true : false );
+}
+/**
+ * Same as config_setting_lookup_bool, but uses bool instead of int
+ **/
+int config_setting_lookup_bool_real( const config_setting_t *setting, const char *name, bool *value ) {
+	config_setting_t *member = config_setting_get_member(setting, name);
+
+	if( !member )
+		return CONFIG_FALSE;
+	
+	if( config_setting_type(member) != CONFIG_TYPE_BOOL )
+		return CONFIG_FALSE;
+	
+	*value = config_setting_get_bool_real(member);
+
+	return CONFIG_TRUE;
+}
+
+/**
+ * Converts and returns a configuration that is CONFIG_TYPE_INT to uint16
+ **/
+uint16 config_setting_get_uint16( config_setting_t *setting ) {
+	if( setting == NULL || setting->type != CONFIG_TYPE_INT )
+		return 0;
+
+	if( setting->value.ival > _UI16_MAX )
+		setting->value.ival = _UI16_MAX;
+
+	return (uint16)setting->value.ival;
+}
+
+int config_setting_lookup_uint16( const config_setting_t *setting, const char *name, uint16 *value ) {
+	config_setting_t *member = config_setting_get_member(setting, name);
+
+	if( !member )
+		return CONFIG_FALSE;
+
+	if( config_setting_type(member) != CONFIG_TYPE_INT )
+		return CONFIG_FALSE;
+
+	*value = config_setting_get_uint16(member);
+
+	return CONFIG_TRUE;
+}
+
+/**
+ * Converts and returns a configuration that is CONFIG_TYPE_INT to short
+ **/
+short config_setting_get_short( config_setting_t *setting ) {
+	if( setting == NULL || setting->type != CONFIG_TYPE_INT )
+		return 0;
+
+	if( setting->value.ival > SHRT_MAX )
+		setting->value.ival = SHRT_MAX;
+
+	return (short)setting->value.ival;
+}
+
+int config_setting_lookup_short( const config_setting_t *setting, const char *name, short *value ) {
+	config_setting_t *member = config_setting_get_member(setting, name);
+
+	if( !member )
+		return CONFIG_FALSE;
+
+	if( config_setting_type(member) != CONFIG_TYPE_INT )
+		return CONFIG_FALSE;
+
+	*value = config_setting_get_short(member);
+
+	return CONFIG_TRUE;
+}
+
 void libconfig_defaults(void) {
 	libconfig = &libconfig_s;
 	
@@ -190,4 +274,11 @@ void libconfig_defaults(void) {
 	libconfig->setting_copy_elem = config_setting_copy_elem;
 	libconfig->setting_copy_aggregate = config_setting_copy_aggregate;
 	libconfig->setting_copy = config_setting_copy;
+	/* */
+	libconfig->setting_get_bool_real = config_setting_get_bool_real;
+	libconfig->setting_get_uint16 = config_setting_get_uint16;
+	libconfig->setting_get_short = config_setting_get_short;
+	libconfig->setting_lookup_short = config_setting_lookup_short;
+	libconfig->setting_lookup_bool_real = config_setting_lookup_bool_real;
+	libconfig->setting_lookup_uint16 = config_setting_lookup_uint16;
 }
