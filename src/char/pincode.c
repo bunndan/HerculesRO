@@ -15,6 +15,7 @@
 #include "../common/showmsg.h"
 #include "../common/socket.h"
 #include "../common/strlib.h"
+#include "../common/conf.h"
 
 int enabled = PINCODE_OK;
 int changetime = 0;
@@ -150,34 +151,46 @@ void pincode_decrypt(unsigned int userSeed, char* pin) {
 	sprintf(pin, "%d%d%d%d", pin[0], pin[1], pin[2], pin[3]);
 }
 
-bool pincode_config_read(char *w1, char *w2) {
-	
-	while ( true ) {
-		
-		if ( strcmpi(w1, "pincode_enabled") == 0 ) {
-			enabled = atoi(w2);
+/**
+ * Reads 'char_configuration.pincode' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool pincode_config_read( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+	const char *str = NULL;
+
+	if( !(setting = libconfig->lookup(config, "char_configuration.pincode")) ) {
+		ShowError("char_config_read: char_configuration.pincode was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	if( libconfig->setting_lookup_bool(setting, "enabled", &enabled) == CONFIG_TRUE ) {
 #if PACKETVER < 20110309
 			if( enabled ) {
 				ShowWarning("pincode_enabled requires PACKETVER 20110309 or higher. disabling...\n");
 				enabled = 0;
 			}
 #endif
-		} else if ( strcmpi(w1, "pincode_changetime") == 0 ) {
-			changetime = atoi(w2)*60;
-		} else if ( strcmpi(w1, "pincode_maxtry") == 0 ) {
-			maxtry = atoi(w2);
-			if( maxtry > 3 ) {
-				ShowWarning("pincode_maxtry is too high (%d); maximum allowed: 3! capping to 3...\n",maxtry);
-				maxtry = 3;
-			}
-		} else if ( strcmpi(w1, "pincode_charselect") == 0 ) {
-			charselect = atoi(w2);
-		} else
-			return false;
-		
-		break;
 	}
-	
+
+	if( libconfig->setting_lookup_int(setting, "change_time", &changetime) == CONFIG_TRUE )
+		changetime *= 60;
+
+	if( libconfig->setting_lookup_int(setting, "max_tries", &maxtry) == CONFIG_TRUE ) {
+		if( maxtry > 3 ) {
+			ShowWarning("pincode_maxtry is too high (%d); Maximum allowed: 3! Capping to 3...\n",maxtry);
+			maxtry = 3;
+		}
+	}
+
+	if( libconfig->setting_lookup_int(setting, "request", &charselect) == CONFIG_TRUE ) {
+		if( charselect != 1 && charselect != 0 ) {
+			ShowWarning("Invalid pincode.request! Defaulting to 0\n");
+			charselect = 0;
+		}
+	}
+
 	return true;
 }
 

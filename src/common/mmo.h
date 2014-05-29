@@ -127,7 +127,6 @@
 #define MAX_GUILDLEVEL 50
 #define MAX_GUARDIANS 8         // Local max per castle. [Skotlex]
 #define MAX_QUEST_OBJECTIVES 3  // Max quest objectives for a quest
-#define MAX_START_ITEMS 32      // Max number of items allowed to be given to a char whenever it's created. [mkbu95]
 
 // for produce
 #define MIN_ATTRIBUTE 0

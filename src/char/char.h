@@ -76,7 +76,7 @@ extern int char_name_option;
 extern char char_name_letters[];
 extern bool char_gm_read;
 extern int autosave_interval;
-extern int save_log;
+extern bool save_log;
 extern char db_path[];
 extern char char_db[256];
 extern char scdata_db[256];
@@ -117,7 +117,7 @@ extern int db_use_sql_mob_db;
 extern int db_use_sql_mob_skill_db;
 
 extern int guild_exp_rate;
-extern int log_inter;
+extern bool log_inter;
 
 void global_accreg_to_login_start (int account_id, int char_id);
 void global_accreg_to_login_send (void);
