@@ -5530,15 +5530,15 @@ bool char_config_read_first_nest( const char* cfgName, config_t *config ) {
 /**
  * Reads 'char_configuration' and initializes required variables
  * @param cfgName path to configuration file
- * @retval 1 in case of failure
+ * @retval false in case of failure
  **/
-int char_config_read(const char* cfgName)
+bool char_config_read(const char* cfgName)
 {
 	config_t config;
 	const char *import;
 
 	if( libconfig->read_file(&config, cfgName) )
-		return 1;
+		return false; // Error message is already shown by libconfig->read_file
 
 	char_config_read_first_nest(cfgName, &config);
 	char_config_read_inter(cfgName, &config);
@@ -5559,7 +5559,7 @@ int char_config_read(const char* cfgName)
 	}
 
 	config_destroy(&config);
-	return 0;
+	return true;
 }
 
 int do_final(void) {
@@ -5651,6 +5651,9 @@ int do_init(int argc, char **argv) {
 	//Read map indexes
 	mapindex->init();
 	start_point.map = mapindex->name2id("new_zone01");
+
+	safestrncpy(userid, "s1", sizeof(userid));
+	safestrncpy(passwd, "p1", sizeof(passwd));
 		
 	char_config_read((argc < 2) ? CHAR_CONF_NAME : argv[1]);
 	char_lan_config_read((argc > 3) ? argv[3] : LAN_CONF_NAME);
