@@ -974,7 +974,7 @@ void Sql_inter_server_read(const char* cfgName) {
 		return;
 
 	if( !(setting = libconfig->lookup(&config, "inter_configuration.mysql_reconnect")) ) {
-		ShowError("subnet_config_read: inter_configuration.mysql_reconnect was not found in %s!\n", cfgName);
+		ShowError("sql_inter_server_read: inter_configuration.mysql_reconnect was not found in %s!\n", cfgName);
 		config_destroy(&config);
 		return;
 	}
@@ -993,7 +993,7 @@ void Sql_inter_server_read(const char* cfgName) {
 	// import should overwrite any previous configuration, so it should be called last
 	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
 		if( !strcmp(import, cfgName) || !strcmp(import, "conf/inter-server.conf") )
-			ShowWarning("sql_config_read: Loop detected! Skipping 'import'...\n");
+			ShowWarning("sql_inter_server_read: Loop detected! Skipping 'import'...\n");
 		else
 			Sql_inter_server_read(import);
 	}

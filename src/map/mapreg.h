@@ -43,7 +43,7 @@ struct mapreg_interface {
 	int (*save_timer) (int tid, int64 tick, int id, intptr_t data);
 	int (*destroyreg) (DBKey key, DBData *data, va_list ap);
 	void (*reload) (void);
-	bool (*config_read) (const char *w1, const char *w2);
+	bool (*config_read) (config_setting_t *setting);
 };
 
 struct mapreg_interface *mapreg;

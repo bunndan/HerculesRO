@@ -328,10 +328,12 @@ void mapreg_init(void) {
 /**
  * Loads the mapreg configuration file.
  */
-bool mapreg_config_read(const char* w1, const char* w2) {
-	if(!strcmpi(w1, "mapreg_db"))
-		safestrncpy(mapreg->table, w2, sizeof(mapreg->table));
-	else
+bool mapreg_config_read(config_setting_t *setting) {
+
+	if( !setting )
+		return false;
+
+	if( libconfig->setting_lookup_string_char(setting,"mapreg_db", mapreg->table, sizeof(mapreg->table)) != CONFIG_TRUE )
 		return false;
 
 	return true;

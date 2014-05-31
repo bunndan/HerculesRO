@@ -3596,89 +3596,115 @@ void map_reloadnpc(bool clear, const char * const *extra_scripts, int extra_scri
 	}
 }
 
-int inter_config_read(char *cfgName) {
-	char line[1024],w1[1024],w2[1024];
-	FILE *fp;
+/**
+ * Reads 'inter_configuration.connection' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool inter_config_read_connection( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
 
-	if( !( fp = fopen(cfgName,"r") ) ){
-		ShowError("File not found: %s\n",cfgName);
-		return 1;
+	if( !(setting = libconfig->lookup(config, "inter_configuration.sql_connection")) ) {
+		ShowError("inter_config_read: inter_configuration.sql_connection was not found in %s!\n", cfgName);
+		return false;
 	}
-	while(fgets(line, sizeof(line), fp)) {
-		if(line[0] == '/' && line[1] == '/')
-			continue;
-		
-		if( sscanf(line,"%[^:]: %[^\r\n]",w1,w2) < 2 )
-			continue;
-		/* table names */
-		if(strcmpi(w1,"item_db_db")==0)
-			strcpy(map->item_db_db,w2);
-		else if(strcmpi(w1,"mob_db_db")==0)
-			strcpy(map->mob_db_db,w2);
-		else if(strcmpi(w1,"item_db2_db")==0)
-			strcpy(map->item_db2_db,w2);
-		else if(strcmpi(w1,"item_db_re_db")==0)
-			strcpy(map->item_db_re_db,w2);
-		else if(strcmpi(w1,"mob_db2_db")==0)
-			strcpy(map->mob_db2_db,w2);
-		else if(strcmpi(w1,"mob_skill_db_db")==0)
-			strcpy(map->mob_skill_db_db,w2);
-		else if(strcmpi(w1,"mob_skill_db2_db")==0)
-			strcpy(map->mob_skill_db2_db,w2);
-		else if(strcmpi(w1,"interreg_db")==0)
-			strcpy(map->interreg_db,w2);
-		/* map sql stuff */
-		else if(strcmpi(w1,"map_server_ip")==0)
-			strcpy(map->server_ip, w2);
-		else if(strcmpi(w1,"map_server_port")==0)
-			map->server_port=atoi(w2);
-		else if(strcmpi(w1,"map_server_id")==0)
-			strcpy(map->server_id, w2);
-		else if(strcmpi(w1,"map_server_pw")==0)
-			strcpy(map->server_pw, w2);
-		else if(strcmpi(w1,"map_server_db")==0)
-			strcpy(map->server_db, w2);
-		else if(strcmpi(w1,"default_codepage")==0)
-			strcpy(map->default_codepage, w2);
-		else if(strcmpi(w1,"use_sql_item_db")==0) {
-			map->db_use_sql_item_db = config_switch(w2);
-			ShowStatus ("Using item database as SQL: '%s'\n", w2);
-		}
-		else if(strcmpi(w1,"use_sql_mob_db")==0) {
-			map->db_use_sql_mob_db = config_switch(w2);
-			ShowStatus ("Using monster database as SQL: '%s'\n", w2);
-		}
-		else if(strcmpi(w1,"use_sql_mob_skill_db")==0) {
-			map->db_use_sql_mob_skill_db = config_switch(w2);
-			ShowStatus ("Using monster skill database as SQL: '%s'\n", w2);
-		}
-		else if(strcmpi(w1,"autotrade_merchants_db")==0)
-			strcpy(map->autotrade_merchants_db, w2);
-		else if(strcmpi(w1,"autotrade_data_db")==0)
-			strcpy(map->autotrade_data_db, w2);
-		else if(strcmpi(w1,"npc_market_data_db")==0)
-			strcpy(map->npc_market_data_db, w2);
-		/* sql log db */
-		else if(strcmpi(w1,"log_db_ip")==0)
-			strcpy(logs->db_ip, w2);
-		else if(strcmpi(w1,"log_db_id")==0)
-			strcpy(logs->db_id, w2);
-		else if(strcmpi(w1,"log_db_pw")==0)
-			strcpy(logs->db_pw, w2);
-		else if(strcmpi(w1,"log_db_port")==0)
-			logs->db_port = atoi(w2);
-		else if(strcmpi(w1,"log_db_db")==0)
-			strcpy(logs->db_name, w2);
-		/* mapreg */
-		else if( mapreg->config_read(w1,w2) )
-			continue;
-		/* import */
-		else if(strcmpi(w1,"import")==0)
-			map->inter_config_read(w2);
-	}
-	fclose(fp);
 
-	return 0;
+	libconfig->setting_lookup_string_char(setting, "default_codepage", map->default_codepage, sizeof(map->default_codepage));
+
+	if( !(setting = libconfig->lookup(config, "inter_configuration.sql_connection.map_server")) ) {
+		ShowError("inter_config_read: inter_configuration.sql_connection.map_server was not found in %s!\n", cfgName);
+	} else {
+		libconfig->setting_lookup_int(setting, "port", &map->port);
+		libconfig->setting_lookup_string_char(setting, "server_ip", map->server_ip, sizeof(map->server_ip));
+		libconfig->setting_lookup_string_char(setting, "server_id", map->server_id, sizeof(map->server_id));
+		libconfig->setting_lookup_string_char(setting, "server_pw", map->server_pw, sizeof(map->server_pw));
+		libconfig->setting_lookup_string_char(setting, "server_db", map->server_db, sizeof(map->server_db));
+	}
+
+	if( !(setting = libconfig->lookup(config, "inter_configuration.sql_connection.log_database")) ) {
+		ShowError("inter_config_read: inter_configuration.sql_connection.map_server was not found in %s!\n", cfgName);
+	} else {
+		libconfig->setting_lookup_int(setting, "port", &logs->db_port);
+		libconfig->setting_lookup_string_char(setting, "db_ip", logs->db_ip, sizeof(logs->db_ip));
+		libconfig->setting_lookup_string_char(setting, "db_id", logs->db_id, sizeof(logs->db_id));
+		libconfig->setting_lookup_string_char(setting, "db_pw", logs->db_pw, sizeof(logs->db_pw));
+		libconfig->setting_lookup_string_char(setting, "db_db", logs->db_name, sizeof(logs->db_name));
+	}
+
+	return true;
+}
+
+/**
+ * Reads 'inter_configuration.database_names' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool inter_config_read_database_names( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+
+	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names")) ) {
+		ShowError("inter_config_read: inter_configuration.database_names was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_string_char(setting, "item_db_db", map->item_db_db, sizeof(map->item_db_db));
+	libconfig->setting_lookup_string_char(setting, "item_db_re_db", map->item_db_db, sizeof(map->item_db_re_db));
+	libconfig->setting_lookup_string_char(setting, "item_db2_db", map->item_db_db, sizeof(map->item_db2_db));
+	libconfig->setting_lookup_string_char(setting, "mob_db_db", map->mob_db_db, sizeof(map->mob_db_db));
+	libconfig->setting_lookup_string_char(setting, "mob_db2_db", map->mob_db2_db, sizeof(map->mob_db2_db));
+	libconfig->setting_lookup_string_char(setting, "mob_skill_db_db", map->mob_skill_db_db, sizeof(map->mob_skill_db_db));
+	libconfig->setting_lookup_string_char(setting, "mob_skill_db2_db", map->mob_skill_db_db, sizeof(map->mob_skill_db2_db));
+	libconfig->setting_lookup_string_char(setting, "autotrade_merchants_db", map->autotrade_merchants_db, sizeof(map->autotrade_merchants_db));
+	libconfig->setting_lookup_string_char(setting, "autotrade_data_db", map->autotrade_data_db, sizeof(map->autotrade_data_db));
+	libconfig->setting_lookup_string_char(setting, "npc_market_data_db", map->npc_market_data_db, sizeof(map->npc_market_data_db));
+	mapreg->config_read(setting);
+
+	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.registry")) ) {
+		ShowError("inter_config_read: inter_configuration.database_names.registry was not found in %s!\n", cfgName);
+		return false;
+	}
+	libconfig->setting_lookup_string_char(setting, "interreg_db", map->interreg_db, sizeof(map->interreg_db));
+	return true;
+}
+
+bool inter_config_read(const char *cfgName) {
+	config_t config;
+	config_setting_t *setting;
+
+	const char *import;
+
+	if( libconfig->read_file(&config, cfgName) )
+		return false;
+
+	map->inter_config_read_database_names(cfgName, &config);
+	if( !(setting = libconfig->lookup(&config, "inter_configuration")) ) {
+		ShowError("inter_config_read: inter_configuration was not found in %s!\n", cfgName);
+	} else {
+		if( libconfig->setting_lookup_bool(setting, "use_sql_item", &map->db_use_sql_item_db) == CONFIG_TRUE
+			&& map->db_use_sql_item_db == true )
+			ShowStatus ("Using item database as SQL: '%s'\n", map->item_db_db);
+
+		if( libconfig->setting_lookup_bool(setting, "use_sql_mob_db", &map->db_use_sql_mob_db) == CONFIG_TRUE
+			&& map->db_use_sql_mob_db == true )
+			ShowStatus ("Using monster database as SQL: '%s'\n", map->mob_db_db);
+
+		if( libconfig->setting_lookup_bool(setting, "use_sql_mob_skill_db", &map->db_use_sql_mob_skill_db) == CONFIG_TRUE
+			&& map->db_use_sql_mob_skill_db == true )
+			ShowStatus ("Using monster skill database as SQL: '%s'\n", map->mob_skill_db_db);
+	}
+
+	map->inter_config_read_connection(cfgName, &config);
+
+	// import should overwrite any previous configuration, so it should be called last
+	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
+		if( !strcmp(import, cfgName) || !strcmp(import, map->INTER_CONF_NAME) )
+			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
+		else
+			map->inter_config_read(import);
+	}
+
+	config_destroy(&config);
+	return true;
 }
 
 /*=======================================
@@ -6111,6 +6137,8 @@ void map_defaults(void) {
 	map->config_read_sub = map_config_read_sub;
 	map->reloadnpc_sub = map_reloadnpc_sub;
 	map->inter_config_read = inter_config_read;
+	map->inter_config_read_database_names = inter_config_read_database_names;
+	map->inter_config_read_connection = inter_config_read_connection;
 	map->sql_init = map_sql_init;
 	map->sql_close = map_sql_close;
 	map->zone_mf_cache = map_zone_mf_cache;

@@ -1044,7 +1044,9 @@ struct map_interface {
 	int (*config_read) (char *cfgName);
 	int (*config_read_sub) (char *cfgName);
 	void (*reloadnpc_sub) (char *cfgName);
-	int (*inter_config_read) (char *cfgName);
+	bool (*inter_config_read) (const char *cfgName);
+	bool (*inter_config_read_database_names) ( const char* cfgName, config_t *config );
+	bool (*inter_config_read_connection) ( const char* cfgName, config_t *config );
 	int (*sql_init) (void);
 	int (*sql_close) (void);
 	bool (*zone_mf_cache) (int m, char *flag, char *params);
