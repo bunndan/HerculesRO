@@ -9,6 +9,7 @@
 #include "../../3rdparty/libconfig/libconfig.h"
 
 #include "../common/showmsg.h" // ShowError
+#include "../common/strlib.h" // safestrncpy
 
 /* interface source */
 struct libconfig_interface libconfig_s;
@@ -197,6 +198,22 @@ int config_setting_lookup_short( const config_setting_t *setting, const char *na
 	return CONFIG_TRUE;
 }
 
+/**
+ * Works the same way as setting_lookup_string, but it uses a char instead of a const char
+ * @param sv_size sizeof(setting_variable)
+ * @retval CONFIG_TRUE in case of success
+ **/
+int config_setting_lookup_string_char( config_setting_t *setting, const char *setting_name, char *setting_variable, size_t sv_size ) {
+	const char *str;
+
+	if( libconfig->setting_lookup_string(setting, setting_name, &str) == CONFIG_TRUE ) {
+		safestrncpy(setting_variable, str, sv_size);
+		return CONFIG_TRUE;
+	}
+
+	return CONFIG_FALSE;
+}
+
 void libconfig_defaults(void) {
 	libconfig = &libconfig_s;
 	
@@ -281,4 +298,5 @@ void libconfig_defaults(void) {
 	libconfig->setting_lookup_short = config_setting_lookup_short;
 	libconfig->setting_lookup_bool_real = config_setting_lookup_bool_real;
 	libconfig->setting_lookup_uint16 = config_setting_lookup_uint16;
+	libconfig->setting_lookup_string_char = config_setting_lookup_string_char;
 }

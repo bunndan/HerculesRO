@@ -97,6 +97,7 @@ struct libconfig_interface {
 	int (*setting_lookup_bool_real) ( const config_setting_t *setting, const char *name, bool *value );
 	int (*setting_lookup_uint16) ( const config_setting_t *setting, const char *name, uint16 *value );
 	int (*setting_lookup_short) ( const config_setting_t *setting, const char *name, short *value );
+	int (*setting_lookup_string_char) ( config_setting_t *setting, const char *setting_name, char *setting_variable, size_t sv_size );
 };
 
 struct libconfig_interface *libconfig;
