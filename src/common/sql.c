@@ -14,6 +14,7 @@
 #include "../common/showmsg.h"
 #include "../common/strlib.h"
 #include "../common/timer.h"
+#include "../common/conf.h"
 
 #ifdef WIN32
 #	include "../common/winapi.h" // Needed before mysql.h
@@ -22,8 +23,8 @@
 
 void hercules_mysql_error_handler(unsigned int ecode);
 
-int mysql_reconnect_type;
-unsigned int mysql_reconnect_count;
+int mysql_reconnect_type = 2;
+int mysql_reconnect_count = 1;
 
 /// Sql handle
 struct Sql {
@@ -947,7 +948,7 @@ void SqlStmt_Free(SqlStmt* self)
 }
 /* receives mysql error codes during runtime (not on first-time-connects) */
 void hercules_mysql_error_handler(unsigned int ecode) {
-	static unsigned int retry = 1;
+	static int retry = 1;
 	switch( ecode ) {
 	case 2003:/* Can't connect to MySQL (this error only happens here when failing to reconnect) */
 		if( mysql_reconnect_type == 1 ) {
@@ -959,46 +960,45 @@ void hercules_mysql_error_handler(unsigned int ecode) {
 		break;
 	}
 }
-void Sql_inter_server_read(const char* cfgName, bool first) {
-	int i;
-	char line[1024], w1[1024], w2[1024];
-	FILE* fp;
 
-	fp = fopen(cfgName, "r");
-	if(fp == NULL) {
-		if( first ) {
-			ShowFatalError("File not found: %s\n", cfgName);
-			exit(EXIT_FAILURE);
-		} else
-			ShowError("File not found: %s\n", cfgName);
+/**
+ * Parses mysql_reconnect from inter_configuration
+ **/
+void Sql_inter_server_read(const char* cfgName) {
+	config_t config;
+	config_setting_t *setting;
+
+	const char *import;
+
+	if( libconfig->read_file(&config, cfgName) )
+		return;
+
+	if( !(setting = libconfig->lookup(&config, "inter_configuration.mysql_reconnect")) ) {
+		ShowError("subnet_config_read: inter_configuration.mysql_reconnect was not found in %s!\n", cfgName);
+		config_destroy(&config);
 		return;
 	}
 
-	while(fgets(line, sizeof(line), fp)) {
-		i = sscanf(line, "%[^:]: %[^\r\n]", w1, w2);
-		if(i != 2)
-			continue;
-
-		if(!strcmpi(w1,"mysql_reconnect_type")) {
-			mysql_reconnect_type = atoi(w2);
-			switch( mysql_reconnect_type ) {
-			case 1:
-			case 2:
-				break;
-			default:
-				ShowError("%s::mysql_reconnect_type is set to %d which is not valid, defaulting to 1...\n", cfgName, mysql_reconnect_type);
-				mysql_reconnect_type = 1;
-				break;
-			}
-		} else if(!strcmpi(w1,"mysql_reconnect_count")) {
-			mysql_reconnect_count = atoi(w2);
-			if( mysql_reconnect_count < 1 )
-				mysql_reconnect_count = 1;
-		} else if(!strcmpi(w1,"import"))
-			Sql_inter_server_read(w2,false);
+	if( libconfig->setting_lookup_int(setting, "type", &mysql_reconnect_type) == CONFIG_TRUE ) {
+		if( mysql_reconnect_type != 1 && mysql_reconnect_type != 2 ) {
+			ShowError("%s::mysql_reconnect_type is set to %d which is not valid, defaulting to 1...\n", cfgName, mysql_reconnect_type);
+			mysql_reconnect_type = 1;
+		}
 	}
-	fclose(fp);
+	if( libconfig->setting_lookup_int(setting, "count", &mysql_reconnect_count ) == CONFIG_TRUE ) {
+		if( mysql_reconnect_count < 1 )
+			mysql_reconnect_count = 1;
+	}
 
+	// import should overwrite any previous configuration, so it should be called last
+	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
+		if( !strcmp(import, cfgName) || !strcmp(import, "conf/inter-server.conf") )
+			ShowWarning("sql_config_read: Loop detected! Skipping 'import'...\n");
+		else
+			Sql_inter_server_read(import);
+	}
+
+	config_destroy(&config);
 	return;
 }
 
@@ -1100,7 +1100,7 @@ void Sql_HerculesUpdateSkip(Sql* self,const char *filename) {
 }
 
 void Sql_Init(void) {
-	Sql_inter_server_read("conf/inter-server.conf",true);
+	Sql_inter_server_read("conf/inter-server.conf");
 }
 void sql_defaults(void) {
 	SQL = &sql_s;
