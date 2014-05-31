@@ -30,6 +30,7 @@
 #include "../common/socket.h"
 #include "../common/strlib.h"
 #include "../common/timer.h"
+#include "../common/conf.h"
 
 #define WISDATA_TTL (60*1000)	//Wis data Time To Live (60 seconds)
 #define WISDELLIST_MAX 256		// Number of elements in the list Delete data Wis
@@ -902,56 +903,67 @@ int inter_accreg_fromsql(int account_id,int char_id, int fd, int type)
 	return 1;
 }
 
+/**
+ * Reads 'inter_configuration.connection' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool inter_config_read_connection( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+
+	if( !(setting = libconfig->lookup(config, "inter_configuration.sql_connection")) ) {
+		ShowError("inter_config_read: inter_configuration.sql_connection was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_string_char(setting, "default_codepage", default_codepage, sizeof(default_codepage));
+
+	if( !(setting = libconfig->lookup(config, "inter_configuration.sql_connection.char_server")) ) {
+		ShowError("inter_config_read: inter_configuration.sql_connection.char_server was not found in %s!\n", cfgName);
+	} else {
+		libconfig->setting_lookup_int(setting, "port", &char_server_port);
+		libconfig->setting_lookup_string_char(setting, "server_ip", char_server_ip, sizeof(char_server_ip));
+		libconfig->setting_lookup_string_char(setting, "server_id", char_server_id, sizeof(char_server_id));
+		libconfig->setting_lookup_string_char(setting, "server_pw", char_server_pw, sizeof(char_server_pw));
+		libconfig->setting_lookup_string_char(setting, "server_db", char_server_db, sizeof(char_server_db));
+	}
+
+	return true;
+}
+
 /*==========================================
  * read config file
  *------------------------------------------*/
 static int inter_config_read(const char* cfgName)
 {
-	int i;
-	char line[1024], w1[1024], w2[1024];
-	FILE* fp;
+	config_t config;
+	config_setting_t *setting;
 
-	fp = fopen(cfgName, "r");
-	if(fp == NULL) {
-		ShowError("File not found: %s\n", cfgName);
-		return 1;
+	const char *import;
+
+	if( libconfig->read_file(&config, cfgName) )
+		return 0;
+
+	if( !(setting = libconfig->lookup(&config, "inter_configuration")) ) {
+		ShowError("inter_config_read: inter_configuration was not found in %s!\n", cfgName);
+		return 0;
 	}
+	libconfig->setting_lookup_int(setting, "party_share_level", &party_share_level);
+	libconfig->setting_lookup_bool_real(setting, "log_inter", &log_inter);
 
-	while(fgets(line, sizeof(line), fp))
-	{
-		i = sscanf(line, "%[^:]: %[^\r\n]", w1, w2);
-		if(i != 2)
-			continue;
-
-		if(!strcmpi(w1,"char_server_ip")) {
-			strcpy(char_server_ip,w2);
-		} else
-		if(!strcmpi(w1,"char_server_port")) {
-			char_server_port = atoi(w2);
-		} else
-		if(!strcmpi(w1,"char_server_id")) {
-			strcpy(char_server_id,w2);
-		} else
-		if(!strcmpi(w1,"char_server_pw")) {
-			strcpy(char_server_pw,w2);
-		} else
-		if(!strcmpi(w1,"char_server_db")) {
-			strcpy(char_server_db,w2);
-		} else
-		if(!strcmpi(w1,"default_codepage")) {
-			strcpy(default_codepage,w2);
-		}
-		else if(!strcmpi(w1,"party_share_level"))
-			party_share_level = atoi(w2);
-		else if(!strcmpi(w1,"log_inter"))
-			log_inter = atoi(w2);
-		else if(!strcmpi(w1,"import"))
-			inter_config_read(w2);
-	}
-	fclose(fp);
+	inter_config_read_connection(cfgName, &config);
 
 	ShowInfo ("Done reading %s.\n", cfgName);
 
+	// import should overwrite any previous configuration, so it should be called last
+	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
+		if( !strcmp(import, cfgName) || !strcmp(import, INTER_CONF_NAME) )
+			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
+		else
+			inter_config_read(import);
+	}
+
+	config_destroy(&config);
 	return 0;
 }
 

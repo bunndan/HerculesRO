@@ -21,7 +21,7 @@ void mapif_parse_accinfo2(bool success, int map_fd, int u_fd, int u_aid, int acc
 int inter_log(char *fmt,...);
 int inter_vlog(char *fmt, va_list ap);
 
-#define inter_cfgName "conf/inter-server.conf"
+#define INTER_CONF_NAME "conf/inter-server.conf"
 
 extern unsigned int party_share_level;
 
