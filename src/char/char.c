@@ -5017,8 +5017,8 @@ static int online_data_cleanup(int tid, int64 tick, int id, intptr_t data) {
 }
 
 //----------------------------------
-// Reading Lan Support configuration
-// Rewrote: Anvanced subnet check [LuzZza]
+// Reading LAN Support configuration
+// Rewrote: Advanced subnet check [LuzZza]
 //----------------------------------
 int char_lan_config_read(const char *lancfgName)
 {
@@ -5070,103 +5070,125 @@ int char_lan_config_read(const char *lancfgName)
 	return 0;
 }
 
-void sql_config_read(const char* cfgName)
+/**
+ * Reads 'inter_configuration.database_names.guild' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool sql_config_read_guild( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+	const char *str = NULL;
+
+	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.guild")) ) {
+		ShowError("sql_config_read: inter_configuration.database_names.guild was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_string_char(setting, "main_db", guild_db, sizeof(guild_db));
+	libconfig->setting_lookup_string_char(setting, "alliance_db", guild_alliance_db, sizeof(guild_alliance_db));
+	libconfig->setting_lookup_string_char(setting, "castle_db", guild_castle_db, sizeof(guild_castle_db));
+	libconfig->setting_lookup_string_char(setting, "expulsion_db", guild_expulsion_db, sizeof(guild_expulsion_db));
+	libconfig->setting_lookup_string_char(setting, "member_db", guild_member_db, sizeof(guild_member_db));
+	libconfig->setting_lookup_string_char(setting, "skill_db", guild_skill_db, sizeof(guild_skill_db));
+	libconfig->setting_lookup_string_char(setting, "position_db", guild_position_db, sizeof(guild_position_db));
+	libconfig->setting_lookup_string_char(setting, "storage_db", guild_storage_db, sizeof(guild_storage_db));
+
+	return true;
+}
+
+/**
+ * Reads 'inter_configuration.database_names.pc' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool sql_config_read_pc( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+	const char *str = NULL;
+
+	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.pc")) ) {
+		ShowError("sql_config_read: inter_configuration.database_names.pc was not found in %s!\n", cfgName);
+		return false;
+	}
+	libconfig->setting_lookup_string_char(setting, "hotkey_db", hotkey_db, sizeof(hotkey_db));
+	libconfig->setting_lookup_string_char(setting, "scdata_db", scdata_db, sizeof(scdata_db));
+	libconfig->setting_lookup_string_char(setting, "inventory_db", inventory_db, sizeof(inventory_db));
+	// cart_inventory is not used
+	libconfig->setting_lookup_string_char(setting, "charlog_db", charlog_db, sizeof(charlog_db));
+	libconfig->setting_lookup_string_char(setting, "storage_db", storage_db, sizeof(storage_db));
+	libconfig->setting_lookup_string_char(setting, "skill_db", skill_db, sizeof(skill_db));
+	libconfig->setting_lookup_string_char(setting, "memo_db", memo_db, sizeof(memo_db));
+	libconfig->setting_lookup_string_char(setting, "party_db", party_db, sizeof(party_db));
+	libconfig->setting_lookup_string_char(setting, "pet_db", pet_db, sizeof(pet_db));
+	libconfig->setting_lookup_string_char(setting, "friend_db", friend_db, sizeof(friend_db));
+	libconfig->setting_lookup_string_char(setting, "mail_db", mail_db, sizeof(mail_db));
+	libconfig->setting_lookup_string_char(setting, "auction_db", auction_db, sizeof(auction_db));
+	libconfig->setting_lookup_string_char(setting, "quest_db", quest_db, sizeof(quest_db));
+	libconfig->setting_lookup_string_char(setting, "homunculus_db", homunculus_db, sizeof(homunculus_db));
+	libconfig->setting_lookup_string_char(setting, "skill_homunculus_db", skill_homunculus_db, sizeof(skill_homunculus_db));
+	libconfig->setting_lookup_string_char(setting, "mercenary_db", mercenary_db, sizeof(mercenary_db));
+	libconfig->setting_lookup_string_char(setting, "mercenary_owner_db", mercenary_owner_db, sizeof(mercenary_owner_db));
+	libconfig->setting_lookup_string_char(setting, "elemental_db", elemental_db, sizeof(elemental_db));
+	libconfig->setting_lookup_string_char(setting, "account_data_db", account_data_db, sizeof(account_data_db));
+
+	return true;
+}
+
+/**
+ * Reads 'inter_configuration.database_names.registry' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool sql_config_read_registry( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+	const char *str = NULL;
+
+	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.registry")) ) {
+		ShowError("sql_config_read: inter_configuration.database_names.registry was not found in %s!\n", cfgName);
+		return false;
+	}
+	// Not all registries are read by char-server
+	libconfig->setting_lookup_string_char(setting, "char_reg_num_db", char_reg_num_db, sizeof(char_reg_num_db));
+	libconfig->setting_lookup_string_char(setting, "char_reg_str_db", char_reg_str_db, sizeof(char_reg_str_db));
+	libconfig->setting_lookup_string_char(setting, "acc_reg_str_db", acc_reg_str_db, sizeof(acc_reg_str_db));
+	libconfig->setting_lookup_string_char(setting, "acc_reg_num_db", acc_reg_num_db, sizeof(acc_reg_num_db));
+	libconfig->setting_lookup_string_char(setting, "interreg_db", interreg_db, sizeof(interreg_db));
+
+	return true;
+}
+
+bool sql_config_read(const char* cfgName)
 {
-	char line[1024], w1[1024], w2[1024];
-	FILE* fp;
+	config_t config;
+	config_setting_t *setting;
+	const char *import;
 
-	if ((fp = fopen(cfgName, "r")) == NULL) {
-		ShowError("File not found: %s\n", cfgName);
-		return;
+	if( libconfig->read_file(&config, cfgName) )
+		return false; // Error message is already shown by libconfig->read_file
+
+	if( !(setting = libconfig->lookup(&config, "inter_configuration.database_names")) ) {
+		ShowError("sql_config_read: inter_configuration.database_names was not found in %s!\n", cfgName);
+		config_destroy(&config);
+		return false;
 	}
+	libconfig->setting_lookup_string_char(setting, "char_db", char_db, sizeof(char_db));
+	libconfig->setting_lookup_string_char(setting, "interlog_db", interlog_db, sizeof(interlog_db));
+	libconfig->setting_lookup_string_char(setting, "ragsrvinfo_db", ragsrvinfo_db, sizeof(ragsrvinfo_db));
 
-	while(fgets(line, sizeof(line), fp))
-	{
-		if(line[0] == '/' && line[1] == '/')
-			continue;
+	sql_config_read_registry(cfgName, &config);
+	sql_config_read_pc(cfgName, &config);
+	sql_config_read_guild(cfgName, &config);
 
-		if (sscanf(line, "%[^:]: %[^\r\n]", w1, w2) != 2)
-			continue;
-
-		if(!strcmpi(w1,"char_db"))
-			safestrncpy(char_db, w2, sizeof(char_db));
-		else if(!strcmpi(w1,"scdata_db"))
-			safestrncpy(scdata_db, w2, sizeof(scdata_db));
-		else if(!strcmpi(w1,"cart_db"))
-			safestrncpy(cart_db, w2, sizeof(cart_db));
-		else if(!strcmpi(w1,"inventory_db"))
-			safestrncpy(inventory_db, w2, sizeof(inventory_db));
-		else if(!strcmpi(w1,"charlog_db"))
-			safestrncpy(charlog_db, w2, sizeof(charlog_db));
-		else if(!strcmpi(w1,"storage_db"))
-			safestrncpy(storage_db, w2, sizeof(storage_db));
-		else if(!strcmpi(w1,"skill_db"))
-			safestrncpy(skill_db, w2, sizeof(skill_db));
-		else if(!strcmpi(w1,"interlog_db"))
-			safestrncpy(interlog_db, w2, sizeof(interlog_db));
-		else if(!strcmpi(w1,"memo_db"))
-			safestrncpy(memo_db, w2, sizeof(memo_db));
-		else if(!strcmpi(w1,"guild_db"))
-			safestrncpy(guild_db, w2, sizeof(guild_db));
-		else if(!strcmpi(w1,"guild_alliance_db"))
-			safestrncpy(guild_alliance_db, w2, sizeof(guild_alliance_db));
-		else if(!strcmpi(w1,"guild_castle_db"))
-			safestrncpy(guild_castle_db, w2, sizeof(guild_castle_db));
-		else if(!strcmpi(w1,"guild_expulsion_db"))
-			safestrncpy(guild_expulsion_db, w2, sizeof(guild_expulsion_db));
-		else if(!strcmpi(w1,"guild_member_db"))
-			safestrncpy(guild_member_db, w2, sizeof(guild_member_db));
-		else if(!strcmpi(w1,"guild_skill_db"))
-			safestrncpy(guild_skill_db, w2, sizeof(guild_skill_db));
-		else if(!strcmpi(w1,"guild_position_db"))
-			safestrncpy(guild_position_db, w2, sizeof(guild_position_db));
-		else if(!strcmpi(w1,"guild_storage_db"))
-			safestrncpy(guild_storage_db, w2, sizeof(guild_storage_db));
-		else if(!strcmpi(w1,"party_db"))
-			safestrncpy(party_db, w2, sizeof(party_db));
-		else if(!strcmpi(w1,"pet_db"))
-			safestrncpy(pet_db, w2, sizeof(pet_db));
-		else if(!strcmpi(w1,"mail_db"))
-			safestrncpy(mail_db, w2, sizeof(mail_db));
-		else if(!strcmpi(w1,"auction_db"))
-			safestrncpy(auction_db, w2, sizeof(auction_db));
-		else if(!strcmpi(w1,"friend_db"))
-			safestrncpy(friend_db, w2, sizeof(friend_db));
-		else if(!strcmpi(w1,"hotkey_db"))
-			safestrncpy(hotkey_db, w2, sizeof(hotkey_db));
-		else if(!strcmpi(w1,"quest_db"))
-			safestrncpy(quest_db,w2,sizeof(quest_db));
-		else if(!strcmpi(w1,"homunculus_db"))
-			safestrncpy(homunculus_db,w2,sizeof(homunculus_db));
-		else if(!strcmpi(w1,"skill_homunculus_db"))
-			safestrncpy(skill_homunculus_db,w2,sizeof(skill_homunculus_db));
-		else if(!strcmpi(w1,"mercenary_db"))
-			safestrncpy(mercenary_db,w2,sizeof(mercenary_db));
-		else if(!strcmpi(w1,"mercenary_owner_db"))
-			safestrncpy(mercenary_owner_db,w2,sizeof(mercenary_owner_db));
-		else if(!strcmpi(w1,"ragsrvinfo_db"))
-			safestrncpy(ragsrvinfo_db,w2,sizeof(ragsrvinfo_db));
-		else if(!strcmpi(w1,"elemental_db"))
-			safestrncpy(elemental_db,w2,sizeof(elemental_db));
-		else if(!strcmpi(w1,"interreg_db"))
-			safestrncpy(interreg_db,w2,sizeof(interreg_db));
-		else if(!strcmpi(w1,"account_data_db"))
-			safestrncpy(account_data_db,w2,sizeof(account_data_db));
-		else if(!strcmpi(w1,"char_reg_num_db"))
-			safestrncpy(char_reg_num_db, w2, sizeof(char_reg_num_db));
-		else if(!strcmpi(w1,"char_reg_str_db"))
-			safestrncpy(char_reg_str_db, w2, sizeof(char_reg_str_db));
-		else if(!strcmpi(w1,"acc_reg_str_db"))
-			safestrncpy(acc_reg_str_db, w2, sizeof(acc_reg_str_db));
-		else if(!strcmpi(w1,"acc_reg_num_db"))
-			safestrncpy(acc_reg_num_db, w2, sizeof(acc_reg_num_db));
-
-		//support the import command, just like any other config
-		else if(!strcmpi(w1,"import"))
-			sql_config_read(w2);
-	}
-	fclose(fp);
 	ShowInfo("Done reading %s.\n", cfgName);
+	// import should overwrite any previous configuration, so it should be called last
+	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
+		if( !strcmp(import, cfgName) || !strcmp(import, SQL_CONF_NAME) )
+			ShowWarning("sql_config_read: Loop detected! Skipping 'import'...\n");
+		else
+			sql_config_read(import);
+	}
+
+	config_destroy(&config);
+	return true;
 }
 
 /**
