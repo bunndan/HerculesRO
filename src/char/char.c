@@ -5017,57 +5017,73 @@ static int online_data_cleanup(int tid, int64 tick, int id, intptr_t data) {
 }
 
 //----------------------------------
-// Reading LAN Support configuration
+// Reading Lan Support configuration
 // Rewrote: Advanced subnet check [LuzZza]
 //----------------------------------
-int char_lan_config_read(const char *lancfgName)
-{
-	FILE *fp;
-	int line_num = 0;
-	char line[1024], w1[64], w2[64], w3[64], w4[64];
 
-	if((fp = fopen(lancfgName, "r")) == NULL) {
-		ShowWarning("LAN Support configuration file is not found: %s\n", lancfgName);
-		return 1;
+/**
+ * Parses subnet_configuration
+ * @param cfgName configuration file
+ * @retval number of interfaces detected
+ **/
+int subnet_config_read(const char *cfgName)
+{
+	config_t config;
+	config_setting_t *setting;
+
+	const char *str;
+	int i, count = 0, subnet_count = 0;
+
+
+	if( libconfig->read_file(&config, cfgName) )
+		return 0; // Error message is already shown by libconfig->read_file
+
+	if( !(setting = libconfig->lookup(&config, "subnet_configuration.subnetworks")) ) {
+		ShowError("subnet_config_read: subnet_configuration was not found in %s!\n", cfgName);
+		config_destroy(&config);
+		return 0;
 	}
 
-	while(fgets(line, sizeof(line), fp)) {
-		line_num++;
-		if ((line[0] == '/' && line[1] == '/') || line[0] == '\n' || line[1] == '\n')
-			continue;
+	count = libconfig->setting_length(setting);
 
-		if(sscanf(line,"%[^:]: %[^:]:%[^:]:%[^\r\n]", w1, w2, w3, w4) != 4) {
+	for( i = 0; i < count; i++ ) {
+		config_setting_t *obj = libconfig->setting_get_elem(setting, i);
 
-			ShowWarning("Error syntax of configuration file %s in line %d.\n", lancfgName, line_num);
+		if( libconfig->setting_lookup_string(obj, "net-submask", &str) == CONFIG_TRUE )
+			subnet[subnet_count].mask = str2ip(str);
+		else {
+			ShowError("subnet_config_read: Missing 'net-submask', entry %d, skipping...\n", i);
 			continue;
 		}
 
-		remove_control_chars(w1);
-		remove_control_chars(w2);
-		remove_control_chars(w3);
-		remove_control_chars(w4);
+		if( libconfig->setting_lookup_string(obj, "char_ip", &str) == CONFIG_TRUE )
+			subnet[subnet_count].char_ip = str2ip(str);
+		else {
+			ShowError("subnet_config_read: Missing 'char-ip', entry %d, skipping...\n", i);
+			continue;
+		}
 
-		if( strcmpi(w1, "subnet") == 0 )
+		if( libconfig->setting_lookup_string(obj, "map_ip", &str) == CONFIG_TRUE)
+			subnet[subnet_count].map_ip = str2ip(str);
+		else {
+			ShowError("subnet_config_read: Missing 'map_ip', entry %d, skipping...\n", i);
+			continue;
+		}
+
+		if( (subnet[subnet_count].char_ip & subnet[subnet_count].mask) != (subnet[subnet_count].map_ip & subnet[subnet_count].mask) )
 		{
-			subnet[subnet_count].mask = str2ip(w2);
-			subnet[subnet_count].char_ip = str2ip(w3);
-			subnet[subnet_count].map_ip = str2ip(w4);
-
-			if( (subnet[subnet_count].char_ip & subnet[subnet_count].mask) != (subnet[subnet_count].map_ip & subnet[subnet_count].mask) )
-			{
-				ShowError("%s: Configuration Error: The char server (%s) and map server (%s) belong to different subnetworks!\n", lancfgName, w3, w4);
-				continue;
-			}
-
-			subnet_count++;
+			ShowError("%s: Configuration Error: The char server and map server belong to different subnetworks (entry %d)!\n",
+				cfgName, i);
+			continue;
 		}
+		subnet_count++;
 	}
 
 	if( subnet_count > 1 ) /* only useful if there is more than 1 */
 		ShowStatus("Read information about %d subnetworks.\n", subnet_count);
 
-	fclose(fp);
-	return 0;
+	config_destroy(&config);
+	return subnet_count;
 }
 
 /**
@@ -5678,7 +5694,7 @@ int do_init(int argc, char **argv) {
 	safestrncpy(passwd, "p1", sizeof(passwd));
 		
 	char_config_read((argc < 2) ? CHAR_CONF_NAME : argv[1]);
-	char_lan_config_read((argc > 3) ? argv[3] : LAN_CONF_NAME);
+	subnet_config_read((argc > 3) ? argv[3] : LAN_CONF_NAME);
 	sql_config_read(SQL_CONF_NAME);
 
 	if (strcmp(userid, "s1")==0 && strcmp(passwd, "p1")==0) {
