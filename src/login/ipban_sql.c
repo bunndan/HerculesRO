@@ -18,6 +18,8 @@
 #include "../common/socket.h"
 #include "../common/strlib.h"
 #include "../common/timer.h"
+#include "../common/showmsg.h"
+#include "../common/conf.h"
 
 // global sql settings
 static char   global_db_hostname[32] = "127.0.0.1";
@@ -113,93 +115,108 @@ void ipban_final(void)
 	sql_handle = NULL;
 }
 
-// load configuration options
-bool ipban_config_read(const char* key, const char* value)
-{
-	const char* signature;
+/**
+ * Reads login_configuration.account.ipban.dynamic_pass_failure and loads configuration options
+ * @param cfgName path to configuration file
+ * @retval false in case of failure
+ **/
+bool ipban_config_read_dynamic( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+
+	if( !(setting = libconfig->lookup(config, "login_configuration.account.ipban.dynamic_pass_failure")) ) {
+		ShowError("account_db_sql_set_property: login_configuration.account.ipban.dynamic_pass_failure"
+					"was not found in %s!\n",
+					cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_bool_real(setting, "enabled", &login_config.dynamic_pass_failure_ban);
+	libconfig->setting_lookup_uint(setting, "ban_interval", &login_config.dynamic_pass_failure_ban_interval);
+	libconfig->setting_lookup_uint(setting, "ban_limit", &login_config.dynamic_pass_failure_ban_limit);
+	libconfig->setting_lookup_uint(setting, "ban_duration", &login_config.dynamic_pass_failure_ban_duration);
+
+	return true;
+}
+
+/**
+ * Reads login_configuration.account.ipban.sql_connection and loads configuration options
+ * @param cfgName path to configuration file
+ * @retval false in case of failure
+ **/
+bool ipban_config_read_connection( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+
+	if( !(setting = libconfig->lookup(config, "login_configuration.account.ipban.sql_connection")) ) {
+		ShowError("account_db_sql_set_property: login_configuration.account.ipban.sql_connection was not found in %s!\n",
+			cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_string_char(setting, "db_hostname", ipban_db_hostname, sizeof(ipban_db_hostname));
+	libconfig->setting_lookup_string_char(setting, "db_database", ipban_db_database, sizeof(ipban_db_database));
+
+	libconfig->setting_lookup_string_char(setting, "db_username", ipban_db_username, sizeof(ipban_db_username));
+	libconfig->setting_lookup_string_char(setting, "db_password", ipban_db_password, sizeof(ipban_db_password));
+	libconfig->setting_lookup_string_char(setting, "codepage", ipban_codepage, sizeof(ipban_codepage));
+	libconfig->setting_lookup_uint16(setting, "db_port", &ipban_db_port);
+
+	libconfig->setting_lookup_string_char(setting, "ipban_table", ipban_table, sizeof(ipban_table));
+
+	return true;
+}
+
+/**
+ * Reads 'inter_configuration' and initializes required variables
+ * Sets global configuration
+ * @param cfgName path to configuration file
+ * @retval false in case of failure
+ **/
+bool ipban_config_read_inter( const char* cfgName ) {
+	config_t config;
+	config_setting_t *setting;
+
+	if( libconfig->read_file(&config, cfgName) )
+		return false; // Error message is already shown by libconfig->read_file
+
+	if( !(setting = libconfig->lookup(&config, "inter_configuration.sql_connection")) ) {
+		ShowError("account_db_sql_set_property: inter_configuration.sql_connection was not found!\n");
+		return false;
+	}
+
+	libconfig->setting_lookup_string_char(setting, "db_hostname", global_db_hostname, sizeof(global_db_hostname));
+	libconfig->setting_lookup_string_char(setting, "db_database", global_db_database, sizeof(global_db_database));
+	libconfig->setting_lookup_string_char(setting, "db_username", global_db_username, sizeof(global_db_username));
+	libconfig->setting_lookup_string_char(setting, "db_password", global_db_password, sizeof(global_db_password));
+	libconfig->setting_lookup_uint16(setting, "db_port", &global_db_port);
+	libconfig->setting_lookup_string_char(setting, "codepage", global_codepage, sizeof(global_codepage));
+
+	return true;
+}
+
+/**
+ * Reads login_configuration.account.ipban and loads configuration options
+ * @param cfgName path to configuration file
+ * @retval false in case of failure
+ **/
+bool ipban_config_read( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
 
 	if( ipban_inited )
-		return false;// settings can only be changed before init
+		return false; // settings can only be changed before init
 
-	signature = "sql.";
-	if( strncmpi(key, signature, strlen(signature)) == 0 )
-	{
-		key += strlen(signature);
-		if( strcmpi(key, "db_hostname") == 0 )
-			safestrncpy(global_db_hostname, value, sizeof(global_db_hostname));
-		else
-		if( strcmpi(key, "db_port") == 0 )
-			global_db_port = (uint16)strtoul(value, NULL, 10);
-		else
-		if( strcmpi(key, "db_username") == 0 )
-			safestrncpy(global_db_username, value, sizeof(global_db_username));
-		else
-		if( strcmpi(key, "db_password") == 0 )
-			safestrncpy(global_db_password, value, sizeof(global_db_password));
-		else
-		if( strcmpi(key, "db_database") == 0 )
-			safestrncpy(global_db_database, value, sizeof(global_db_database));
-		else
-		if( strcmpi(key, "codepage") == 0 )
-			safestrncpy(global_codepage, value, sizeof(global_codepage));
-		else
-			return false;// not found
-		return true;
+	if( !(setting = libconfig->lookup(config, "login_configuration.account.ipban")) ) {
+		ShowError("login_config_read: login_configuration.log was not found in %s!\n", cfgName);
+		return false;
 	}
 
-	signature = "ipban.sql.";
-	if( strncmpi(key, signature, strlen(signature)) == 0 )
-	{
-		key += strlen(signature);
-		if( strcmpi(key, "db_hostname") == 0 )
-			safestrncpy(ipban_db_hostname, value, sizeof(ipban_db_hostname));
-		else
-		if( strcmpi(key, "db_port") == 0 )
-			ipban_db_port = (uint16)strtoul(value, NULL, 10);
-		else
-		if( strcmpi(key, "db_username") == 0 )
-			safestrncpy(ipban_db_username, value, sizeof(ipban_db_username));
-		else
-		if( strcmpi(key, "db_password") == 0 )
-			safestrncpy(ipban_db_password, value, sizeof(ipban_db_password));
-		else
-		if( strcmpi(key, "db_database") == 0 )
-			safestrncpy(ipban_db_database, value, sizeof(ipban_db_database));
-		else
-		if( strcmpi(key, "codepage") == 0 )
-			safestrncpy(ipban_codepage, value, sizeof(ipban_codepage));
-		else
-		if( strcmpi(key, "ipban_table") == 0 )
-			safestrncpy(ipban_table, value, sizeof(ipban_table));
-		else
-			return false;// not found
-		return true;
-	}
+	libconfig->setting_lookup_bool_real(setting, "enabled", &login_config.ipban);
+	libconfig->setting_lookup_uint(setting, "cleanup_interval", &login_config.ipban_cleanup_interval);
 
-	signature = "ipban.";
-	if( strncmpi(key, signature, strlen(signature)) == 0 )
-	{
-		key += strlen(signature);
-		if( strcmpi(key, "enable") == 0 )
-			login_config.ipban = (bool)config_switch(value);
-		else
-		if( strcmpi(key, "dynamic_pass_failure_ban") == 0 )
-			login_config.dynamic_pass_failure_ban = (bool)config_switch(value);
-		else
-		if( strcmpi(key, "dynamic_pass_failure_ban_interval") == 0 )
-			login_config.dynamic_pass_failure_ban_interval = atoi(value);
-		else
-		if( strcmpi(key, "dynamic_pass_failure_ban_limit") == 0 )
-			login_config.dynamic_pass_failure_ban_limit = atoi(value);
-		else
-		if( strcmpi(key, "dynamic_pass_failure_ban_duration") == 0 )
-			login_config.dynamic_pass_failure_ban_duration = atoi(value);
-		else
-			return false;// not found
-		return true;
-	}
+	ipban_config_read_inter("conf/inter-server.conf");
+	ipban_config_read_connection(cfgName, config);
+	ipban_config_read_dynamic(cfgName, config);
 
-	return false;// not found
+	return true;
 }
 
 // check ip against active bans list

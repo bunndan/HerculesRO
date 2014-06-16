@@ -5,6 +5,7 @@
 #define _LOGIN_IPBAN_H_
 
 #include "../common/cbasetypes.h"
+#include "../common/conf.h"
 
 // initialize
 void ipban_init(void);
@@ -19,7 +20,7 @@ bool ipban_check(uint32 ip);
 void ipban_log(uint32 ip);
 
 // parses configuration option
-bool ipban_config_read(const char* key, const char* value);
+bool ipban_config_read( const char* cfgName, config_t *config );
 
 
 #endif /* _LOGIN_IPBAN_H_ */
