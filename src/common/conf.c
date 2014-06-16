@@ -145,6 +145,33 @@ int config_setting_lookup_bool_real( const config_setting_t *setting, const char
 }
 
 /**
+ * Converts and returns a configuration that is CONFIG_TYPE_INT to unsigned int
+ **/
+unsigned int config_setting_get_uint( config_setting_t *setting ) {
+	if( setting == NULL || setting->type != CONFIG_TYPE_INT )
+		return 0;
+
+	if( setting->value.ival < 0 )
+		setting->value.ival = 0;
+
+	return (unsigned int)setting->value.ival;
+}
+
+int config_setting_lookup_uint( const config_setting_t *setting, const char *name, unsigned int *value ) {
+	config_setting_t *member = config_setting_get_member(setting, name);
+
+	if( !member )
+		return CONFIG_FALSE;
+
+	if( config_setting_type(member) != CONFIG_TYPE_INT )
+		return CONFIG_FALSE;
+
+	*value = config_setting_get_uint(member);
+
+	return CONFIG_TRUE;
+}
+
+/**
  * Converts and returns a configuration that is CONFIG_TYPE_INT to uint16
  **/
 uint16 config_setting_get_uint16( config_setting_t *setting ) {
@@ -291,12 +318,17 @@ void libconfig_defaults(void) {
 	libconfig->setting_copy_elem = config_setting_copy_elem;
 	libconfig->setting_copy_aggregate = config_setting_copy_aggregate;
 	libconfig->setting_copy = config_setting_copy;
-	/* */
+
+	/* Functions to get different types */
 	libconfig->setting_get_bool_real = config_setting_get_bool_real;
+	libconfig->setting_get_uint = config_setting_get_uint;
 	libconfig->setting_get_uint16 = config_setting_get_uint16;
 	libconfig->setting_get_short = config_setting_get_short;
+
+	/* Functions to lookup different types */
 	libconfig->setting_lookup_short = config_setting_lookup_short;
 	libconfig->setting_lookup_bool_real = config_setting_lookup_bool_real;
+	libconfig->setting_lookup_uint = config_setting_lookup_uint;
 	libconfig->setting_lookup_uint16 = config_setting_lookup_uint16;
 	libconfig->setting_lookup_string_char = config_setting_lookup_string_char;
 }
