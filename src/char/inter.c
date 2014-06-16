@@ -904,31 +904,25 @@ int inter_accreg_fromsql(int account_id,int char_id, int fd, int type)
 }
 
 /**
- * Reads 'inter_configuration.connection.char_server' and initializes required variables
+ * Reads 'char_configuration.sql_connection' and initializes required variables
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool inter_config_read_connection( const char* cfgName, config_t *config ) {
+bool char_config_read_connection( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
-	if( !(setting = libconfig->lookup(config, "inter_configuration.sql_connection")) ) {
-		ShowError("inter_config_read: inter_configuration.sql_connection was not found in %s!\n", cfgName);
-		return false;
-	}
-
-	libconfig->setting_lookup_string_char(setting, "default_codepage", default_codepage, sizeof(default_codepage));
-
-	if( !(setting = libconfig->lookup(config, "inter_configuration.sql_connection.char_server")) ) {
-		ShowError("inter_config_read: inter_configuration.sql_connection.char_server was not found in %s!\n", cfgName);
+	if( !(setting = libconfig->lookup(config, "char_configuration.sql_connection")) ) {
+		ShowError("char_config_read: char_configuration.sql_connection was not found in %s!\n", cfgName);
 	} else {
-		libconfig->setting_lookup_int(setting, "port", &char_server_port);
-		libconfig->setting_lookup_string_char(setting, "server_ip", char_server_ip, sizeof(char_server_ip));
-		libconfig->setting_lookup_string_char(setting, "server_id", char_server_id, sizeof(char_server_id));
-		libconfig->setting_lookup_string_char(setting, "server_pw", char_server_pw, sizeof(char_server_pw));
-		libconfig->setting_lookup_string_char(setting, "server_db", char_server_db, sizeof(char_server_db));
+		libconfig->setting_lookup_int(setting, "db_port", &char_server_port);
+		libconfig->setting_lookup_string_char(setting, "db_hostname", char_server_ip, sizeof(char_server_ip));
+		libconfig->setting_lookup_string_char(setting, "db_username", char_server_id, sizeof(char_server_id));
+		libconfig->setting_lookup_string_char(setting, "db_password", char_server_pw, sizeof(char_server_pw));
+		libconfig->setting_lookup_string_char(setting, "db_database", char_server_db, sizeof(char_server_db));
+		return true;
 	}
-
-	return true;
+	ShowWarning("char_config_read_connection: Defaulting sql_connection...");
+	return false;
 }
 
 /*==========================================
@@ -950,8 +944,7 @@ static int inter_config_read(const char* cfgName)
 	}
 	libconfig->setting_lookup_int(setting, "party_share_level", &party_share_level);
 	libconfig->setting_lookup_bool_real(setting, "log_inter", &log_inter);
-
-	inter_config_read_connection(cfgName, &config);
+	libconfig->setting_lookup_string_char(setting, "sql_connection.default_codepage", default_codepage, sizeof(default_codepage));
 
 	ShowInfo ("Done reading %s.\n", cfgName);
 

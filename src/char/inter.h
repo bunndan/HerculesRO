@@ -7,6 +7,7 @@
 
 #include "char.h"
 #include "../common/sql.h"
+#include "../common/conf.h"
 
 struct accreg;
 
@@ -20,6 +21,8 @@ void mapif_parse_accinfo2(bool success, int map_fd, int u_fd, int u_aid, int acc
 
 int inter_log(char *fmt,...);
 int inter_vlog(char *fmt, va_list ap);
+
+bool char_config_read_connection( const char* cfgName, config_t *config );
 
 #define INTER_CONF_NAME "conf/inter-server.conf"
 

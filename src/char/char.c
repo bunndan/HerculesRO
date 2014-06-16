@@ -5244,7 +5244,7 @@ bool char_config_read_console( const char* cfgName, config_t *config ) {
 	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.console")) ) {
-		ShowError("char_config_read: char_configuration.console was not found in %s!\n", cfgName);
+		ShowError("char_config_read: char_configuration.console was not found in %s!\n", cfgName); 
 		return false;
 	}
 
@@ -5585,6 +5585,7 @@ bool char_config_read(const char* cfgName)
 	char_config_read_player(cfgName, &config);
 	char_config_read_console(cfgName, &config);
 	char_config_read_database(cfgName, &config);
+	char_config_read_connection(cfgName, &config);
 	pincode->config_read(cfgName, &config);
 
 	ShowInfo("Done reading %s.\n", cfgName);
