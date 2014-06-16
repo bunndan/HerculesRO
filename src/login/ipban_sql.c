@@ -21,19 +21,12 @@
 #include "../common/showmsg.h"
 #include "../common/conf.h"
 
-// global sql settings
-static char   global_db_hostname[32] = "127.0.0.1";
-static uint16 global_db_port = 3306;
-static char   global_db_username[32] = "ragnarok";
-static char   global_db_password[32] = "ragnarok";
-static char   global_db_database[32] = "ragnarok";
-static char   global_codepage[32] = "";
-// local sql settings
-static char   ipban_db_hostname[32] = "";
-static uint16 ipban_db_port = 0;
-static char   ipban_db_username[32] = "";
-static char   ipban_db_password[32] = "";
-static char   ipban_db_database[32] = "";
+// Sql settings
+static char   ipban_db_hostname[32] = "127.0.0.1";
+static uint16 ipban_db_port = 3306;
+static char   ipban_db_username[32] = "ragnarok";
+static char   ipban_db_password[32] = "ragnarok";
+static char   ipban_db_database[32] = "ragnarok";
 static char   ipban_codepage[32] = "";
 static char   ipban_table[32] = "ipbanlist";
 
@@ -60,24 +53,12 @@ void ipban_init(void)
 	if( !login_config.ipban )
 		return;// ipban disabled
 
-	if( ipban_db_hostname[0] != '\0' )
-	{// local settings
-		username = ipban_db_username;
-		password = ipban_db_password;
-		hostname = ipban_db_hostname;
-		port     = ipban_db_port;
-		database = ipban_db_database;
-		codepage = ipban_codepage;
-	}
-	else
-	{// global settings
-		username = global_db_username;
-		password = global_db_password;
-		hostname = global_db_hostname;
-		port     = global_db_port;
-		database = global_db_database;
-		codepage = global_codepage;
-	}
+	username = ipban_db_username;
+	password = ipban_db_password;
+	hostname = ipban_db_hostname;
+	port     = ipban_db_port;
+	database = ipban_db_database;
+	codepage = ipban_codepage;
 
 	// establish connections
 	sql_handle = SQL->Malloc();
@@ -160,8 +141,6 @@ bool ipban_config_read_connection( const char* cfgName, config_t *config ) {
 	libconfig->setting_lookup_string_char(setting, "codepage", ipban_codepage, sizeof(ipban_codepage));
 	libconfig->setting_lookup_uint16(setting, "db_port", &ipban_db_port);
 
-	libconfig->setting_lookup_string_char(setting, "ipban_table", ipban_table, sizeof(ipban_table));
-
 	return true;
 }
 
@@ -178,17 +157,11 @@ bool ipban_config_read_inter( const char* cfgName ) {
 	if( libconfig->read_file(&config, cfgName) )
 		return false; // Error message is already shown by libconfig->read_file
 
-	if( !(setting = libconfig->lookup(&config, "inter_configuration.sql_connection")) ) {
-		ShowError("account_db_sql_set_property: inter_configuration.sql_connection was not found!\n");
+	if( !(setting = libconfig->lookup(&config, "inter_configuration.database_names")) ) {
+		ShowError("ipban_config_read: inter_configuration.database_names was not found!\n");
 		return false;
 	}
-
-	libconfig->setting_lookup_string_char(setting, "db_hostname", global_db_hostname, sizeof(global_db_hostname));
-	libconfig->setting_lookup_string_char(setting, "db_database", global_db_database, sizeof(global_db_database));
-	libconfig->setting_lookup_string_char(setting, "db_username", global_db_username, sizeof(global_db_username));
-	libconfig->setting_lookup_string_char(setting, "db_password", global_db_password, sizeof(global_db_password));
-	libconfig->setting_lookup_uint16(setting, "db_port", &global_db_port);
-	libconfig->setting_lookup_string_char(setting, "codepage", global_codepage, sizeof(global_codepage));
+	libconfig->setting_lookup_string_char(setting, "ipban_table", ipban_table, sizeof(ipban_table));
 
 	return true;
 }

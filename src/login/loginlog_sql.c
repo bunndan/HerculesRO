@@ -17,19 +17,12 @@
 #include "../common/showmsg.h"
 #include "../common/conf.h"
 
-// global sql settings (in ipban_sql.c)
-static char   global_db_hostname[32] = "127.0.0.1";
-static uint16 global_db_port = 3306;
-static char   global_db_username[32] = "ragnarok";
-static char   global_db_password[32] = "ragnarok";
-static char   global_db_database[32] = "ragnarok";
-static char   global_codepage[32] = "";
-// local sql settings
-static char   log_db_hostname[32] = "";
-static uint16 log_db_port = 0;
-static char   log_db_username[32] = "";
-static char   log_db_password[32] = "";
-static char   log_db_database[32] = "";
+// Sql settings
+static char   log_db_hostname[32] = "127.0.0.1";
+static uint16 log_db_port = 3306;
+static char   log_db_username[32] = "ragnarok";
+static char   log_db_password[32] = "ragnarok";
+static char   log_db_database[32] = "ragnarok";
 static char   log_codepage[32] = "";
 static char   log_login_db[256] = "loginlog";
 
@@ -92,24 +85,12 @@ bool loginlog_init(void)
 	const char* database;
 	const char* codepage;
 
-	if( log_db_hostname[0] != '\0' )
-	{// local settings
-		username = log_db_username;
-		password = log_db_password;
-		hostname = log_db_hostname;
-		port     = log_db_port;
-		database = log_db_database;
-		codepage = log_codepage;
-	}
-	else
-	{// global settings
-		username = global_db_username;
-		password = global_db_password;
-		hostname = global_db_hostname;
-		port     = global_db_port;
-		database = global_db_database;
-		codepage = global_codepage;
-	}
+	username = log_db_username;
+	password = log_db_password;
+	hostname = log_db_hostname;
+	port     = log_db_port;
+	database = log_db_database;
+	codepage = log_codepage;
 
 	sql_handle = SQL->Malloc();
 
@@ -136,31 +117,26 @@ bool loginlog_final(void)
 }
 
 /**
- * Reads 'inter_configuration.sql_connection.log_database' and initializes required variables
+ * Reads 'inter_configuration.log' and initializes required variables
  * Sets global configuration
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool loginlog_config_read_inter_log( const char* cfgName ) {
-	config_t config;
+bool loginlog_config_read_log( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 
-	if( libconfig->read_file(&config, cfgName) )
-		return false; // Error message is already shown by libconfig->read_file
-
-	if( !(setting = libconfig->lookup(&config, "inter_configuration.sql_connection.log_database")) ) {
-		ShowError("account_db_sql_set_property: inter_configuration.sql_connection.log_database was not found!\n");
+	if( !(setting = libconfig->lookup(config, "inter_configuration.log.sql_connection")) ) {
+		ShowError("loginlog_config_read: inter_configuration.log.sql_connection was not found!\n");
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "db_ip", log_db_hostname, sizeof(log_db_hostname));
-	libconfig->setting_lookup_string_char(setting, "db_db", global_db_database, sizeof(global_db_database));
-	libconfig->setting_lookup_string_char(setting, "db_id", log_db_username, sizeof(log_db_username));
-	libconfig->setting_lookup_string_char(setting, "db_db", log_db_password, sizeof(log_db_password));
+	libconfig->setting_lookup_string_char(setting, "db_hostname", log_db_hostname, sizeof(log_db_hostname));
+	libconfig->setting_lookup_string_char(setting, "db_database", log_db_database, sizeof(log_db_database));
+	libconfig->setting_lookup_string_char(setting, "db_username", log_db_username, sizeof(log_db_username));
+	libconfig->setting_lookup_string_char(setting, "db_password", log_db_password, sizeof(log_db_password));
 
 	libconfig->setting_lookup_uint16(setting, "db_port", &log_db_port);
 	libconfig->setting_lookup_string_char(setting, "codepage", log_codepage, sizeof(log_codepage));
-	libconfig->setting_lookup_string_char(setting, "login_db", log_login_db, sizeof(log_login_db));
 
 	return true;
 }
@@ -171,34 +147,27 @@ bool loginlog_config_read_inter_log( const char* cfgName ) {
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool loginlog_config_read_inter( const char* cfgName ) {
-	config_t config;
+bool loginlog_config_read_names( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
-	int error =0;
 
-	if( libconfig->read_file(&config, cfgName) )
-		return false; // Error message is already shown by libconfig->read_file
-
-	if( !(setting = libconfig->lookup(&config, "inter_configuration.sql_connection")) ) {
-		ShowError("account_db_sql_set_property: inter_configuration.sql_connection was not found!\n");
+	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names")) ) {
+		ShowError("loginlog_config_read: inter_configuration.database_names was not found!\n");
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "db_hostname", global_db_hostname, sizeof(global_db_hostname));
-	libconfig->setting_lookup_string_char(setting, "db_database", global_db_database, sizeof(global_db_database));
-	libconfig->setting_lookup_string_char(setting, "db_username", global_db_username, sizeof(global_db_username));
-	libconfig->setting_lookup_string_char(setting, "db_password", global_db_password, sizeof(global_db_password));
-
-	libconfig->setting_lookup_uint16(setting, "db_port", &global_db_port);
-	libconfig->setting_lookup_string_char(setting, "codepage", global_codepage, sizeof(global_codepage));
+	libconfig->setting_lookup_string_char(setting, "login_db", log_login_db, sizeof(log_login_db));
 
 	return true;
 }
 
-bool loginlog_config_read( void )
-{
-	loginlog_config_read_inter("conf/inter-server.conf");
-	loginlog_config_read_inter_log("conf/inter-server.conf");
+bool loginlog_config_read( const char* cfgName ) {
+	config_t config;
+
+	if( libconfig->read_file(&config, cfgName) )
+		return false; // Error message is already shown by libconfig->read_file
+
+	loginlog_config_read_names(cfgName, &config);
+	loginlog_config_read_log(cfgName, &config);
 
 	return true;
 }

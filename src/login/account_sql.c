@@ -30,14 +30,7 @@ typedef struct AccountDB_SQL
 
 	Sql* accounts;       // SQL accounts storage
 
-	// global sql settings
-	char   global_db_hostname[32];
-	uint16 global_db_port;
-	char   global_db_username[32];
-	char   global_db_password[32];
-	char   global_db_database[32];
-	char   global_codepage[32];
-	// local sql settings
+	// Sql settings
 	char   db_hostname[32];
 	uint16 db_port;
 	char   db_username[32];
@@ -98,21 +91,14 @@ AccountDB* account_db_sql(void)
 
 	// initialize to default values
 	db->accounts = NULL;
-	// global sql settings
-	safestrncpy(db->global_db_hostname, "127.0.0.1", sizeof(db->global_db_hostname));
-	db->global_db_port = 3306;
-	safestrncpy(db->global_db_username, "ragnarok", sizeof(db->global_db_username));
-	safestrncpy(db->global_db_password, "ragnarok", sizeof(db->global_db_password));
-	safestrncpy(db->global_db_database, "ragnarok", sizeof(db->global_db_database));
-	safestrncpy(db->global_codepage, "", sizeof(db->global_codepage));
-	// local sql settings
-	safestrncpy(db->db_hostname, "", sizeof(db->db_hostname));
+	// Sql settings
+	safestrncpy(db->db_hostname, "127.0.0.1", sizeof(db->db_hostname));
 	db->db_port = 3306;
-	safestrncpy(db->db_username, "", sizeof(db->db_username));
-	safestrncpy(db->db_password, "", sizeof(db->db_password));
-	safestrncpy(db->db_database, "", sizeof(db->db_database));
+	safestrncpy(db->db_username, "ragnarok", sizeof(db->db_username));
+	safestrncpy(db->db_password, "ragnarok", sizeof(db->db_password));
+	safestrncpy(db->db_database, "ragnarok", sizeof(db->db_database));
 	safestrncpy(db->codepage, "", sizeof(db->codepage));
-	// other settings
+	// other settingsx
 	db->case_sensitive = false;
 	safestrncpy(db->account_db, "login", sizeof(db->account_db));
 	safestrncpy(db->global_acc_reg_num_db, "global_acc_reg_num_db", sizeof(db->global_acc_reg_num_db));
@@ -140,24 +126,12 @@ static bool account_db_sql_init(AccountDB* self)
 	db->accounts = SQL->Malloc();
 	sql_handle = db->accounts;
 
-	if( db->db_hostname[0] != '\0' )
-	{// local settings
-		username = db->db_username;
-		password = db->db_password;
-		hostname = db->db_hostname;
-		port     = db->db_port;
-		database = db->db_database;
-		codepage = db->codepage;
-	}
-	else
-	{// global settings
-		username = db->global_db_username;
-		password = db->global_db_password;
-		hostname = db->global_db_hostname;
-		port     = db->global_db_port;
-		database = db->global_db_database;
-		codepage = db->global_codepage;
-	}
+	username = db->db_username;
+	password = db->db_password;
+	hostname = db->db_hostname;
+	port     = db->db_port;
+	database = db->db_database;
+	codepage = db->codepage;
 
 	if( SQL_ERROR == SQL->Connect(sql_handle, username, password, hostname, port, database) )
 	{
@@ -285,7 +259,6 @@ static bool account_db_sql_get_property(AccountDB* self, const char* key, char* 
 
 /**
  * Reads 'inter_configuration' and initializes required variables
- * Sets global configuration
  * @param db *self
  * @param cfgName path to configuration file
  * @retval false in case of failure
@@ -297,18 +270,20 @@ bool account_db_read_inter( AccountDB_SQL* db, const char* cfgName ) {
 	if( libconfig->read_file(&config, cfgName) )
 		return false; // Error message is already shown by libconfig->read_file
 
-	if( !(setting = libconfig->lookup(&config, "inter_configuration.sql_connection")) ) {
-		ShowError("account_db_sql_set_property: inter_configuration.sql_connection was not found!\n");
+	if( !(setting = libconfig->lookup(&config, "inter_configuration.database_names")) ) {
+		ShowError("account_db_sql_set_property: inter_configuration.database_names was not found!\n");
 		return false;
 	}
+	libconfig->setting_lookup_string_char(setting, "account_db", db->account_db, sizeof(db->account_db));
 
-	libconfig->setting_lookup_string_char(setting, "db_hostname", db->global_db_hostname, sizeof(db->global_db_hostname));
-	libconfig->setting_lookup_string_char(setting, "db_database", db->global_db_database, sizeof(db->global_db_database));
-	libconfig->setting_lookup_string_char(setting, "db_username", db->global_db_username, sizeof(db->global_db_username));
-	libconfig->setting_lookup_string_char(setting, "db_password", db->global_db_password, sizeof(db->global_db_password));
-
-	libconfig->setting_lookup_uint16(setting, "db_port", &db->global_db_port);
-	libconfig->setting_lookup_string_char(setting, "codepage", db->global_codepage, sizeof(db->global_codepage));
+	if( !(setting = libconfig->lookup(&config, "inter_configuration.database_names.registry")) ) {
+		ShowError("account_db_sql_set_property: inter_configuration.database_names.registry was not found!\n");
+		return false;
+	}
+	libconfig->setting_lookup_string_char(setting, "global_acc_reg_str_db",
+									db->global_acc_reg_str_db, sizeof(db->global_acc_reg_str_db));
+	libconfig->setting_lookup_string_char(setting, "global_acc_reg_num_db",
+										db->global_acc_reg_num_db, sizeof(db->global_acc_reg_num_db));
 
 	return true;
 }
@@ -327,16 +302,10 @@ static bool account_db_sql_set_property(AccountDB* self, config_t *config) {
 	libconfig->setting_lookup_string_char(setting, "db_username", db->db_username, sizeof(db->db_username));
 	libconfig->setting_lookup_string_char(setting, "db_password", db->db_password, sizeof(db->db_password));
 	libconfig->setting_lookup_string_char(setting, "db_database", db->db_database, sizeof(db->db_database));
-
 	libconfig->setting_lookup_string_char(setting, "codepage", db->codepage, sizeof(db->codepage));
 	libconfig->setting_lookup_uint16(setting, "db_port", &db->db_port);
-	libconfig->setting_lookup_bool_real(setting, "case_sensitive", &db->case_sensitive);
-	libconfig->setting_lookup_string_char(setting, "account_db", db->account_db, sizeof(db->account_db));
 
-	libconfig->setting_lookup_string_char(setting, "global_acc_reg_str_db",
-									db->global_acc_reg_str_db, sizeof(db->global_acc_reg_str_db));
-	libconfig->setting_lookup_string_char(setting, "global_acc_reg_num_db",
-										db->global_acc_reg_num_db, sizeof(db->global_acc_reg_num_db));
+	libconfig->setting_lookup_bool_real(setting, "case_sensitive", &db->case_sensitive);
 
 	account_db_read_inter(db, "conf/inter-server.conf");
 

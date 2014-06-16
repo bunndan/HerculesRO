@@ -1904,7 +1904,7 @@ bool login_config_read(const char* cfgName)
 	login_config_read_account(cfgName, &config);
 	login_config_read_permission(cfgName, &config);
 
-	loginlog_config_read(); // Only inter-server
+	loginlog_config_read("conf/inter-server.conf"); // Only inter-server
 
 	ShowInfo("Finished reading %s.\n", cfgName);
 
@@ -1916,6 +1916,7 @@ bool login_config_read(const char* cfgName)
 			login_config_read(import);
 	}
 
+	config_destroy(&config);
 	return 0;
 }
 
