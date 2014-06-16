@@ -8,6 +8,7 @@
 #include "../common/cbasetypes.h"
 #include "../common/mmo.h" // ACCOUNT_REG2_NUM
 #include "../common/sql.h" // Sql
+#include "../common/conf.h" // libconfig
 
 typedef struct AccountDB AccountDB;
 typedef struct AccountDBIterator AccountDBIterator;
@@ -83,10 +84,9 @@ struct AccountDB
 	/// Sets a property in this database.
 	///
 	/// @param self Database
-	/// @param key Property name
-	/// @param value Property value
+	/// @param config Configuration node
 	/// @return true if successful
-	bool (*set_property)(AccountDB* self, const char* key, const char* value);
+	bool (*set_property)(AccountDB* self,  config_t *config );
 
 	/// Creates a new account in this database.
 	/// If acc->account_id is not -1, the provided value will be used.
