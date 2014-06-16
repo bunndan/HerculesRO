@@ -14,6 +14,8 @@
 #include "../common/socket.h"
 #include "../common/sql.h"
 #include "../common/strlib.h"
+#include "../common/showmsg.h"
+#include "../common/conf.h"
 
 // global sql settings (in ipban_sql.c)
 static char   global_db_hostname[32] = "127.0.0.1";
@@ -133,58 +135,70 @@ bool loginlog_final(void)
 	return true;
 }
 
-bool loginlog_config_read(const char* key, const char* value)
-{
-	const char* signature;
+/**
+ * Reads 'inter_configuration.sql_connection.log_database' and initializes required variables
+ * Sets global configuration
+ * @param cfgName path to configuration file
+ * @retval false in case of failure
+ **/
+bool loginlog_config_read_inter_log( const char* cfgName ) {
+	config_t config;
+	config_setting_t *setting;
 
-	signature = "sql.";
-	if( strncmpi(key, signature, strlen(signature)) == 0 )
-	{
-		key += strlen(signature);
-		if( strcmpi(key, "db_hostname") == 0 )
-			safestrncpy(global_db_hostname, value, sizeof(global_db_hostname));
-		else
-		if( strcmpi(key, "db_port") == 0 )
-			global_db_port = (uint16)strtoul(value, NULL, 10);
-		else
-		if( strcmpi(key, "db_username") == 0 )
-			safestrncpy(global_db_username, value, sizeof(global_db_username));
-		else
-		if( strcmpi(key, "db_password") == 0 )
-			safestrncpy(global_db_password, value, sizeof(global_db_password));
-		else
-		if( strcmpi(key, "db_database") == 0 )
-			safestrncpy(global_db_database, value, sizeof(global_db_database));
-		else
-		if( strcmpi(key, "codepage") == 0 )
-			safestrncpy(global_codepage, value, sizeof(global_codepage));
-		else
-			return false;// not found
-		return true;
+	if( libconfig->read_file(&config, cfgName) )
+		return false; // Error message is already shown by libconfig->read_file
+
+	if( !(setting = libconfig->lookup(&config, "inter_configuration.sql_connection.log_database")) ) {
+		ShowError("account_db_sql_set_property: inter_configuration.sql_connection.log_database was not found!\n");
+		return false;
 	}
 
-	if( strcmpi(key, "log_db_ip") == 0 )
-		safestrncpy(log_db_hostname, value, sizeof(log_db_hostname));
-	else
-	if( strcmpi(key, "log_db_port") == 0 )
-		log_db_port = (uint16)strtoul(value, NULL, 10);
-	else
-	if( strcmpi(key, "log_db_id") == 0 )
-		safestrncpy(log_db_username, value, sizeof(log_db_username));
-	else
-	if( strcmpi(key, "log_db_pw") == 0 )
-		safestrncpy(log_db_password, value, sizeof(log_db_password));
-	else
-	if( strcmpi(key, "log_db_db") == 0 )
-		safestrncpy(log_db_database, value, sizeof(log_db_database));
-	else
-	if( strcmpi(key, "log_codepage") == 0 )
-		safestrncpy(log_codepage, value, sizeof(log_codepage));
-	else
-	if( strcmpi(key, "log_login_db") == 0 )
-		safestrncpy(log_login_db, value, sizeof(log_login_db));
-	else
+	libconfig->setting_lookup_string_char(setting, "db_ip", log_db_hostname, sizeof(log_db_hostname));
+	libconfig->setting_lookup_string_char(setting, "db_db", global_db_database, sizeof(global_db_database));
+	libconfig->setting_lookup_string_char(setting, "db_id", log_db_username, sizeof(log_db_username));
+	libconfig->setting_lookup_string_char(setting, "db_db", log_db_password, sizeof(log_db_password));
+
+	libconfig->setting_lookup_uint16(setting, "db_port", &log_db_port);
+	libconfig->setting_lookup_string_char(setting, "codepage", log_codepage, sizeof(log_codepage));
+	libconfig->setting_lookup_string_char(setting, "login_db", log_login_db, sizeof(log_login_db));
+
+	return true;
+}
+
+/**
+ * Reads 'inter_configuration' and initializes required variables
+ * Sets global configuration
+ * @param cfgName path to configuration file
+ * @retval false in case of failure
+ **/
+bool loginlog_config_read_inter( const char* cfgName ) {
+	config_t config;
+	config_setting_t *setting;
+	int error =0;
+
+	if( libconfig->read_file(&config, cfgName) )
+		return false; // Error message is already shown by libconfig->read_file
+
+	if( !(setting = libconfig->lookup(&config, "inter_configuration.sql_connection")) ) {
+		ShowError("account_db_sql_set_property: inter_configuration.sql_connection was not found!\n");
 		return false;
+	}
+
+	libconfig->setting_lookup_string_char(setting, "db_hostname", global_db_hostname, sizeof(global_db_hostname));
+	libconfig->setting_lookup_string_char(setting, "db_database", global_db_database, sizeof(global_db_database));
+	libconfig->setting_lookup_string_char(setting, "db_username", global_db_username, sizeof(global_db_username));
+	libconfig->setting_lookup_string_char(setting, "db_password", global_db_password, sizeof(global_db_password));
+
+	libconfig->setting_lookup_uint16(setting, "db_port", &global_db_port);
+	libconfig->setting_lookup_string_char(setting, "codepage", global_codepage, sizeof(global_codepage));
+
+	return true;
+}
+
+bool loginlog_config_read( void )
+{
+	loginlog_config_read_inter("conf/inter-server.conf");
+	loginlog_config_read_inter_log("conf/inter-server.conf");
 
 	return true;
 }
