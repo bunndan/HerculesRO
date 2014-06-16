@@ -5254,6 +5254,7 @@ bool char_config_read_console( const char* cfgName, config_t *config ) {
 		if( msg_silent ) /* only bother if its actually enabled */
 			ShowInfo("Console Silent Setting: %d\n", msg_silent);
 	}
+	libconfig->setting_lookup_string_char(setting, "timestamp_format", timestamp_format, sizeof(timestamp_format));
 
 	return true;
 }

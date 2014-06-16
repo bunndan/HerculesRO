@@ -904,7 +904,7 @@ int inter_accreg_fromsql(int account_id,int char_id, int fd, int type)
 }
 
 /**
- * Reads 'inter_configuration.connection' and initializes required variables
+ * Reads 'inter_configuration.connection.char_server' and initializes required variables
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
