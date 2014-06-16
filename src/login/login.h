@@ -86,9 +86,10 @@ struct Login_Config {
 	unsigned int dynamic_pass_failure_ban_limit;    // number of failures needed to trigger the ipban
 	unsigned int dynamic_pass_failure_ban_duration; // duration of the ipban
 	bool use_dnsbl;                                 // dns blacklist blocking ?
-	char dnsbl_servs[1024];                         // comma-separated list of dnsbl servers
+	char **dnsbl_servers;                           // List of dnsbl servers
+	size_t dnsbl_servers_count;						// First dimension size of dnsbl_servers
 
-	int client_hash_check;							// flags for checking client md5
+	bool client_hash_check;							// flags for checking client md5
 	struct client_hash_node *client_hash_nodes;		// linked list containg md5 hash for each gm group
 };
 

@@ -977,16 +977,16 @@ int mmo_auth(struct login_session_data* sd, bool isServer) {
 	ip2str(session[sd->fd]->client_addr, ip);
 
 	// DNS Blacklist check
-	if( login_config.use_dnsbl ) {
+	if( login_config.use_dnsbl && login_config.dnsbl_servers ) {
 		char r_ip[16];
 		char ip_dnsbl[256];
-		char* dnsbl_serv;
+		size_t i;
 		uint8* sin_addr = (uint8*)&session[sd->fd]->client_addr;
 
 		sprintf(r_ip, "%u.%u.%u.%u", sin_addr[0], sin_addr[1], sin_addr[2], sin_addr[3]);
 
-		for( dnsbl_serv = strtok(login_config.dnsbl_servs,","); dnsbl_serv != NULL; dnsbl_serv = strtok(NULL,",") ) {
-			sprintf(ip_dnsbl, "%s.%s", r_ip, trim(dnsbl_serv));
+		for( i = 0; i < login_config.dnsbl_servers_count; i++ ) {
+			sprintf(ip_dnsbl, "%s.%s", r_ip, trim(login_config.dnsbl_servers[i]));
 			if( host2ip(ip_dnsbl) ) {
 				ShowInfo("DNSBL: (%s) Blacklisted. User Kicked.\n", r_ip);
 				return 3;
@@ -1587,127 +1587,335 @@ void login_set_defaults()
 	login_config.dynamic_pass_failure_ban_limit = 7;
 	login_config.dynamic_pass_failure_ban_duration = 5;
 	login_config.use_dnsbl = false;
-	safestrncpy(login_config.dnsbl_servs, "", sizeof(login_config.dnsbl_servs));
+	login_config.dnsbl_servers = NULL;
 
 	login_config.client_hash_check = 0;
 	login_config.client_hash_nodes = NULL;
 }
 
-//-----------------------------------
-// Reading main configuration file
-//-----------------------------------
-int login_config_read(const char* cfgName)
+/**
+ * Frees login_config.dnsbl_servers
+ **/
+void free_dnsbl_servers( void ) {
+	size_t i;
+
+	if( !login_config.dnsbl_servers )
+		return;
+
+	for( i = 0; i < login_config.dnsbl_servers_count && login_config.dnsbl_servers[i]; i++ )
+		aFree(login_config.dnsbl_servers[i]);
+
+	aFree(login_config.dnsbl_servers);
+	login_config.dnsbl_servers = NULL;
+}
+
+/**
+ * Reads information from ... .permission.DNS_blacklist.dnsbl_servers
+ * a 2D dynamic array is created, using aMalloc, in login_config.dnsbl_servers 
+ * in order to store this information. It should be freed via free_dnsbl_servers()
+ **/
+void login_config_set_dnsbl_servers( config_setting_t *setting ) {
+	int i;
+	int count = libconfig->setting_length(setting);
+
+	// There's no need to parse if it's disabled or if there's no list
+	if( !count || !login_config.use_dnsbl )
+		return;
+
+	if( login_config.dnsbl_servers )
+		free_dnsbl_servers();
+
+	login_config.dnsbl_servers = aMalloc(sizeof(char*)*count);
+
+	for( i = 0; i < count; i++ ) {
+		const char *string = libconfig->setting_get_string_elem(setting, i);
+		char *temp = NULL;
+
+		if( string == NULL )
+			continue;
+
+		login_config.dnsbl_servers[i] = aMalloc( (strlen(string)+1) );
+		safestrncpy(login_config.dnsbl_servers[i], string, (strlen(string)+1));
+	}
+	login_config.dnsbl_servers_count = count;
+	return;
+}
+
+/**
+ * Reads 'login_configuration.permission.DNS_blacklist' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool login_config_read_permission_blacklist( const char *cfgName, config_t *config ) {
+	config_setting_t *setting;
+
+	if( !(setting = libconfig->lookup(config, "login_configuration.permission.DNS_blacklist")) ) {
+		ShowError("login_config_read: login_configuration.permission.DNS_blacklist was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_bool_real(setting, "enabled", &login_config.use_dnsbl);
+
+	if( (setting = libconfig->lookup(config, "login_configuration.permission.DNS_blacklist.dnsbl_servers")) )
+		login_config_set_dnsbl_servers(setting);
+
+	return true;
+}
+
+/**
+ * Frees login_config.client_hash_nodes
+ **/
+void free_client_hash_nodes( void ) {
+	struct client_hash_node *node,
+							*next;
+
+	if( !login_config.client_hash_nodes )
+		return;
+
+	for( node = login_config.client_hash_nodes; node; node = next ) {
+		next = node->next;
+		aFree(node);
+	}
+	
+	login_config.client_hash_nodes = NULL;
+}
+
+/**
+ * Reads information from login_configuration.permission.hash.md5_hashes
+ * a linked list is created with the information and the first node is
+ * found in login_config.client_hash_nodes these nodes are allocated
+ * using aCalloc via CREATE, should be freed using free_client_hash_nodes()
+ **/
+void login_config_set_md5hash( config_setting_t *setting ) {
+	int i;
+	int count = libconfig->setting_length(setting);
+
+	// There's no need to parse if it's disabled or if there's no list
+	if( !count || !login_config.client_hash_check )
+		return;
+
+	if( login_config.client_hash_nodes )
+		free_client_hash_nodes();
+
+	for( i = 0; i < count; i++ ) {
+		int j;
+		int group_id = 0;
+		char md5[33];
+		struct client_hash_node *nnode = NULL;
+		config_setting_t *item = libconfig->setting_get_elem(setting, i);
+
+		if( item == NULL )
+			continue;
+
+		if( libconfig->setting_lookup_int(item, "group_id", &group_id) != CONFIG_TRUE ) {
+			ShowWarning("login_config_set_md5hash: entry (%d) is missing group_id! Ignoring...\n", i);
+			continue;
+		}
+
+		if( libconfig->setting_lookup_string_char(item, "hash", md5, sizeof(md5)) != CONFIG_TRUE ) {
+			ShowWarning("login_config_set_md5hash: entry (%d) is missing hash! Ignoring...\n", i);
+			continue;
+		}
+
+		CREATE(nnode, struct client_hash_node, 1);
+		for( j = 0; j < 32; j += 2 ) {
+			char buf[3];
+			unsigned int byte;
+
+			memcpy(buf, &md5[j], 2);
+			buf[2] = 0;
+
+			sscanf(buf, "%x", &byte);
+			nnode->hash[j / 2] = (uint8)(byte & 0xFF);
+		}
+
+		nnode->group_id = group_id;
+		nnode->next = login_config.client_hash_nodes; // login_config.client_hash_nodes is initialized before calling this function
+		login_config.client_hash_nodes = nnode;
+	}
+
+	return;
+}
+
+/**
+ * Reads 'login_configuration.permission.hash' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool login_config_read_permission_hash( const char *cfgName, config_t *config ) {
+	config_setting_t *setting;
+
+	if( !(setting = libconfig->lookup(config, "login_configuration.permission.hash")) ) {
+		ShowError("login_config_read: login_configuration.permission.hash was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_bool_real(setting, "enabled", &login_config.client_hash_check);
+
+	if( (setting = libconfig->lookup(config, "login_configuration.permission.hash.MD5_hashes")) )
+		login_config_set_md5hash(setting);
+
+	return true;
+}
+
+/**
+ * Reads 'login_configuration.permission' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool login_config_read_permission( const char *cfgName, config_t *config ) {
+	config_setting_t *setting;
+
+	if( !(setting = libconfig->lookup(config, "login_configuration.permission")) ) {
+		ShowError("login_config_read: login_configuration.permission was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_int(setting, "group_id_to_connect", &login_config.group_id_to_connect);
+	libconfig->setting_lookup_int(setting, "min_group_id_to_connect", &login_config.min_group_id_to_connect);
+	libconfig->setting_lookup_bool_real(setting, "check_client_version", &login_config.check_client_version);
+	libconfig->setting_lookup_uint(setting, "client_version_to_connect", &login_config.client_version_to_connect);
+
+
+	login_config_read_permission_hash(cfgName, config);
+	login_config_read_permission_blacklist(cfgName, config);
+
+	return true;
+}
+
+/**
+ * Reads 'login_configuration.account' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool login_config_read_account( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+	AccountDB* db = account_engine[0].db;
+
+	if( !(setting = libconfig->lookup(config, "login_configuration.account")) ) {
+		ShowError("login_config_read: login_configuration.account was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_bool_real(setting, "new_account", &login_config.new_account_flag);
+	libconfig->setting_lookup_bool_real(setting, "new_acc_length_limit", &login_config.new_acc_length_limit);
+
+	libconfig->setting_lookup_int(setting, "allowed_regs", &allowed_regs);
+	libconfig->setting_lookup_int(setting, "time_allowed", &time_allowed);
+	libconfig->setting_lookup_int(setting, "start_limited_time", &login_config.start_limited_time);
+	libconfig->setting_lookup_bool_real(setting, "use_MD5_passwords", &login_config.use_md5_passwds);
+
+	db->set_property(db, config);
+	ipban_config_read(cfgName, config);
+
+	return true;
+}
+
+/**
+ * Reads 'login_configuration.log' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool login_config_read_log( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+
+	if( !(setting = libconfig->lookup(config, "login_configuration.log")) ) {
+		ShowError("login_config_read: login_configuration.log was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_bool_real(setting, "log_login", &login_config.log_login);
+	libconfig->setting_lookup_string_char(setting, "date_format",
+											login_config.date_format,
+											sizeof(login_config.date_format)
+											);
+	return true;
+}
+
+/**
+ * Reads 'login_configuration.console' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool login_config_read_console( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+
+	if( !(setting = libconfig->lookup(config, "login_configuration.console")) ) {
+		ShowError("login_config_read: login_configuration.console was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_bool(setting, "stdout_with_ansisequence", &stdout_with_ansisequence);
+	libconfig->setting_lookup_string_char(setting, "timestamp_format", timestamp_format, sizeof(timestamp_format));
+
+	if( libconfig->setting_lookup_int(setting, "console_silent", &msg_silent) == CONFIG_TRUE ) {
+		if( msg_silent ) /* only bother if its actually enabled */
+			ShowInfo("Console Silent Setting: %d\n", msg_silent);
+	}
+	return true;
+}
+
+/**
+ * Reads 'login_configuration.inter' and initializes required variables
+ * @param cfgName path to configuration file (used in error and warning messages)
+ * @retval false in case of fatal error
+ **/
+bool login_config_read_inter( const char* cfgName, config_t *config ) {
+	config_setting_t *setting;
+	const char *str = NULL;
+
+	if( !(setting = libconfig->lookup(config, "login_configuration.inter")) ) {
+		ShowError("login_config_read: login_configuration.inter was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_uint16(setting, "login_port", &login_config.login_port);
+
+	if( libconfig->setting_lookup_uint(setting, "ip_sync_interval", &login_config.ip_sync_interval) == CONFIG_TRUE )
+		login_config.ip_sync_interval *= 1000*60; // In minutes
+
+	if( libconfig->setting_lookup_string(setting, "bind_ip", &str) == CONFIG_TRUE ) {
+		char old_ip_str[16];
+		ip2str(login_config.login_ip, old_ip_str);
+
+		if( (login_config.login_ip = host2ip(str)) )
+			ShowStatus("Login server binding IP address : %s -> %s\n", old_ip_str, str);
+	}
+
+	return true;
+}
+
+/**
+ * Reads 'inter_configuration' and initializes required variables
+ * @param cfgName path to configuration file
+ * @retval false in case of failure
+ **/
+bool login_config_read(const char* cfgName)
 {
-	char line[1024], w1[1024], w2[1024];
-	FILE* fp = fopen(cfgName, "r");
-	if (fp == NULL) {
-		ShowError("Configuration file (%s) not found.\n", cfgName);
-		return 1;
-	}
-	while(fgets(line, sizeof(line), fp)) {
-		if (line[0] == '/' && line[1] == '/')
-			continue;
+	config_t config;
+	const char *import;
 
-		if (sscanf(line, "%[^:]: %[^\r\n]", w1, w2) < 2)
-			continue;
+	if( libconfig->read_file(&config, cfgName) )
+		return false; // Error message is already shown by libconfig->read_file
 
-		if(!strcmpi(w1,"timestamp_format"))
-			safestrncpy(timestamp_format, w2, 20);
-		else if(!strcmpi(w1,"stdout_with_ansisequence"))
-			stdout_with_ansisequence = config_switch(w2);
-		else if(!strcmpi(w1,"console_silent")) {
-			msg_silent = atoi(w2);
-			if( msg_silent ) /* only bother if we actually have this enabled */
-				ShowInfo("Console Silent Setting: %d\n", atoi(w2));
-		}
-		else if( !strcmpi(w1, "bind_ip") ) {
-			login_config.login_ip = host2ip(w2);
-			if( login_config.login_ip ) {
-				char ip_str[16];
-				ShowStatus("Login server binding IP address : %s -> %s\n", w2, ip2str(login_config.login_ip, ip_str));
-			}
-		}
-		else if( !strcmpi(w1, "login_port") ) {
-			login_config.login_port = (uint16)atoi(w2);
-		}
-		else if(!strcmpi(w1, "log_login"))
-			login_config.log_login = (bool)config_switch(w2);
+	login_config_read_inter(cfgName, &config);
+	login_config_read_console(cfgName, &config);
+	login_config_read_log(cfgName, &config);
+	login_config_read_account(cfgName, &config);
+	login_config_read_permission(cfgName, &config);
 
-		else if(!strcmpi(w1, "new_account"))
-			login_config.new_account_flag = (bool)config_switch(w2);
-		else if(!strcmpi(w1, "new_acc_length_limit"))
-			login_config.new_acc_length_limit = (bool)config_switch(w2);
-		else if(!strcmpi(w1, "start_limited_time"))
-			login_config.start_limited_time = atoi(w2);
-		else if(!strcmpi(w1, "check_client_version"))
-			login_config.check_client_version = (bool)config_switch(w2);
-		else if(!strcmpi(w1, "client_version_to_connect"))
-			login_config.client_version_to_connect = (unsigned int)strtoul(w2, NULL, 10);
-		else if(!strcmpi(w1, "use_MD5_passwords"))
-			login_config.use_md5_passwds = (bool)config_switch(w2);
-		else if(!strcmpi(w1, "group_id_to_connect"))
-			login_config.group_id_to_connect = atoi(w2);
-		else if(!strcmpi(w1, "min_group_id_to_connect"))
-			login_config.min_group_id_to_connect = atoi(w2);
-		else if(!strcmpi(w1, "date_format"))
-			safestrncpy(login_config.date_format, w2, sizeof(login_config.date_format));
-		else if(!strcmpi(w1, "allowed_regs")) //account flood protection system
-			allowed_regs = atoi(w2);
-		else if(!strcmpi(w1, "time_allowed"))
-			time_allowed = atoi(w2);
-		else if(!strcmpi(w1, "use_dnsbl"))
-			login_config.use_dnsbl = (bool)config_switch(w2);
-		else if(!strcmpi(w1, "dnsbl_servers"))
-			safestrncpy(login_config.dnsbl_servs, w2, sizeof(login_config.dnsbl_servs));
-		else if(!strcmpi(w1, "ipban_cleanup_interval"))
-			login_config.ipban_cleanup_interval = (unsigned int)atoi(w2);
-		else if(!strcmpi(w1, "ip_sync_interval"))
-			login_config.ip_sync_interval = (unsigned int)1000*60*atoi(w2); //w2 comes in minutes.
-		else if(!strcmpi(w1, "client_hash_check"))
-			login_config.client_hash_check = config_switch(w2);
-		else if(!strcmpi(w1, "client_hash")) {
-			int group = 0;
-			char md5[33];
+	loginlog_config_read(); // Only inter-server
 
-			if (sscanf(w2, "%d, %32s", &group, md5) == 2) {
-				struct client_hash_node *nnode;
-				int i;
-				CREATE(nnode, struct client_hash_node, 1);
-
-				if (strcmpi(md5, "disabled") == 0) {
-					nnode->hash[0] = '\0';
-				} else {
-					for (i = 0; i < 32; i += 2) {
-						char buf[3];
-						unsigned int byte;
-
-						memcpy(buf, &md5[i], 2);
-						buf[2] = 0;
-
-						sscanf(buf, "%x", &byte);
-						nnode->hash[i / 2] = (uint8)(byte & 0xFF);
-					}
-				}
-
-				nnode->group_id = group;
-				nnode->next = login_config.client_hash_nodes;
-
-				login_config.client_hash_nodes = nnode;
-			}
-		}
-		else if(!strcmpi(w1, "import"))
-			login_config_read(w2);
-		else
-		{
-			AccountDB* db = account_engine[0].db;
-			if( db )
-				db->set_property(db, w1, w2);
-			ipban_config_read(w1, w2);
-			loginlog_config_read(w1, w2);
-		}
-	}
-	fclose(fp);
 	ShowInfo("Finished reading %s.\n", cfgName);
+
+	// import should overwrite any previous configuration, so it should be called last
+	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
+		if( !strcmp(import, cfgName) || !strcmp(import, LOGIN_CONF_NAME) )
+			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
+		else
+			login_config_read(import);
+	}
+
 	return 0;
 }
 
@@ -1716,17 +1924,13 @@ int login_config_read(const char* cfgName)
 //--------------------------------------
 int do_final(void) {
 	int i;
-	struct client_hash_node *hn = login_config.client_hash_nodes;
 
 	ShowStatus("Terminating...\n");
 	
 	HPM->event(HPET_FINAL);
-	
-	while (hn) {
-		struct client_hash_node *tmp = hn;
-		hn = hn->next;
-		aFree(tmp);
-	}
+
+	free_client_hash_nodes();
+	free_dnsbl_servers();
 
 	login_log(0, "login server", 100, "login server shutdown");
 
@@ -1796,6 +2000,11 @@ int do_init(int argc, char** argv)
 
 	// intialize engine (to accept config settings)
 	account_engine[0].db = account_engine[0].constructor();
+	accounts = account_engine[0].db;
+	if( accounts == NULL ) {
+		ShowFatalError("do_init: account engine 'sql' not found.\n");
+		exit(EXIT_FAILURE);
+	}
 
 	// read login-server configuration
 	login_set_defaults();
@@ -1833,16 +2042,9 @@ int do_init(int argc, char** argv)
 	}
 
 	// Account database init
-	accounts = account_engine[0].db;
-	if( accounts == NULL ) {
-		ShowFatalError("do_init: account engine 'sql' not found.\n");
+	if(!accounts->init(accounts)) {
+		ShowFatalError("do_init: Failed to initialize account engine 'sql'.\n");
 		exit(EXIT_FAILURE);
-	} else {
-
-		if(!accounts->init(accounts)) {
-			ShowFatalError("do_init: Failed to initialize account engine 'sql'.\n");
-			exit(EXIT_FAILURE);
-		}
 	}
 
 	HPM->share(account_db_sql_up(accounts),"sql_handle");
