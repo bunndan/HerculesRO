@@ -5321,17 +5321,14 @@ bool char_config_read_player_deletion( const char* cfgName, config_t *config ) {
  **/
 bool char_config_read_player_name( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.player.name")) ) {
 		ShowError("char_config_read: char_configuration.player.name was not found in %s!\n", cfgName);
 		return false;
 	}
 
-	if( libconfig->setting_lookup_string(setting, "unknown_char_name", &str ) == CONFIG_TRUE )
-		safestrncpy(unknown_char_name, str, sizeof(unknown_char_name));
-	if( libconfig->setting_lookup_string(setting, "name_letters", &str ) == CONFIG_TRUE )
-		safestrncpy(char_name_letters, str, sizeof(char_name_letters));
+	libconfig->setting_lookup_string_char(setting, "unknown_char_name", unknown_char_name, sizeof(unknown_char_name));
+	libconfig->setting_lookup_string_char(setting, "name_letters", char_name_letters, sizeof(char_name_letters));
 
 	libconfig->setting_lookup_int(setting, "name_option", &char_name_option);
 	libconfig->setting_lookup_bool_real(setting, "name_ignoring_case", &name_ignoring_case);
@@ -5449,7 +5446,6 @@ bool char_config_read_player( const char* cfgName, config_t *config ) {
  **/
 bool char_config_read_permission( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.permission")) ) {
 		ShowError("char_config_read: char_configuration.permission was not found in %s!\n", cfgName);
@@ -5499,7 +5495,7 @@ void char_config_set_ip( const char *type, const char *value, uint32 *type_ip, c
  **/
 bool char_config_read_inter( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const  char *str = NULL;
+	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.inter")) ) {
 		ShowError("char_config_read: char_configuration.inter was not found in %s!\n", cfgName);
@@ -5507,10 +5503,8 @@ bool char_config_read_inter( const char* cfgName, config_t *config ) {
 	}
 
 	// Login information
-	if( libconfig->setting_lookup_string(setting, "userid", &str) == CONFIG_TRUE )
-		safestrncpy(userid, str, sizeof(userid));
-	if( libconfig->setting_lookup_string(setting, "passwd", &str) == CONFIG_TRUE )
-		safestrncpy(passwd, str, sizeof(passwd));
+	libconfig->setting_lookup_string_char(setting, "userid", userid, sizeof(userid));
+	libconfig->setting_lookup_string_char(setting, "passwd", passwd, sizeof(passwd));
 
 	// Login-server and character-server information
 	if( libconfig->setting_lookup_string(setting, "login_ip", &str) == CONFIG_TRUE )
@@ -5535,7 +5529,6 @@ bool char_config_read_inter( const char* cfgName, config_t *config ) {
  **/
 bool char_config_read_first_nest( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration")) ) {
 		ShowError("char_config_read: char_configuration was not found in %s!\n", cfgName);
@@ -5543,22 +5536,20 @@ bool char_config_read_first_nest( const char* cfgName, config_t *config ) {
 	}
 
 	// char_configuration.server_name
-	if( libconfig->setting_lookup_string(setting, "server_name", &str) == CONFIG_TRUE ) {
-		safestrncpy(server_name, str, sizeof(server_name));
+	if( libconfig->setting_lookup_string_char(setting, "server_name", server_name, sizeof(server_name)) == CONFIG_TRUE ) {
 		ShowInfo("server name %s\n", server_name);
 	} else {
 		ShowWarning("char_config_read: server_name was not set! Defaulting to 'Hercules'\n");
 		safestrncpy(server_name, "Hercules", sizeof(server_name));
 	}
 	// char_configuration.wisp_server_name
-	if( libconfig->setting_lookup_string(setting, "wisp_server_name", &str) == CONFIG_TRUE ) {
+	if( libconfig->setting_lookup_string_char(setting, "wisp_server_name", wisp_server_name, sizeof(wisp_server_name)) == CONFIG_TRUE ) {
 		// wisp_server_name should _always_ be equal or bigger than 4 characters!
-		if( strlen(str) < 4 ) {
+		if( strlen(wisp_server_name) < 4 ) {
 			ShowWarning("char_config_read: char_configuration.wisp_server_name is too small!\n"
 						"Defaulting to: Server\n");
 			safestrncpy(server_name, "Server", sizeof(server_name));
 		}
-		safestrncpy(wisp_server_name, str, sizeof(server_name));
 	}
 	// char_configuration.guild_exp_rate
 	libconfig->setting_lookup_int(setting, "guild_exp_rate", &guild_exp_rate);
