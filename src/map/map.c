@@ -2936,19 +2936,26 @@ int map_readfromcache(struct map_data *m, char *buffer) {
 	return 0; // Not found
 }
 
-
-int map_addmap(const char* mapname) {
+/**
+ * Adds a map object
+ **/
+void map_addmap(const char* mapname) {
 	map->list[map->count].instance_id = -1;
 	mapindex->getmapname(mapname, map->list[map->count++].name);
-	return 0;
 }
 
+/**
+ * Removes a map with id from map->list
+ **/
 void map_delmapid(int id) {
 	ShowNotice("Removing map [ %s ] from maplist"CL_CLL"\n",map->list[id].name);
 	memmove(map->list+id, map->list+id+1, sizeof(map->list[0])*(map->count-id-1));
 	map->count--;
 }
 
+/**
+ * Removes a map with name mapname from map->list
+ **/
 int map_delmap(char* mapname) {
 	int i;
 	char map_name[MAP_NAME_LENGTH];
@@ -3591,17 +3598,19 @@ int map_config_read( char *cfgName ) {
 	return 0;
 }
 
-
 /**
- * Checks if a map name is in a list (deleted_maps)
- * @retval true Map was found in the list
- * @see map_config_read_sub
+ * Checks if a filename is in a list
+ * @param deleted_list 2D char array containing file names to compare
+ * @param del_count number of items in deleted_list
+ *
+ * @retval true filename was found in the list
+ * @see map_config_read_sub and map_reloadnpc_sub
  **/
-bool map_is_deleted( int del_count, char **deleted_maps, const char *mapname ) {
+bool map_srcfile_is_deleted( int del_count, char **deleted_list, const char *filename ) {
 	int j;
 
 	for( j = 0; j < del_count; j++ ) {
-		if( strcmp(deleted_maps[j], mapname) == 0 )
+		if( strcmp(deleted_list[j], filename) == 0 )
 			return true;
 	}
 
@@ -3609,31 +3618,59 @@ bool map_is_deleted( int del_count, char **deleted_maps, const char *mapname ) {
 }
 
 /**
- * Reads 'map_configuration.map_list'/'map_configuration.map_removed' and adds or removes maps from map-server
+ * Reads two list settings and adds or removes objects from map-server
  *
- * First all objects from map_configuration.map_removed are added into an array, then
- * objects from map_configuration.map_list are compared to this array and added to the server
+ * @param type Type of addition (@see enum srcfile_type)
+ * @param cfgName path to configuration file
+ * @param list Setting path to added files list
+ * @param rlist Setting path to removed files list
  *
- * @param cfgName path to configuration file (used in error and warning messages)
- * @retval false in case of fatal error
+ * First all objects from rlist are added into an array, then
+ * objects from list are compared to this array and added to the server
+ *
+ * @retval false error
  **/
-bool map_config_read_sub( char *cfgName ) {
+bool map_srcfile_load( enum srcfile_type type, char *cfgName, const char *list, const char *rlist ) {
 	config_t config;
-	config_setting_t *setting;
-	int count = 0, del_count = 0, i;
+	config_setting_t *setting, *setting2;
+	int count = 0, i;
 
-	char **deleted_maps;
+	char **removed_files = NULL; // 2D list that'll contain srcnames of removed files
+	int del_count = 0; // size of removed_files
+
+	size_t olength; // Maximum length of srcfile names
+	void (*obj_add)(const char *name); // Pointer to function that adds objects
+
+	switch( type ) {
+			case SRC_MAP:
+				obj_add = map->addmap;
+				olength = MAP_NAME_LENGTH;
+				break;
+			case SRC_NPC:
+				obj_add = npc->addsrcfile;
+				olength = 255;
+				break;
+			default:
+				ShowError("map_srcfile_load: Unknown src file type! (%d)\n", type);
+				ShowWarning("map_srcfile_load: No objects were loaded into memory (cfg file: %s)\n", cfgName);
+				return false;
+	}
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false;
 
-	// Remove maps
-	if( (setting = libconfig->lookup(&config, "map_configuration.map_removed")) 
+	if( !(setting2 = libconfig->lookup(&config, list)) ) {
+		ShowError("map_srcfile_load: %s was not found in %s!\n", list, cfgName);
+		return false;
+	}
+
+	// Remove files
+	if( (setting = libconfig->lookup(&config, rlist)) 
 		&& (del_count = libconfig->setting_length(setting)) ) {
 
-		deleted_maps = aMalloc( sizeof(deleted_maps) * del_count );
+		removed_files = aMalloc( sizeof(removed_files) * del_count );
 		for( i = 0; i < del_count; i++ )
-			deleted_maps[i] = aMalloc(sizeof(char) * MAP_NAME_LENGTH);
+			removed_files[i] = aMalloc(sizeof(char) * olength);
 
 		for( i = 0; i < del_count; i++ ) {
 			const char *temp;
@@ -3641,39 +3678,32 @@ bool map_config_read_sub( char *cfgName ) {
 			if( (temp = libconfig->setting_get_string_elem(setting, i)) == NULL )
 				temp = "unknown";
 
-			strncpy(deleted_maps[i], temp, MAP_NAME_LENGTH);
-			// map->delmap is not used because the map is removed from the list before it's added [Panikon]
-			// map->delmap(mapname);
+			strncpy(removed_files[i], temp, olength);
 		}
 	}
 
-	if( !(setting = libconfig->lookup(&config, "map_configuration.map_list")) ) {
-		ShowError("map_config_read_sub: map_configuration.map_list was not found in %s!\n", cfgName);
-		return false;
-	}
-
-	// Add maps to map->list
-	count = libconfig->setting_length(setting);
+	// Add files
+	count = libconfig->setting_length(setting2);
 	if( !count ) {
 		ShowWarning("map_config_read_sub: no maps found in %s!\n", cfgName);
 		return false;
 	}
 	for( i = 0; i < count; i++ ) {
-		const char *mapname;
+		const char *srcname;
 
-		if( (mapname = libconfig->setting_get_string_elem(setting, i)) == NULL )
+		if( (srcname = libconfig->setting_get_string_elem(setting2, i)) == NULL )
 			continue;
 
-		if( del_count && map_is_deleted(del_count, deleted_maps, mapname) )
+		if( del_count && map_srcfile_is_deleted(del_count, removed_files, srcname) )
 			continue;
 
-		map->addmap(mapname);
+		obj_add(srcname);
 	}
 
-	if( deleted_maps ) {
+	if( removed_files ) {
 		for( i = 0; i < del_count; i++ )
-			aFree(deleted_maps[i]);
-		aFree(deleted_maps);
+			aFree(removed_files[i]);
+		aFree(removed_files);
 	}
 
 	libconfig->destroy(&config);
@@ -3681,62 +3711,26 @@ bool map_config_read_sub( char *cfgName ) {
 }
 
 /**
- * Reads 'map_configuration.map_list'/'map_configuration.map_removed' and adds or removes
- * maps from map-server
- * map->count is zeroed before this function is called
- * @param cfgName path to configuration file (used in error and warning messages)
- * @retval false in case of fatal error
+ * Loads NPC list into server
+ * @param clear Clear current script list?
+ * @param extra_scripts 2D const char list with extra scripts that will be added
+ * @param extra_scripts_count Size of extra_scripts
  **/
-void map_reloadnpc_sub( char *cfgName ) {
-	char line[1024], w1[1024], w2[1024];
-	FILE *fp;
-
-	fp = fopen(cfgName,"r");
-	if( fp == NULL )
-	{
-		ShowError("Map configuration file not found at: %s\n", cfgName);
-		return;
-	}
-
-	while( fgets(line, sizeof(line), fp) )
-	{
-		char* ptr;
-
-		if( line[0] == '/' && line[1] == '/' )
-			continue;
-		if( (ptr = strstr(line, "//")) != NULL )
-			*ptr = '\n'; //Strip comments
-		if( sscanf(line, "%[^:]: %[^\t\r\n]", w1, w2) < 2 )
-			continue;
-
-		//Strip trailing spaces
-		ptr = w2 + strlen(w2);
-		while (--ptr >= w2 && *ptr == ' ');
-		ptr++;
-		*ptr = '\0';
-
-		if (strcmpi(w1, "npc") == 0)
-			npc->addsrcfile(w2);
-		else if (strcmpi(w1, "import") == 0)
-			map->reloadnpc_sub(w2);
-		else if (strcmpi(w1, "delnpc") == 0)
-			npc->delsrcfile(w2);
-		else
-			ShowWarning("Unknown setting '%s' in file %s\n", w1, cfgName);
-	}
-
-	fclose(fp);
-}
-
 void map_reloadnpc(bool clear, const char * const *extra_scripts, int extra_scripts_count) {
 	int i;
 	if (clear)
 		npc->addsrcfile("clear"); // this will clear the current script list
 
 #ifdef RENEWAL
-	map->reloadnpc_sub("npc/re/scripts_main.conf");
+	map->srcfile_load(SRC_NPC,
+					  "npc/re/scripts_main.conf",
+					  "npc_global_list",
+					  "npc_removed_list");
 #else
-	map->reloadnpc_sub("npc/pre-re/scripts_main.conf");
+	map->srcfile_load(SRC_NPC,
+					  "npc/pre-re/scripts_main.conf",
+					  "npc_global_list",
+					  "npc_removed_list");
 #endif
 
 	// Append extra scripts
@@ -5864,8 +5858,10 @@ int do_init(int argc, char *argv[])
 		map->config_read(map->MAP_CONF_NAME);
 		CREATE(map->list,struct map_data,map->count);
 		map->count = 0;
-		map->config_read_sub(map->MAP_CONF_NAME);
-
+		map->srcfile_load( SRC_MAP,
+						  map->MAP_CONF_NAME,
+						  "map_configuration.map_list",
+						  "map_configuration.map_removed");
 		// loads npcs
 		map->reloadnpc(false, (const char * const *)load_extras, load_extras_count);
 
@@ -6271,8 +6267,7 @@ void map_defaults(void) {
 	map->readgat = map_readgat;
 	map->readallmaps = map_readallmaps;
 	map->config_read = map_config_read;
-	map->config_read_sub = map_config_read_sub;
-	map->reloadnpc_sub = map_reloadnpc_sub;
+	map->srcfile_load = map_srcfile_load;
 	map->inter_config_read = inter_config_read;
 	map->inter_config_read_database_names = inter_config_read_database_names;
 	map->inter_config_read_connection = inter_config_read_connection;

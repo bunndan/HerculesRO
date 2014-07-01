@@ -469,6 +469,16 @@ typedef enum {
 
 } cell_chk;
 
+/**
+ * Possible types of srcfile
+ * Used to determine which function will be used when adding an object
+ * @see map_srcfile_load
+ **/
+enum srcfile_type {
+	SRC_NPC,	// "path/to/npc",
+	SRC_MAP		// "mapname",
+};
+
 struct mapcell {
 	// terrain flags
 	unsigned char
@@ -1034,7 +1044,7 @@ struct map_interface {
 	int (*eraseallipport_sub) (DBKey key, DBData *data, va_list va);
 	char* (*init_mapcache) (FILE *fp);
 	int (*readfromcache) (struct map_data *m, char *buffer);
-	int (*addmap) (const char *mapname);
+	void (*addmap) (const char *mapname);
 	void (*delmapid) (int id);
 	void (*zone_db_clear) (void);
 	void (*list_final) (void);
@@ -1042,7 +1052,7 @@ struct map_interface {
 	int (*readgat) (struct map_data *m);
 	int (*readallmaps) (void);
 	int (*config_read) (char *cfgName);
-	bool (*config_read_sub) (char *cfgName);
+	bool (*srcfile_load) ( enum srcfile_type type, char *cfgName, const char *list, const char *rlist );
 	void (*reloadnpc_sub) (char *cfgName);
 	bool (*inter_config_read) (const char *cfgName);
 	bool (*inter_config_read_database_names) ( const char* cfgName, config_t *config );
