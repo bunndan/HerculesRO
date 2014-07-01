@@ -919,6 +919,7 @@ bool char_config_read_connection( const char* cfgName, config_t *config ) {
 		libconfig->setting_lookup_string_char(setting, "db_username", char_server_id, sizeof(char_server_id));
 		libconfig->setting_lookup_string_char(setting, "db_password", char_server_pw, sizeof(char_server_pw));
 		libconfig->setting_lookup_string_char(setting, "db_database", char_server_db, sizeof(char_server_db));
+		libconfig->setting_lookup_string_char(setting, "default_codepage", default_codepage, sizeof(default_codepage));
 		return true;
 	}
 	ShowWarning("char_config_read_connection: Defaulting sql_connection...");
@@ -944,7 +945,6 @@ static int inter_config_read(const char* cfgName)
 	}
 	libconfig->setting_lookup_int(setting, "party_share_level", &party_share_level);
 	libconfig->setting_lookup_bool_real(setting, "log_inter", &log_inter);
-	libconfig->setting_lookup_string_char(setting, "sql_connection.default_codepage", default_codepage, sizeof(default_codepage));
 
 	ShowInfo ("Done reading %s.\n", cfgName);
 

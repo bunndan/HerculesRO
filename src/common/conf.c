@@ -241,6 +241,22 @@ int config_setting_lookup_string_char( config_setting_t *setting, const char *se
 	return CONFIG_FALSE;
 }
 
+/**
+ * Works the same way as lookup_string, but it uses a char instead of a const char
+ * @param sv_size sizeof(setting_variable)
+ * @retval CONFIG_TRUE in case of success
+ **/
+int config_lookup_string_char( config_t *config, const char *setting_name, char *setting_variable, size_t sv_size ) {
+	const char *str;
+
+	if( libconfig->lookup_string(config, setting_name, &str) == CONFIG_TRUE ) {
+		safestrncpy(setting_variable, str, sv_size);
+		return CONFIG_TRUE;
+	}
+
+	return CONFIG_FALSE;
+}
+
 void libconfig_defaults(void) {
 	libconfig = &libconfig_s;
 	
@@ -331,4 +347,5 @@ void libconfig_defaults(void) {
 	libconfig->setting_lookup_uint = config_setting_lookup_uint;
 	libconfig->setting_lookup_uint16 = config_setting_lookup_uint16;
 	libconfig->setting_lookup_string_char = config_setting_lookup_string_char;
+	libconfig->lookup_string_char = config_lookup_string_char;
 }
