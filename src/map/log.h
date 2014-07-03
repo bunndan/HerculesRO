@@ -91,7 +91,8 @@ struct log_interface {
 		bool sql_logs;
 		bool log_chat_woe_disable;
 		int rare_items_log,refine_items_log,price_items_log,amount_items_log;
-		int branch, mvpdrop, zeny, commands, npc, chat;
+		int chat, zeny;
+		bool branch, mvpdrop, commands, npc;
 		char log_branch[64], log_pick[64], log_zeny[64], log_mvpdrop[64], log_gm[64], log_npc[64], log_chat[64];
 	} config;
 	/* */
@@ -119,7 +120,7 @@ struct log_interface {
 	void (*branch_sub) (struct map_session_data* sd);
 	void (*mvpdrop_sub) (struct map_session_data* sd, int monster_id, int* log_mvp);
 	
-	int (*config_read) (const char* cfgName);
+	bool (*config_read) (const char* cfgName);
 	void (*config_done) (void);
 	void (*sql_init) (void);
 	void (*sql_final) (void);
