@@ -136,6 +136,7 @@ struct HPM_interface {
 	void (*share) (void *, char *);
 	void (*symbol_defaults) (void);
 	void (*config_read) (const char * const *extra_plugins, int extra_plugins_count);
+	bool (*parse_battle_conf) ( config_t *config );
 	bool (*populate) (struct hplugin *plugin,const char *filename);
 	void (*symbol_defaults_sub) (void);//TODO drop
 	char *(*pid2name) (unsigned int pid);

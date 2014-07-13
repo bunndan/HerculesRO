@@ -670,6 +670,37 @@ bool hplugins_addconf(unsigned int pluginID, enum HPluginConfType type, char *na
 	
 	return true;
 }
+
+bool hplugins_parse_battle_conf( config_t *config ) {
+	config_setting_t *setting;
+	unsigned int i;
+	int val, type;
+	char str[1024];
+
+	if( config == NULL )
+		return false;
+
+	for( i = 0; i < HPM->confsc[HPCT_BATTLE]; i++ ) {
+		if( (setting = libconfig->lookup(config, HPM->confs[HPCT_BATTLE][i].key)) == NULL )
+			continue;
+
+		switch( (type = config_setting_type(setting)) ) {
+			case CONFIG_TYPE_INT:
+			case CONFIG_TYPE_BOOL:
+				val = setting->value.ival;
+				break;
+
+			default: // Unsupported type
+				ShowWarning("Setting %s has unsupported type %d, ignoring...\n",
+					HPM->confs[HPCT_BATTLE][i].key, type);
+				continue;
+		}
+		sprintf(str, "%d", val); // FIXME: Remove this when support to int's as value is added
+		HPM->confs[HPCT_BATTLE][i].func(str);
+	}
+	return true;
+}
+
 bool hplugins_parse_conf(const char *w1, const char *w2, enum HPluginConfType point) {
 	unsigned int i;
 	
@@ -854,6 +885,7 @@ void hpm_defaults(void) {
 	HPM->share = hplugin_export_symbol;
 	HPM->symbol_defaults = hplugins_share_defaults;
 	HPM->config_read = hplugins_config_read;
+	HPM->parse_battle_conf =  hplugins_parse_battle_conf;
 	HPM->populate = hplugin_populate;
 	HPM->symbol_defaults_sub = NULL;
 	HPM->pid2name = hplugins_id2name;

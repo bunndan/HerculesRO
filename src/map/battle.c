@@ -6539,7 +6539,7 @@ static const struct _battle_data {
 	{ "show_steal_in_same_party",           &battle_config.show_steal_in_same_party,        0,      0,      1,              },
 	{ "party_hp_mode",                      &battle_config.party_hp_mode,                   0,      0,      1,              },
 	{ "show_party_share_picker",            &battle_config.party_show_share_picker,         1,      0,      1,              },
-	{ "show_picker.item_type",              &battle_config.show_picker_item_type,           112,    0,      INT_MAX,        },
+	{ "show_picker_item_type",              &battle_config.show_picker_item_type,           112,    0,      INT_MAX,        },
 	{ "party_update_interval",              &battle_config.party_update_interval,           1000,   100,    INT_MAX,        },
 	{ "party_item_share_type",              &battle_config.party_share_type,                0,      0,      1|2|3,          },
 	{ "attack_attr_none",                   &battle_config.attack_attr_none,                ~BL_PC, BL_NUL, BL_ALL,         },
@@ -6695,7 +6695,7 @@ static const struct _battle_data {
 	{ "display_status_timers",              &battle_config.display_status_timers,           1,      0,      1,              },
 	{ "skill_add_heal_rate",                &battle_config.skill_add_heal_rate,             7,      0,      INT_MAX,        },
 	{ "eq_single_target_reflectable",       &battle_config.eq_single_target_reflectable,    1,      0,      1,              },
-	{ "invincible.nodamage",                &battle_config.invincible_nodamage,             0,      0,      1,              },
+	{ "invincible_nodamage",                &battle_config.invincible_nodamage,             0,      0,      1,              },
 	{ "mob_slave_keep_target",              &battle_config.mob_slave_keep_target,           0,      0,      1,              },
 	{ "autospell_check_range",              &battle_config.autospell_check_range,           0,      0,      1,              },
 	{ "client_reshuffle_dice",              &battle_config.client_reshuffle_dice,           0,      0,      1,              },
@@ -6916,28 +6916,6 @@ static int Hercules_report_timer(int tid, int64 tick, int id, intptr_t data) {
 }
 #endif
 
-int battle_set_value(const char* w1, const char* w2)
-{
-	int val = config_switch(w2);
-
-	int i;
-	ARR_FIND(0, ARRAYLENGTH(battle_data), i, strcmpi(w1, battle_data[i].str) == 0);
-	if (i == ARRAYLENGTH(battle_data)) {
-		if( HPM->parseConf(w1,w2,HPCT_BATTLE) ) /* if plugin-owned, succeed */
-			return 1;
-		return 0; // not found
-	}
-
-	if (val < battle_data[i].min || val > battle_data[i].max)
-	{
-		ShowWarning("Value for setting '%s': %s is invalid (min:%i max:%i)! Defaulting to %i...\n", w1, w2, battle_data[i].min, battle_data[i].max, battle_data[i].defval);
-		val = battle_data[i].defval;
-	}
-
-	*battle_data[i].val = val;
-	return 1;
-}
-
 int battle_get_value(const char* w1)
 {
 	int i;
@@ -7011,46 +6989,73 @@ void battle_adjust_conf(void) {
 #endif
 }
 
-int battle_config_read(const char* cfgName)
-{
-	FILE* fp;
-	static int count = 0;
+bool battle_set_value( const char *param, const char *value ) {
+	int val = atoi(value);
+	int i;
 
-	if (count == 0)
-		battle->config_set_defaults();
+	ARR_FIND(0, ARRAYLENGTH(battle_data), i, strcmpi(param, battle_data[i].str) == 0);
+	if (i == ARRAYLENGTH(battle_data)) {
+		if( HPM->parseConf(param, value,HPCT_BATTLE) ) /* if plugin-owned, succeed */
+			return true;
+		return false; // not found
+	}
 
-	count++;
-
-	fp = fopen(cfgName,"r");
-	if (fp == NULL)
-		ShowError("File not found: %s\n", cfgName);
-	else
+	if( val < battle_data[i].min || val > battle_data[i].max )
 	{
-		char line[1024], w1[1024], w2[1024];
-		while(fgets(line, sizeof(line), fp))
-		{
-			if (line[0] == '/' && line[1] == '/')
+		ShowWarning("Value for setting '%s': %d is invalid (min:%d max:%d)! Defaulting to %d...\n",
+			battle_data[i].str, val, battle_data[i].min, battle_data[i].max, battle_data[i].defval);
+		val = battle_data[i].defval;
+	}
+	*battle_data[i].val = val;
+	return true;
+}
+
+/**
+ * Dynamically reads battle configuration and initializes required variables
+ * @retval true success
+ **/
+bool battle_config_read( const char* cfgName ) {
+	config_t config;
+	config_setting_t *setting;
+	int i, val, type;
+	char config_name[1024];
+
+	battle->config_set_defaults();
+
+	if( libconfig->read_file(&config, cfgName) )
+		return false; // Error message is already shown by libconfig->read_file
+
+	for( i = 0; i < ARRAYLENGTH(battle_data); i++ ) {
+		sprintf(config_name,"battle_configuration.%s", battle_data[i].str);
+
+		if( (setting = libconfig->lookup(&config, config_name)) == NULL ) {
+			ShowWarning("Unknown configuration: %s!\n", config_name);
+			continue;
+		}
+		switch( (type = config_setting_type(setting)) ) {
+			case CONFIG_TYPE_INT:
+			case CONFIG_TYPE_BOOL:
+				val = setting->value.ival;
+				break;
+
+			default: // Unsupported type
+				ShowWarning("Setting %s has unsupported type %d, ignoring...\n",
+					config_name, type);
 				continue;
-			if (sscanf(line, "%1023[^:]:%1023s", w1, w2) != 2)
-				continue;
-			if (strcmpi(w1, "import") == 0)
-				battle->config_read(w2);
-			else
-			if (battle->config_set_value(w1, w2) == 0)
-				ShowWarning("Unknown setting '%s' in file %s\n", w1, cfgName);
 		}
 
-		fclose(fp);
+		if( val < battle_data[i].min || val > battle_data[i].max ) {
+			ShowWarning("Value for setting '%s': %d is invalid (min:%d max:%d)! Defaulting to %d...\n",
+				config_name, val, battle_data[i].min, battle_data[i].max, battle_data[i].defval);
+			val = battle_data[i].defval;
+		}
+		*battle_data[i].val = val;
 	}
-
-	count--;
-
-	if (count == 0) {
-		battle->config_adjust();
-		clif->bc_ready();
-	}
-
-	return 0;
+	HPM->parse_battle_conf(&config);
+	libconfig->destroy(&config); // config_destroy(&config);
+	battle->config_adjust();
+	clif->bc_ready();
+	return true;
 }
 
 void do_init_battle(bool minimal) {
