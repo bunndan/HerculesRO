@@ -2,8 +2,8 @@
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
 
-#ifndef _MAP_MAP_H_
-#define _MAP_MAP_H_
+#ifndef MAP_MAP_H
+#define MAP_MAP_H
 
 #include <stdarg.h>
 
@@ -324,7 +324,7 @@ struct spawn_data {
 	unsigned int level;
 	struct {
 		unsigned int size : 2; //Holds if mob has to be tiny/large
-		unsigned int ai : 4; //Special ai for summoned monsters.
+		unsigned int ai : 4; //Special AI for summoned monsters.
 		//0: Normal mob | 1: Standard summon, attacks mobs
 		//2: Alchemist Marine Sphere | 3: Alchemist Summon Flora | 4: Summon Zanzou
 		unsigned int dynamic : 1; //Whether this data is indexed by a map's dynamic mob list
@@ -342,7 +342,7 @@ struct flooritem_data {
 	struct item item_data;
 };
 
-enum _sp {
+enum status_point_types {
 	SP_SPEED,SP_BASEEXP,SP_JOBEXP,SP_KARMA,SP_MANNER,SP_HP,SP_MAXHP,SP_SP,	// 0-7
 	SP_MAXSP,SP_STATUSPOINT,SP_0a,SP_BASELEVEL,SP_SKILLPOINT,SP_STR,SP_AGI,SP_VIT,	// 8-15
 	SP_INT,SP_DEX,SP_LUK,SP_CLASS,SP_ZENY,SP_SEX,SP_NEXTBASEEXP,SP_NEXTJOBEXP,	// 16-23
@@ -415,7 +415,7 @@ enum _sp {
 	SP_LAST_KNOWN,
 };
 
-enum _look {
+enum look {
 	LOOK_BASE,
 	LOOK_HAIR,
 	LOOK_WEAPON,
@@ -669,8 +669,8 @@ struct map_data {
 	int nocommand; //Blocks @/# commands for non-gms. [Skotlex]
 	/**
 	* Ice wall reference counter for bugreport:3574
-	* - since there are a thounsand mobs out there in a lot of maps checking on,
-	* - every targetting for icewall on attack path would just be a waste, so,
+	* - since there are a thousand mobs out there in a lot of maps checking on,
+	* - every targeting for icewall on attack path would just be a waste, so,
 	* - this counter allows icewall checking be only run when there is a actual ice wall on the map
 	**/
 	int icewall_num;
@@ -742,7 +742,7 @@ struct map_data_other_server {
 /// Bitfield of flags for the iterator.
 enum e_mapitflags {
 	MAPIT_NORMAL = 0,
-	//	MAPIT_PCISPLAYING = 1,// Unneeded as pc_db/id_db will only hold auth'ed, active players.
+	//	MAPIT_PCISPLAYING = 1,// Unneeded as pc_db/id_db will only hold authed, active players.
 };
 
 struct s_mapiterator;
@@ -1083,4 +1083,4 @@ struct map_interface *map;
 
 void map_defaults(void);
 
-#endif /* _MAP_MAP_H_ */
+#endif /* MAP_MAP_H */

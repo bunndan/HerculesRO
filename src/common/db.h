@@ -39,8 +39,8 @@
  * @encoding US-ASCII                                                        *
  * @see common#db.c                                                          *
 \*****************************************************************************/
-#ifndef _COMMON_DB_H_
-#define _COMMON_DB_H_
+#ifndef COMMON_DB_H
+#define COMMON_DB_H
 
 #include <stdarg.h>
 
@@ -106,7 +106,7 @@ typedef enum DBType {
 } DBType;
 
 /**
- * Bitfield of options that define the behaviour of the database.
+ * Bitfield of options that define the behavior of the database.
  * See {@link #db_fix_options(DBType,DBOptions)} for restrictions of the
  * types of databases.
  * @param DB_OPT_BASE Base options: does not duplicate keys, releases nothing
@@ -116,7 +116,7 @@ typedef enum DBType {
  * @param DB_OPT_RELEASE_KEY Releases the key.
  * @param DB_OPT_RELEASE_DATA Releases the data whenever an entry is removed
  *          from the database.
- *          WARNING: for funtions that return the data (like DBMap::remove),
+ *          WARNING: for functions that return the data (like DBMap::remove),
  *          a dangling pointer will be returned.
  * @param DB_OPT_RELEASE_BOTH Releases both key and data.
  * @param DB_OPT_ALLOW_NULL_KEY Allow NULL keys in the database.
@@ -365,7 +365,7 @@ struct DBIterator
 };
 
 /**
- * Public interface of a database. Only contains funtions.
+ * Public interface of a database. Only contains functions.
  * All the functions take the interface as the first argument.
  * @public
  * @see #db_alloc(const char*,int,DBType,DBOptions,unsigned short)
@@ -1138,8 +1138,8 @@ void  linkdb_foreach (struct linkdb_node** head, LinkDBFunc func, ...);
 	do{ \
 		if( (__n) > VECTOR_CAPACITY(__vec) ) \
 		{ /* increase size */ \
-			if( VECTOR_CAPACITY(__vec) == 0 ) SET_POINTER(VECTOR_DATA(__vec), aMalloc((__n)*sizeof(VECTOR_FIRST(__vec)))); /* allocate new */ \
-			else SET_POINTER(VECTOR_DATA(__vec), aRealloc(VECTOR_DATA(__vec),(__n)*sizeof(VECTOR_FIRST(__vec)))); /* reallocate */ \
+			if( VECTOR_CAPACITY(__vec) == 0 ) VECTOR_DATA(__vec) = aMalloc((__n)*sizeof(VECTOR_FIRST(__vec))); /* allocate new */ \
+			else VECTOR_DATA(__vec) = aRealloc(VECTOR_DATA(__vec),(__n)*sizeof(VECTOR_FIRST(__vec))); /* reallocate */ \
 			memset(VECTOR_DATA(__vec)+VECTOR_LENGTH(__vec), 0, (VECTOR_CAPACITY(__vec)-VECTOR_LENGTH(__vec))*sizeof(VECTOR_FIRST(__vec))); /* clear new data */ \
 			VECTOR_CAPACITY(__vec) = (__n); /* update capacity */ \
 		} \
@@ -1151,7 +1151,7 @@ void  linkdb_foreach (struct linkdb_node** head, LinkDBFunc func, ...);
 		} \
 		else if( (__n) < VECTOR_CAPACITY(__vec) ) \
 		{ /* reduce size */ \
-			SET_POINTER(VECTOR_DATA(__vec), aRealloc(VECTOR_DATA(__vec),(__n)*sizeof(VECTOR_FIRST(__vec)))); /* reallocate */ \
+			VECTOR_DATA(__vec) = aRealloc(VECTOR_DATA(__vec),(__n)*sizeof(VECTOR_FIRST(__vec))); /* reallocate */ \
 			VECTOR_CAPACITY(__vec) = (__n); /* update capacity */ \
 			if( VECTOR_LENGTH(__vec) > (__n) ) VECTOR_LENGTH(__vec) = (__n); /* update length */ \
 		} \
@@ -1549,4 +1549,4 @@ void  linkdb_foreach (struct linkdb_node** head, LinkDBFunc func, ...);
 
 
 
-#endif /* _COMMON_DB_H_ */
+#endif /* COMMON_DB_H */

@@ -119,7 +119,7 @@ bool enable_char_creation = true;
 bool char_new_display = false;
 
 bool name_ignoring_case = false; // Allow or not identical name for characters but with a different case by [Yor]
-int char_name_option = 0; // Option to know which letters/symbols are authorised in the name of a character (0: all, 1: only those in char_name_letters, 2: all EXCEPT those in char_name_letters) by [Yor]
+int char_name_option = 0; // Option to know which letters/symbols are authorized in the name of a character (0: all, 1: only those in char_name_letters, 2: all EXCEPT those in char_name_letters) by [Yor]
 char unknown_char_name[NAME_LENGTH] = "Unknown"; // Name to use when the requested name cannot be determined
 #define TRIM_CHARS "\255\xA0\032\t\x0A\x0D " //The following characters are trimmed regardless because they cause confusion and problems on the servers. [Skotlex]
 char char_name_letters[1024] = ""; // list of letters/symbols allowed (or not) in a character name. by [Yor]
@@ -1396,7 +1396,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 	if( SQL_SUCCESS == SQL->StmtNextRow(stmt) )
 		strcat(t_msg, " accdata");
 
-	if (save_log) ShowInfo("Loaded char (%d - %s): %s\n", char_id, p->name, t_msg);	//ok. all data load successfuly!
+	if (save_log) ShowInfo("Loaded char (%d - %s): %s\n", char_id, p->name, t_msg);	//ok. all data load successfully!
 	SQL->StmtFree(stmt);
 	StrBuf->Destroy(&buf);
 
@@ -1422,7 +1422,7 @@ int mmo_char_sql_init(void)
 	//and send the loginserver the new state....
 
 	// Force all users offline in sql when starting char-server
-	// (useful when servers crashs and don't clean the database)
+	// (useful when servers crashes and don't clean the database)
 	set_all_offline_sql();
 
 	return 0;
@@ -1477,7 +1477,7 @@ bool char_slotchange(struct char_session_data *sd, int fd, unsigned short from, 
 }
 
 //-----------------------------------
-// Function to change chararcter's names
+// Function to change character's names
 //-----------------------------------
 int rename_char_sql(struct char_session_data *sd, int char_id)
 {
@@ -1549,9 +1549,9 @@ int check_char_name(char * name, char * esc_name)
 	if( strcmpi(name, wisp_server_name) == 0 )
 		return -1; // nick reserved for internal server messages
 
-	// Check Authorised letters/symbols in the name of the character
+	// Check Authorized letters/symbols in the name of the character
 	if( char_name_option == 1 )
-	{ // only letters/symbols in char_name_letters are authorised
+	{ // only letters/symbols in char_name_letters are authorized
 		for( i = 0; i < NAME_LENGTH && name[i]; i++ )
 			if( strchr(char_name_letters, name[i]) == NULL )
 				return -2;
@@ -1585,7 +1585,7 @@ int check_char_name(char * name, char * esc_name)
  *  -1: 'Charname already exists'
  *  -2: 'Char creation denied'/ Unknown error
  *  -3: 'You are underaged'
- *  -4: 'You are not elegible to open the Character Slot.'
+ *  -4: 'You are not eligible to open the Character Slot.'
  *  -5: 'Symbols in Character Names are forbidden'
  *  char_id: Success
  **/
@@ -2213,7 +2213,7 @@ void mapif_server_reset(int id);
 void loginif_reset(void)
 {
 	int id;
-	// TODO kick everyone out and reset everything or wait for connect and try to reaquire locks [FlavioJS]
+	// TODO kick everyone out and reset everything or wait for connect and try to reacquire locks [FlavioJS]
 	for( id = 0; id < ARRAYLENGTH(server); ++id )
 		mapif_server_reset(id);
 	flush_fifos();
@@ -2297,7 +2297,7 @@ int parse_fromlogin(int fd) {
 		
 		switch( command ) {
 
-			// acknowledgement of connect-to-loginserver request
+			// acknowledgment of connect-to-loginserver request
 			case 0x2711:
 				if (RFIFOREST(fd) < 3)
 					return 0;
@@ -2317,7 +2317,7 @@ int parse_fromlogin(int fd) {
 				RFIFOSKIP(fd,3);
 			break;
 
-			// acknowledgement of account authentication request
+			// acknowledgment of account authentication request
 			case 0x2713:
 				if (RFIFOREST(fd) < 33)
 					return 0;
@@ -2537,7 +2537,7 @@ int parse_fromlogin(int fd) {
 				unsigned char buf[11];
 				WBUFW(buf,0) = 0x2b14;
 				WBUFL(buf,2) = RFIFOL(fd,2);
-				WBUFB(buf,6) = RFIFOB(fd,6); // 0: change of statut, 1: ban
+				WBUFB(buf,6) = RFIFOB(fd,6); // 0: change of status, 1: ban
 				WBUFL(buf,7) = RFIFOL(fd,7); // status or final date of a banishment
 				mapif_sendall(buf, 11);
 			}
@@ -3172,7 +3172,7 @@ int parse_frommap(int fd)
 					memcpy(&char_dat, RFIFOP(fd,13), sizeof(struct mmo_charstatus));
 					mmo_char_tosql(cid, &char_dat);
 				} else {	//This may be valid on char-server reconnection, when re-sending characters that already logged off.
-					ShowError("parse_from_map (save-char): Received data for non-existant/offline character (%d:%d).\n", aid, cid);
+					ShowError("parse_from_map (save-char): Received data for non-existing/offline character (%d:%d).\n", aid, cid);
 					set_char_online(id, cid, aid);
 				}
 
@@ -4185,7 +4185,7 @@ int parse_char(int fd)
 				ShowInfo("request connect - account_id:%d/login_id1:%d/login_id2:%d\n", account_id, login_id1, login_id2);
 
 				if (sd) {
-					//Received again auth packet for already authentified account?? Discard it.
+					//Received again auth packet for already authenticated account?? Discard it.
 					//TODO: Perhaps log this as a hack attempt?
 					//TODO: and perhaps send back a reply?
 					break;
@@ -4212,7 +4212,7 @@ int parse_char(int fd)
 					break;
 				}
 
-				// search authentification
+				// search authentication
 				node = (struct auth_node*)idb_get(auth_db, account_id);
 				if( node != NULL &&
 					node->account_id == account_id &&
@@ -4243,7 +4243,7 @@ int parse_char(int fd)
 				{// authentication not found (coming from login server)
 					if (login_fd > 0) { // don't send request if no login-server
 						WFIFOHEAD(login_fd,23);
-						WFIFOW(login_fd,0) = 0x2712; // ask login-server to authentify an account
+						WFIFOW(login_fd,0) = 0x2712; // ask login-server to authenticate an account
 						WFIFOL(login_fd,2) = sd->account_id;
 						WFIFOL(login_fd,6) = sd->login_id1;
 						WFIFOL(login_fd,10) = sd->login_id2;
@@ -4328,7 +4328,7 @@ int parse_char(int fd)
 					break;
 				}
 				
-				/* set char as online prior to loading its data so 3rd party applications will realise the sql data is not reliable */
+				/* set char as online prior to loading its data so 3rd party applications will realize the sql data is not reliable */
 				set_char_online(-2,char_id,sd->account_id);
 				if( !mmo_char_fromsql(char_id, &char_dat, true) ) { /* failed? set it back offline */
 					set_char_offline(char_id, sd->account_id);
@@ -4470,13 +4470,13 @@ int parse_char(int fd)
 					WFIFOW(fd,0) = 0x6e;
 					/* Others I found [Ind] */
 					/* 0x02 = Symbols in Character Names are forbidden */
-					/* 0x03 = You are not elegible to open the Character Slot. */
+					/* 0x03 = You are not eligible to open the Character Slot. */
 					/* 0x0B = This service is only available for premium users.  */
 					switch (result) {
 						case -1: WFIFOB(fd,2) = 0x00; break; // 'Charname already exists'
 						case -2: WFIFOB(fd,2) = 0xFF; break; // 'Char creation denied'
 						case -3: WFIFOB(fd,2) = 0x01; break; // 'You are underaged'
-						case -4: WFIFOB(fd,2) = 0x03; break; // 'You are not elegible to open the Character Slot.'
+						case -4: WFIFOB(fd,2) = 0x03; break; // 'You are not eligible to open the Character Slot.'
 						case -5: WFIFOB(fd,2) = 0x02; break; // 'Symbols in Character Names are forbidden'
 
 						default:
@@ -4652,7 +4652,7 @@ int parse_char(int fd)
 			//Confirm change name.
 			// 0x28f <char_id>.L
 			case 0x28f:
-				// 0: Sucessfull
+				// 0: Successful
 				// 1: This character's name has already been changed. You cannot change a character's name more than once.
 				// 2: User information is not correct.
 				// 3: You have failed to change this character's name.
@@ -4757,7 +4757,7 @@ int parse_char(int fd)
 
 				RFIFOSKIP(fd,60);
 			}
-			return 0; // avoid processing of followup packets here
+			return 0; // avoid processing of follow-up packets here
 				
 			// checks the entered pin
 			case 0x8b8:
@@ -5017,7 +5017,7 @@ static int online_data_cleanup(int tid, int64 tick, int id, intptr_t data) {
 }
 
 //----------------------------------
-// Reading Lan Support configuration
+// Reading LAN Support configuration
 // Rewrote: Advanced subnet check [LuzZza]
 //----------------------------------
 
@@ -5740,7 +5740,7 @@ int do_init(int argc, char **argv) {
 	timer->add_func_list(online_data_cleanup, "online_data_cleanup");
 	timer->add_interval(timer->gettick() + 1000, online_data_cleanup, 0, 0, 600 * 1000);
 
-	//Cleaning the tables for NULL entrys @ startup [Sirius]
+	//Cleaning the tables for NULL entries @ startup [Sirius]
 	//Chardb clean
 	if( SQL_ERROR == SQL->Query(sql_handle, "DELETE FROM `%s` WHERE `account_id` = '0'", char_db) )
 		Sql_ShowDebug(sql_handle);

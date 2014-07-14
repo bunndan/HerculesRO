@@ -13,16 +13,16 @@
  *  If it has reusable entries (freed entry), it uses one.                   *
  *  So no assumption should be made about the data of the entry.             *
  *  Entries should be freed in the manager they where allocated from.        *
- *  Failure to do so can lead to unexpected behaviours.                      *
+ *  Failure to do so can lead to unexpected behaviors.                      *
  *                                                                           *
  *  <H2>Advantages:</H2>                                                     *
  *  - The same manager is used for entries of the same size.                 *
  *    So entries freed in one instance of the manager can be used by other   *
  *    instances of the manager.                                              *
  *  - Much less memory allocation/deallocation - program will be faster.     *
- *  - Avoids memory fragmentaion - program will run better for longer.       *
+ *  - Avoids memory fragmentation - program will run better for longer.       *
  *                                                                           *
- *  <H2>Disavantages:</H2>                                                   *
+ *  <H2>Disadvantages:</H2>                                                   *
  *  - Unused entries are almost inevitable - memory being wasted.            *
  *  - A  manager will only auto-destroy when all of its instances are        *
  *    destroyed so memory will usually only be recovered near the end.       *
@@ -37,8 +37,8 @@
  * @author Flavio @ Amazon Project                                           *
  * @encoding US-ASCII                                                        *
 \*****************************************************************************/
-#ifndef _COMMON_ERS_H_
-#define _COMMON_ERS_H_
+#ifndef COMMON_ERS_H
+#define COMMON_ERS_H
 
 #include "../common/cbasetypes.h"
 
@@ -49,7 +49,7 @@
  *  ERS                   - Entry manager.                                   *
  *  ers_new               - Allocate an instance of an entry manager.        *
  *  ers_report            - Print a report about the current state.          *
- *  ers_final             - Clears the remainder of the manangers.           *
+ *  ers_final             - Clears the remainder of the managers.           *
 \*****************************************************************************/
 
 /**
@@ -64,7 +64,7 @@
  * By default it aligns to one byte, using the "natural order" of the entries.
  * This should NEVER be set to zero or less.
  * If greater than one, some memory can be wasted. This should never be needed
- * but is here just in case some aligment issues arise.
+ * but is here just in case some alignment issues arise.
  */
 #ifndef ERS_ALIGNED
 #	define ERS_ALIGNED 1
@@ -102,7 +102,7 @@ typedef struct eri {
 	/**
 	 * Free an entry allocated from this manager.
 	 * WARNING: Does not check if the entry was allocated by this manager.
-	 * Freeing such an entry can lead to unexpected behaviour.
+	 * Freeing such an entry can lead to unexpected behavior.
 	 * @param self Interface of the entry manager
 	 * @param entry Entry to be freed
 	 */
@@ -126,7 +126,7 @@ typedef struct eri {
 
 	/* */
 	void (*chunk_size) (struct eri *self, unsigned int new_size);
-} *ERS;
+} ERS;
 
 #ifdef DISABLE_ERS
 // Use memory manager to allocate/free and disable other interface functions
@@ -158,7 +158,7 @@ typedef struct eri {
  * @param The requested size of the entry in bytes
  * @return Interface of the object
  */
-ERS ers_new(uint32 size, char *name, enum ERSOptions options);
+ERS *ers_new(uint32 size, char *name, enum ERSOptions options);
 
 /**
  * Print a report about the current state of the Entry Reusage System.
@@ -170,9 +170,9 @@ ERS ers_new(uint32 size, char *name, enum ERSOptions options);
 void ers_report(void);
 
 /**
- * Clears the remainder of the manangers
+ * Clears the remainder of the managers
  **/
 void ers_final(void);
 #endif /* DISABLE_ERS / not DISABLE_ERS */
 
-#endif /* _COMMON_ERS_H_ */
+#endif /* COMMON_ERS_H */

@@ -107,7 +107,7 @@ char* search_timer_func_list(TimerFunc func)
 #if defined(ENABLE_RDTSC)
 static uint64 RDTSC_BEGINTICK = 0,   RDTSC_CLOCK = 0;
 
-static __inline uint64 _rdtsc(){
+static __inline uint64 rdtsc_(void) {
 	register union{
 		uint64	qw;
 		uint32 	dw[2];
@@ -118,7 +118,7 @@ static __inline uint64 _rdtsc(){
 	return t.qw;
 }
 
-static void rdtsc_calibrate(){
+static void rdtsc_calibrate(void){
 	uint64 t1, t2;
 	int32 i;
 	
@@ -127,14 +127,14 @@ static void rdtsc_calibrate(){
 	RDTSC_CLOCK = 0;
 	
 	for(i = 0; i < 5; i++){
-		t1 = _rdtsc();
+		t1 = rdtsc_();
 		usleep(1000000); //1000 MS
-		t2 = _rdtsc();
+		t2 = rdtsc_();
 		RDTSC_CLOCK += (t2 - t1) / 1000;
 	}
 	RDTSC_CLOCK /= 5;
 	
-	RDTSC_BEGINTICK = _rdtsc();
+	RDTSC_BEGINTICK = rdtsc_();
 	
 	ShowMessage(" done. (Frequency: %u Mhz)\n", (uint32)(RDTSC_CLOCK/1000) );
 }
@@ -170,14 +170,14 @@ static int64 sys_tick(void) {
 	}
 	if (pGetTickCount64)
 		return (int64)pGetTickCount64();
-	// 32-bit fallback. Note: This will wrap around every ~49 days since system startup!!!
+	// 32-bit fall back. Note: This will wrap around every ~49 days since system startup!!!
 	return (int64)GetTickCount();
 #elif defined(ENABLE_RDTSC)
 	// RDTSC: Returns the number of CPU cycles since reset. Unreliable if
 	//   the CPU frequency is variable.
-	return (int64)((_rdtsc() - RDTSC_BEGINTICK) / RDTSC_CLOCK);
+	return (int64)((rdtsc_() - RDTSC_BEGINTICK) / RDTSC_CLOCK);
 #elif defined(HAVE_MONOTONIC_CLOCK)
-	// Monotinic clock: Implementation-defined.
+	// Monotonic clock: Implementation-defined.
 	//   Clock that cannot be set and represents monotonic time since some
 	//   unspecified starting point.  This clock is not affected by
 	//   discontinuous jumps in the system time (e.g., if the system
@@ -188,7 +188,7 @@ static int64 sys_tick(void) {
 	// int64 cast to avoid overflows on platforms where time_t is 32 bit
 	return (int64)tval.tv_sec * 1000 + tval.tv_nsec / 1000000;
 #else
-	// Fallback, regular clock: Number of milliseconds since epoch.
+	// Fall back, regular clock: Number of milliseconds since epoch.
 	//   The time returned by gettimeofday() is affected by discontinuous
 	//   jumps in the system time (e.g., if the system  administrator
 	//   manually  changes  the system time).  If you need a monotonically

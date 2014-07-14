@@ -1,8 +1,8 @@
 // Copyright (c) Athena Dev Teams - Licensed under GNU GPL
 // For more information, see LICENCE in the main folder
 
-#ifndef _LOGIN_IPBAN_H_
-#define _LOGIN_IPBAN_H_
+#ifndef LOGIN_IPBAN_H
+#define LOGIN_IPBAN_H
 
 #include "../common/cbasetypes.h"
 #include "../common/conf.h"
@@ -23,4 +23,4 @@ void ipban_log(uint32 ip);
 bool ipban_config_read( const char* cfgName, config_t *config );
 
 
-#endif /* _LOGIN_IPBAN_H_ */
+#endif /* LOGIN_IPBAN_H */

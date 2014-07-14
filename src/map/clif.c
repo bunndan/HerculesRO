@@ -2588,7 +2588,7 @@ void clif_cartlist(struct map_session_data *sd) {
 
 /// Removes cart (ZC_CARTOFF).
 /// 012b
-/// Client behaviour:
+/// Client behavior:
 /// Closes the cart storage and removes all it's items from memory.
 /// The Num & Weight values of the cart are left untouched and the cart is NOT removed.
 void clif_clearcart(int fd)
@@ -4622,6 +4622,8 @@ void clif_graffiti_entry(struct block_list *bl, struct skill_unit *su, enum send
 /// 099f <lenght>.W <id> L <creator id>.L <x>.W <y>.W <unit id>.L <range>.W <visible>.B (ZC_SKILL_ENTRY4)
 void clif_getareachar_skillunit(struct block_list *bl, struct skill_unit *su, enum send_target target) {
 	struct packet_skill_entry p;
+	nullpo_retv(bl);
+	nullpo_retv(su);
 
 	if( su->group->state.guildaura )
 		return;
@@ -5047,7 +5049,7 @@ void clif_skillcastcancel(struct block_list* bl)
 ///     4 = "no party" MsgStringTable[163]
 ///     5 = "no shout" MsgStringTable[164]
 ///     6 = "no PKing" MsgStringTable[165]
-///     7 = "no alligning" MsgStringTable[383]
+///     7 = "no aligning" MsgStringTable[383]
 ///     ? = ignored
 /// cause:
 ///     0 = "not enough skill level" MsgStringTable[214] (AL_WARP)
@@ -5425,7 +5427,7 @@ void clif_skill_estimation(struct map_session_data *sd,struct block_list *dst) {
 }
 
 
-/// Presents a textual list of producable items (ZC_MAKABLEITEMLIST).
+/// Presents a textual list of producible items (ZC_MAKABLEITEMLIST).
 /// 018d <packet len>.W { <name id>.W { <material id>.W }*3 }*
 /// material id:
 ///     unused by the client
@@ -5467,7 +5469,7 @@ void clif_skill_produce_mix_list(struct map_session_data *sd, int skill_id , int
 }
 
 
-/// Present a list of producable items (ZC_MAKINGITEM_LIST).
+/// Present a list of producible items (ZC_MAKINGITEM_LIST).
 /// 025a <packet len>.W <mk type>.W { <name id>.W }*
 /// mk type:
 ///     1 = cooking
@@ -5603,7 +5605,7 @@ void clif_displaymessage(const int fd, const char* mes) {
 		if ( ( len = strnlen(mes, 255) ) > 0 ) { // don't send a void message (it's not displaying on the client chat). @help can send void line.
 			WFIFOHEAD(fd, 5 + len);
 			WFIFOW(fd,0) = 0x8e;
-			WFIFOW(fd,2) = 5 + len; // 4 + len + NULL teminate
+			WFIFOW(fd,2) = 5 + len; // 4 + len + NULL terminate
 			safestrncpy((char *)WFIFOP(fd,4), mes, len + 1);
 			WFIFOSET(fd, 5 + len);
 		}
@@ -5632,7 +5634,7 @@ void clif_displaymessage2(const int fd, const char* mes) {
 				} else {
 					WFIFOHEAD(fd, 5 + len);
 					WFIFOW(fd,0) = 0x8e;
-					WFIFOW(fd,2) = 5 + len; // 4 + len + NULL teminate
+					WFIFOW(fd,2) = 5 + len; // 4 + len + NULL terminate
 					safestrncpy((char *)WFIFOP(fd,4), line, len + 1);
 					WFIFOSET(fd, 5 + len);
 				}
@@ -5649,7 +5651,7 @@ void clif_displaymessage_sprintf(const int fd, const char* mes, ...) {
 	if( map->cpsd_active && fd == 0 ) {
 		ShowInfo("HCP: ");
 		va_start(ap,mes);
-		_vShowMessage(MSG_NONE,mes,ap);
+		vShowMessage_(MSG_NONE,mes,ap);
 		va_end(ap);
 		ShowMessage("\n");
 	} else if ( fd > 0 ) {
@@ -5669,7 +5671,7 @@ void clif_displaymessage_sprintf(const int fd, const char* mes, ...) {
 
 		/* */
 		WFIFOW(fd,0) = 0x8e;
-		WFIFOW(fd,2) = 5 + len; // 4 + len + NULL teminate
+		WFIFOW(fd,2) = 5 + len; // 4 + len + NULL terminate
 
 		WFIFOSET(fd, 5 + len);
 	}
@@ -5924,8 +5926,8 @@ void clif_wis_message(int fd, const char* nick, const char* mes, size_t mes_len)
 /// Inform the player about the result of his whisper action (ZC_ACK_WHISPER).
 /// 0098 <result>.B
 /// result:
-///     0 = success to send wisper
-///     1 = target character is not loged in
+///     0 = success to send whisper
+///     1 = target character is not logged in
 ///     2 = ignored by target
 ///     3 = everyone ignored by target
 void clif_wis_end(int fd, int flag) {
@@ -6191,7 +6193,7 @@ void clif_item_refine_list(struct map_session_data *sd)
 
 
 /// Notification of an auto-casted skill (ZC_AUTORUN_SKILL).
-/// 0147 <skill id>.W <type>.L <level>.W <sp cost>.W <atk range>.W <skill name>.24B <upgradable>.B
+/// 0147 <skill id>.W <type>.L <level>.W <sp cost>.W <atk range>.W <skill name>.24B <upgradeable>.B
 void clif_item_skill(struct map_session_data *sd,uint16 skill_id,uint16 skill_lv)
 {
 	int fd;
@@ -7276,7 +7278,7 @@ void clif_mvp_noitem(struct map_session_data* sd)
 ///     0 = "Guild has been created."
 ///     1 = "You are already in a Guild."
 ///     2 = "That Guild Name already exists."
-///     3 = "You need the neccessary item to create a Guild."
+///     3 = "You need the necessary item to create a Guild."
 void clif_guild_created(struct map_session_data *sd,int flag)
 {
 	int fd;
@@ -7669,7 +7671,7 @@ void clif_guild_emblem_area(struct block_list* bl)
 
 
 /// Sends guild skills (ZC_GUILD_SKILLINFO).
-/// 0162 <packet len>.W <skill points>.W { <skill id>.W <type>.L <level>.W <sp cost>.W <atk range>.W <skill name>.24B <upgradable>.B }*
+/// 0162 <packet len>.W <skill points>.W { <skill id>.W <type>.L <level>.W <sp cost>.W <atk range>.W <skill name>.24B <upgradeable>.B }*
 void clif_guild_skillinfo(struct map_session_data* sd)
 {
 	int fd;
@@ -8186,7 +8188,7 @@ void clif_manner_message(struct map_session_data* sd, uint32 type)
 }
 
 
-/// Followup to 0x14a type 3/5, informs who did the manner adjustment action (ZC_NOTIFY_MANNER_POINT_GIVEN).
+/// Follow-up to 0x14a type 3/5, informs who did the manner adjustment action (ZC_NOTIFY_MANNER_POINT_GIVEN).
 /// 014b <type>.B <GM name>.24B
 /// type:
 ///     0 = positive (unmute)
@@ -8277,7 +8279,7 @@ void clif_playBGM(struct map_session_data* sd, const char* name)
 /// term:
 ///     unknown purpose, only relevant to act = 1
 /// npc id:
-///     The accustic direction of the sound is determined by the
+///     The acoustic direction of the sound is determined by the
 ///     relative position of the NPC to the player (3D sound).
 void clif_soundeffect(struct map_session_data* sd, struct block_list* bl, const char* name, int type)
 {
@@ -8602,11 +8604,11 @@ void clif_charnameack (int fd, struct block_list *bl)
 				nullpo_retv(md);
 
 				memcpy(WBUFP(buf,6), md->name, NAME_LENGTH);
-				if( md->guardian_data && md->guardian_data->guild_id )
+				if( md->guardian_data && md->guardian_data->g )
 				{
 					WBUFW(buf, 0) = cmd = 0x195;
 					WBUFB(buf,30) = 0;
-					memcpy(WBUFP(buf,54), md->guardian_data->guild_name, NAME_LENGTH);
+					memcpy(WBUFP(buf,54), md->guardian_data->g->name, NAME_LENGTH);
 					memcpy(WBUFP(buf,78), md->guardian_data->castle->castle_name, NAME_LENGTH);
 				}
 				else if( battle_config.show_mob_info )
@@ -8643,7 +8645,7 @@ void clif_charnameack (int fd, struct block_list *bl)
 			return;
 	}
 
-	// if no receipient specified just update nearby clients
+	// if no recipient specified just update nearby clients
 	if (fd == 0)
 		clif->send(buf, packet_len(cmd), bl, AREA);
 	else {
@@ -8738,7 +8740,7 @@ void clif_slide(struct block_list *bl, int x, int y)
 /// 008d <packet len>.W <id>.L <message>.?B
 void clif_disp_overhead(struct block_list *bl, const char* mes)
 {
-	unsigned char buf[256]; //This should be more than sufficient, the theorical max is CHAT_SIZE + 8 (pads and extra inserted crap)
+	unsigned char buf[256]; //This should be more than sufficient, the theoretical max is CHAT_SIZE + 8 (pads and extra inserted crap)
 	size_t len_mes = strlen(mes)+1; //Account for \0
 
 	if (len_mes > sizeof(buf)-8) {
@@ -8846,7 +8848,7 @@ void clif_starskill(struct map_session_data* sd, const char* mapname, int monste
 }
 
 /*==========================================
- * Info about Star Glaldiator save map [Komurka]
+ * Info about Star Gladiator save map [Komurka]
  * type: 1: Information, 0: Map registered
  *------------------------------------------*/
 void clif_feel_info(struct map_session_data* sd, unsigned char feel_level, unsigned char type)
@@ -8858,7 +8860,7 @@ void clif_feel_info(struct map_session_data* sd, unsigned char feel_level, unsig
 }
 
 /*==========================================
- * Info about Star Glaldiator hate mob [Komurka]
+ * Info about Star Gladiator hate mob [Komurka]
  * type: 1: Register mob, 0: Information.
  *------------------------------------------*/
 void clif_hate_info(struct map_session_data *sd, unsigned char hate_level,int class_, unsigned char type)
@@ -9052,7 +9054,7 @@ bool clif_process_message(struct map_session_data *sd, int format, char **name_,
 		if( strncmp(name, sd->status.name, namelen) || // the text must start with the speaker's name
 			name[namelen] != ' ' || name[namelen+1] != ':' || name[namelen+2] != ' ' ) // followed by ' : '
 		{
-			//Hacked message, or infamous "client desynch" issue where they pick one char while loading another.
+			//Hacked message, or infamous "client desynchronize" issue where they pick one char while loading another.
 			ShowWarning("clif_process_message: Player '%s' sent a message using an incorrect name! Forcing a relog...\n", sd->status.name);
 			set_eof(fd); // Just kick them out to correct it.
 			return false;
@@ -9864,7 +9866,7 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data* sd)
 	if( atcommand->exec(fd, sd, message, true)  )
 		return;
 
-	if( sd->sc.data[SC_BERSERK] || (sd->sc.data[SC_DEEP_SLEEP] && sd->sc.data[SC_DEEP_SLEEP]->val2) || (sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOCHAT) )
+	if( !pc->can_talk(sd) )
 		return;
 
 	if( battle_config.min_chat_delay ) { //[Skotlex]
@@ -10111,14 +10113,14 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 		return;
 	}
 
-	if (sd->sc.count &&
-		(sd->sc.data[SC_TRICKDEAD] ||
-		(sd->sc.data[SC_AUTOCOUNTER] && action_type != 0x07) ||
-		 sd->sc.data[SC_BLADESTOP] ||
-		 sd->sc.data[SC_DEEP_SLEEP] ||
-		 sd->sc.data[SC__MANHOLE] ||
-		 sd->sc.data[SC_CURSEDCIRCLE_ATKER] ||
-		 sd->sc.data[SC_CURSEDCIRCLE_TARGET] ))
+	// Statuses that don't let the player sit / attack / talk with NPCs(targeted)
+	// (not all are included in pc_can_attack)
+	if( sd->sc.count && (
+			sd->sc.data[SC_TRICKDEAD] ||
+			(sd->sc.data[SC_AUTOCOUNTER] && action_type != 0x07) ||
+			 sd->sc.data[SC_BLADESTOP] ||
+			 sd->sc.data[SC_DEEP_SLEEP] )
+			 )
 		return;
 
 	pc_stop_walking(sd, 1);
@@ -10140,10 +10142,6 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 				return;
 
 			if( sd->sc.option&OPTION_COSTUME )
-				return;
-
-			if( sd->sc.data[SC_BASILICA] || sd->sc.data[SC__SHADOWFORM] ||
-			(sd->sc.data[SC_SIREN] && sd->sc.data[SC_SIREN]->val2 == target_id) )
 				return;
 
 			if (!battle_config.sdelay_attack_enable && pc->checkskill(sd, SA_FREECAST) <= 0) {
@@ -10323,7 +10321,7 @@ void clif_hercules_chsys_quit(struct map_session_data *sd) {
 ///     1 = pick up item
 ///     2 = sit down
 ///     3 = stand up
-///     7 = continous attack
+///     7 = continuous attack
 ///     12 = (touch skill?)
 /// There are various variants of this packet, some of them have padding between fields.
 void clif_parse_ActionRequest(int fd, struct map_session_data *sd)
@@ -10377,7 +10375,8 @@ void clif_parse_WisMessage(int fd, struct map_session_data* sd)
 	if ( atcommand->exec(fd, sd, message, true) )
 		return;
 
-	if (sd->sc.data[SC_BERSERK] || (sd->sc.data[SC_DEEP_SLEEP] && sd->sc.data[SC_DEEP_SLEEP]->val2) || (sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOCHAT))
+	// Statuses that prevent the player from whispering
+	if( !pc->can_talk(sd) )
 		return;
 
 	if (battle_config.min_chat_delay) { //[Skotlex]
@@ -11037,7 +11036,7 @@ void clif_parse_ChatLeave(int fd, struct map_session_data* sd)
 }
 
 
-//Handles notifying asker and rejecter of what has just ocurred.
+//Handles notifying asker and rejecter of what has just occurred.
 //Type is used to determine the correct msg_txt to use:
 //0:
 void clif_noask_sub(struct map_session_data *src, struct map_session_data *target, int type) {
@@ -12239,7 +12238,7 @@ void clif_parse_PartyChangeLeader(int fd, struct map_session_data* sd) {
 /// Party Booking in KRO [Spiria]
 ///
 
-/// Request to register a party booking advertisment (CZ_PARTY_BOOKING_REQ_REGISTER).
+/// Request to register a party booking advertisement (CZ_PARTY_BOOKING_REQ_REGISTER).
 /// 0802 <level>.W <map id>.W { <job>.W }*6
 void clif_parse_PartyBookingRegisterReq(int fd, struct map_session_data* sd)
 {
@@ -12259,7 +12258,7 @@ void clif_parse_PartyBookingRegisterReq(int fd, struct map_session_data* sd)
 }
 
 
-/// Result of request to register a party booking advertisment (ZC_PARTY_BOOKING_ACK_REGISTER).
+/// Result of request to register a party booking advertisement (ZC_PARTY_BOOKING_ACK_REGISTER).
 /// 0803 <result>.W
 /// result:
 ///     0 = success
@@ -12280,7 +12279,7 @@ void clif_PartyBookingRegisterAck(struct map_session_data *sd, int flag)
 }
 
 
-/// Request to search for party booking advertisments (CZ_PARTY_BOOKING_REQ_SEARCH).
+/// Request to search for party booking advertisement (CZ_PARTY_BOOKING_REQ_SEARCH).
 /// 0804 <level>.W <map id>.W <job>.W <last index>.L <result count>.W
 void clif_parse_PartyBookingSearchReq(int fd, struct map_session_data* sd)
 {
@@ -12331,7 +12330,7 @@ void clif_PartyBookingSearchAck(int fd, struct party_booking_ad_info** results, 
 }
 
 
-/// Request to delete own party booking advertisment (CZ_PARTY_BOOKING_REQ_DELETE).
+/// Request to delete own party booking advertisement (CZ_PARTY_BOOKING_REQ_DELETE).
 /// 0806
 void clif_parse_PartyBookingDeleteReq(int fd, struct map_session_data* sd)
 {
@@ -12344,7 +12343,7 @@ void clif_parse_PartyBookingDeleteReq(int fd, struct map_session_data* sd)
 }
 
 
-/// Result of request to delete own party booking advertisment (ZC_PARTY_BOOKING_ACK_DELETE).
+/// Result of request to delete own party booking advertisement (ZC_PARTY_BOOKING_ACK_DELETE).
 /// 0807 <result>.W
 /// result:
 ///     0 = success
@@ -12366,7 +12365,7 @@ void clif_PartyBookingDeleteAck(struct map_session_data* sd, int flag)
 }
 
 
-/// Request to update party booking advertisment (CZ_PARTY_BOOKING_REQ_UPDATE).
+/// Request to update party booking advertisement (CZ_PARTY_BOOKING_REQ_UPDATE).
 /// 0808 { <job>.W }*6
 void clif_parse_PartyBookingUpdateReq(int fd, struct map_session_data* sd)
 {
@@ -12384,7 +12383,7 @@ void clif_parse_PartyBookingUpdateReq(int fd, struct map_session_data* sd)
 }
 
 
-/// Notification about new party booking advertisment (ZC_PARTY_BOOKING_NOTIFY_INSERT).
+/// Notification about new party booking advertisement (ZC_PARTY_BOOKING_NOTIFY_INSERT).
 /// 0809 <index>.L <char name>.24B <expire time>.L <level>.W <map id>.W { <job>.W }*6
 void clif_PartyBookingInsertNotify(struct map_session_data* sd, struct party_booking_ad_info* pb_ad)
 {
@@ -12410,7 +12409,7 @@ void clif_PartyBookingInsertNotify(struct map_session_data* sd, struct party_boo
 }
 
 
-/// Notification about updated party booking advertisment (ZC_PARTY_BOOKING_NOTIFY_UPDATE).
+/// Notification about updated party booking advertisement (ZC_PARTY_BOOKING_NOTIFY_UPDATE).
 /// 080a <index>.L { <job>.W }*6
 void clif_PartyBookingUpdateNotify(struct map_session_data* sd, struct party_booking_ad_info* pb_ad)
 {
@@ -12431,7 +12430,7 @@ void clif_PartyBookingUpdateNotify(struct map_session_data* sd, struct party_boo
 }
 
 
-/// Notification about deleted party booking advertisment (ZC_PARTY_BOOKING_NOTIFY_DELETE).
+/// Notification about deleted party booking advertisement (ZC_PARTY_BOOKING_NOTIFY_DELETE).
 /// 080b <index>.L
 void clif_PartyBookingDeleteNotify(struct map_session_data* sd, int index)
 {
@@ -12450,7 +12449,7 @@ void clif_PartyBookingDeleteNotify(struct map_session_data* sd, int index)
 /// Modified version of Party Booking System for 2012-04-10 or 2012-04-18 (RagexeRE).
 /// Code written by mkbu95, Spiria, Yommy and Ind
 
-/// Request to register a party booking advertisment (CZ_PARTY_RECRUIT_REQ_REGISTER).
+/// Request to register a party booking advertisement (CZ_PARTY_RECRUIT_REQ_REGISTER).
 /// 08e5 <level>.W <notice>.37B
 void clif_parse_PartyRecruitRegisterReq(int fd, struct map_session_data* sd)
 {
@@ -12497,7 +12496,7 @@ void clif_PartyRecruitSearchAck(int fd, struct party_booking_ad_info** results, 
 #endif
 }
 
-/// Result of request to register a party booking advertisment (ZC_PARTY_RECRUIT_ACK_REGISTER).
+/// Result of request to register a party booking advertisement (ZC_PARTY_RECRUIT_ACK_REGISTER).
 /// 08e6 <result>.W
 /// result:
 ///     0 = success
@@ -12517,7 +12516,7 @@ void clif_PartyRecruitRegisterAck(struct map_session_data *sd, int flag)
 #endif
 }
 
-/// Request to search for party booking advertisments (CZ_PARTY_RECRUIT_REQ_SEARCH).
+/// Request to search for party booking advertisement (CZ_PARTY_RECRUIT_REQ_SEARCH).
 /// 08e7 <level>.W <map id>.W <last index>.L <result count>.W
 void clif_parse_PartyRecruitSearchReq(int fd, struct map_session_data* sd)
 {
@@ -12533,7 +12532,7 @@ void clif_parse_PartyRecruitSearchReq(int fd, struct map_session_data* sd)
 #endif
 }
 
-/// Request to delete own party booking advertisment (CZ_PARTY_RECRUIT_REQ_DELETE).
+/// Request to delete own party booking advertisement (CZ_PARTY_RECRUIT_REQ_DELETE).
 /// 08e9
 void clif_parse_PartyRecruitDeleteReq(int fd, struct map_session_data* sd)
 {
@@ -12545,7 +12544,7 @@ void clif_parse_PartyRecruitDeleteReq(int fd, struct map_session_data* sd)
 #endif
 }
 
-/// Result of request to delete own party booking advertisment (ZC_PARTY_RECRUIT_ACK_DELETE).
+/// Result of request to delete own party booking advertisement (ZC_PARTY_RECRUIT_ACK_DELETE).
 /// 08ea <result>.W
 /// result:
 ///     0 = success
@@ -12566,7 +12565,7 @@ void clif_PartyRecruitDeleteAck(struct map_session_data* sd, int flag)
 #endif
 }
 
-/// Request to update party booking advertisment (CZ_PARTY_RECRUIT_REQ_UPDATE).
+/// Request to update party booking advertisement (CZ_PARTY_RECRUIT_REQ_UPDATE).
 /// 08eb <notice>.37B
 void clif_parse_PartyRecruitUpdateReq(int fd, struct map_session_data *sd)
 {
@@ -12581,7 +12580,7 @@ void clif_parse_PartyRecruitUpdateReq(int fd, struct map_session_data *sd)
 #endif
 }
 
-/// Notification about new party booking advertisment (ZC_PARTY_RECRUIT_NOTIFY_INSERT).
+/// Notification about new party booking advertisement (ZC_PARTY_RECRUIT_NOTIFY_INSERT).
 /// 08ec <index>.L <expire time>.L <char name>.24B <level>.W <notice>.37B
 void clif_PartyRecruitInsertNotify(struct map_session_data* sd, struct party_booking_ad_info* pb_ad)
 {
@@ -12603,7 +12602,7 @@ void clif_PartyRecruitInsertNotify(struct map_session_data* sd, struct party_boo
 #endif
 }
 
-/// Notification about updated party booking advertisment (ZC_PARTY_RECRUIT_NOTIFY_UPDATE).
+/// Notification about updated party booking advertisement (ZC_PARTY_RECRUIT_NOTIFY_UPDATE).
 /// 08ed <index>.L <notice>.37B
 void clif_PartyRecruitUpdateNotify(struct map_session_data *sd, struct party_booking_ad_info* pb_ad)
 {
@@ -12620,7 +12619,7 @@ void clif_PartyRecruitUpdateNotify(struct map_session_data *sd, struct party_boo
 #endif
 }
 
-/// Notification about deleted party booking advertisment (ZC_PARTY_RECRUIT_NOTIFY_DELETE).
+/// Notification about deleted party booking advertisement (ZC_PARTY_RECRUIT_NOTIFY_DELETE).
 /// 08ee <index>.L
 void clif_PartyRecruitDeleteNotify(struct map_session_data* sd, int index)
 {
@@ -13172,7 +13171,7 @@ void clif_parse_GuildChangeNotice(int fd, struct map_session_data* sd)
 	if(!sd->state.gmaster_flag)
 		return;
 
-	// compensate for some client defects when using multilanguage mode
+	// compensate for some client defects when using multilingual mode
 	if (msg1[0] == '|' && msg1[3] == '|') msg1+= 3; // skip duplicate marker
 	if (msg2[0] == '|' && msg2[3] == '|') msg2+= 3; // skip duplicate marker
 	if (msg2[0] == '|') msg2[strnlen(msg2, MAX_GUILDMES2)-1] = '\0'; // delete extra space at the end of string
@@ -13612,7 +13611,7 @@ void clif_parse_GMRecall2(int fd, struct map_session_data* sd) {
 /// Request to execute GM commands.
 /// usage:
 /// /item n - summon n monster or acquire n item/s
-/// /item money - grants 2147483647 zenies
+/// /item money - grants 2147483647 Zeny
 /// /item whereisboss - locate boss mob in current map.(not yet implemented)
 /// /item regenboss_n t - regenerate n boss monster by t millisecond.(not yet implemented)
 /// /item onekillmonster - toggle an ability to kill mobs in one hit.(not yet implemented)
@@ -13993,7 +13992,7 @@ void clif_friendslist_toggle(struct map_session_data *sd,int account_id, int cha
 }
 
 
-//Subfunction called from clif_foreachclient to toggle friends on/off [Skotlex]
+//Sub-function called from clif_foreachclient to toggle friends on/off [Skotlex]
 int clif_friendslist_toggle_sub(struct map_session_data *sd,va_list ap)
 {
 	int account_id, char_id, online;
@@ -14342,7 +14341,7 @@ void clif_parse_ranklist(int fd, struct map_session_data *sd) {
 		case RANKTYPE_BLACKSMITH:
 		case RANKTYPE_ALCHEMIST:
 		case RANKTYPE_TAEKWON:
-			clif->ranklist(sd, type); // pk_list unsuported atm
+			clif->ranklist(sd, type); // pk_list unsupported atm
 			break;
 	}
 }
@@ -14672,7 +14671,7 @@ void clif_check(int fd, struct map_session_data* pl_sd) {
 	WFIFOW(fd,34) = pl_sd->battle_status.flee2/10;
 	WFIFOW(fd,36) = pl_sd->battle_status.cri/10;
 	WFIFOW(fd,38) = (2000-pl_sd->battle_status.amotion)/10;  // aspd
-	WFIFOW(fd,40) = 0;  // FIXME: What is 'plusASPD' supposed to be? Maybe adelay?
+	WFIFOW(fd,40) = 0;  // FIXME: What is 'plusASPD' supposed to be? Maybe a delay?
 	WFIFOSET(fd,packet_len(0x214));
 }
 
@@ -14737,7 +14736,7 @@ void clif_Mail_getattachment(int fd, uint8 flag)
 /// 0249 <result>.B
 /// result:
 ///     0 = success
-///     1 = recipinent does not exist
+///     1 = recipient does not exist
 void clif_Mail_send(int fd, bool fail)
 {
 	WFIFOHEAD(fd,packet_len(0x249));
@@ -16068,7 +16067,7 @@ void clif_mercenary_info(struct map_session_data *sd) {
 
 
 /// Mercenary skill tree (ZC_MER_SKILLINFO_LIST).
-/// 029d <packet len>.W { <skill id>.W <type>.L <level>.W <sp cost>.W <attack range>.W <skill name>.24B <upgradable>.B }*
+/// 029d <packet len>.W { <skill id>.W <type>.L <level>.W <sp cost>.W <attack range>.W <skill name>.24B <upgradeable>.B }*
 void clif_mercenary_skillblock(struct map_session_data *sd)
 {
 	struct mercenary_data *md;
@@ -17142,7 +17141,7 @@ void clif_parse_debug(int fd,struct map_session_data *sd) {
 }
 /*==========================================
  * Server tells client to display a window similar to Magnifier (item) one
- * Server populates the window with avilable elemental converter options according to player's inventory
+ * Server populates the window with available elemental converter options according to player's inventory
  *------------------------------------------*/
 int clif_elementalconverter_list(struct map_session_data *sd) {
 	int i,c,view,fd;
@@ -17587,7 +17586,7 @@ void clif_parse_CashShopSchedule(int fd, struct map_session_data *sd) {
 }
 void clif_parse_CashShopBuy(int fd, struct map_session_data *sd) {
 	unsigned short limit = RFIFOW(fd, 4), i, j;
-	unsigned int kafra_pay = RFIFOL(fd, 6);// [Ryuuzaki] - These are free cash points (strangely #CASH = main cash curreny for us, confusing)
+	unsigned int kafra_pay = RFIFOL(fd, 6);// [Ryuuzaki] - These are free cash points (strangely #CASH = main cash currently for us, confusing)
 
 	if( map->list[sd->bl.m].flag.nocashshop ) {
 		clif->colormes(fd,COLOR_RED,msg_txt(1489)); //Cash Shop is disabled in this map

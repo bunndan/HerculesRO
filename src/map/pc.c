@@ -4191,7 +4191,7 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 	if( !item->script ) //if it has no script, you can't really consume it!
 		return 0;
 
-	if( (item->item_usage.flag&NOUSE_SITTING) && (pc_issit(sd) == 1) && (pc_get_group_level(sd) < item->item_usage.override) ) {
+	if( (item->item_usage.flag&INR_SITTING) && (pc_issit(sd) == 1) && (pc_get_group_level(sd) < item->item_usage.override) ) {
 		clif->msgtable(sd->fd,0x297);
 		//clif->colormes(sd->fd,COLOR_WHITE,msg_txt(1474));
 		return 0; // You cannot use this item while sitting.
@@ -4384,6 +4384,7 @@ int pc_useitem(struct map_session_data *sd,int n) {
 	if (nameid != ITEMID_NAUTHIZ && sd->sc.opt1 > 0 && sd->sc.opt1 != OPT1_STONEWAIT && sd->sc.opt1 != OPT1_BURNING)
 		return 0;
 
+	// Statuses that don't let the player use items
 	if (sd->sc.count && (
 		sd->sc.data[SC_BERSERK] ||
 		(sd->sc.data[SC_GRAVITATION] && sd->sc.data[SC_GRAVITATION]->val3 == BCT_SELF) ||
@@ -4396,6 +4397,7 @@ int pc_useitem(struct map_session_data *sd,int n) {
 		sd->sc.data[SC_WHITEIMPRISON] ||
 		sd->sc.data[SC_DEEP_SLEEP] ||
 		sd->sc.data[SC_SATURDAY_NIGHT_FEVER] ||
+		sd->sc.data[SC_COLD] ||
 		(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOITEM)
 	    ))
 		return 0;
@@ -5941,9 +5943,9 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 	return 1;
 }
 
-/*==========================================
- * Alters experienced based on self bonuses that do not get even shared to the party.
- *------------------------------------------*/
+/**
+ * Alters EXP based on self bonuses that do not get shared with the party
+ **/
 void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsigned int *job_exp, struct block_list *src) {
 	int bonus = 0;
 	struct status_data *st = status->get_status_data(src);
@@ -5974,19 +5976,23 @@ void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsigned in
 	
 	return;
 }
-/*==========================================
- * Give x exp at sd player and calculate remaining exp for next lvl
- *------------------------------------------*/
-int pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned int base_exp,unsigned int job_exp,bool is_quest) {
+
+/**
+ * Gives a determined EXP amount to sd and calculates remaining EXP for next level
+ * @param src if is NULL no bonuses are taken into account
+ * @param is_quest Used to let client know that the EXP was from a quest (clif->displayexp) PACKETVER >= 20091027
+ * @retval true success
+ **/
+bool pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned int base_exp,unsigned int job_exp,bool is_quest) {
 	float nextbp=0, nextjp=0;
 	unsigned int nextb=0, nextj=0;
 	nullpo_ret(sd);
 
 	if(sd->bl.prev == NULL || pc_isdead(sd))
-		return 0;
+		return false;
 
 	if(!battle_config.pvp_exp && map->list[sd->bl.m].flag.pvp)  // [MouseJstr]
-		return 0; // no exp on pvp maps
+		return false; // no exp on pvp maps
 
 	if(sd->status.guild_id>0)
 		base_exp-=guild->payexp(sd,base_exp);
@@ -6018,7 +6024,8 @@ int pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned int
 		}
 	}
 
-	//Cap exp to the level up requirement of the previous level when you are at max level, otherwise cap at UINT_MAX (this is required for some S. Novice bonuses). [Skotlex]
+	// Cap exp to the level up requirement of the previous level when you are at max level,
+	// otherwise cap at UINT_MAX (this is required for some S. Novice bonuses). [Skotlex]
 	if (base_exp) {
 		nextb = nextb?UINT_MAX:pc->thisbaseexp(sd);
 		if(sd->status.base_exp > nextb - base_exp)
@@ -6053,7 +6060,7 @@ int pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned int
 		clif_disp_onlyself(sd,output,strlen(output));
 	}
 
-	return 1;
+	return true;
 }
 
 /*==========================================
@@ -6228,7 +6235,7 @@ int pc_maxparameterincrease(struct map_session_data* sd, int type) {
  * Subtracts status points according to the cost of the increased stat points.
  *
  * @param sd       The target character.
- * @param type     The stat to change (see enum _sp)
+ * @param type     The stat to change (see enum status_point_types)
  * @param increase The stat increase (strictly positive) amount.
  * @retval true  if the stat was increased by any amount.
  * @retval false if there were no changes.
@@ -6287,7 +6294,7 @@ bool pc_statusup(struct map_session_data* sd, int type, int increase) {
  * Does not subtract status points for the cost of the modified stat points.
  *
  * @param sd   The target character.
- * @param type The stat to change (see enum _sp)
+ * @param type The stat to change (see enum status_point_types)
  * @param val  The stat increase (or decrease) amount.
  * @return the stat increase amount.
  * @retval 0 if no changes were made.
@@ -6610,7 +6617,7 @@ int pc_resetskill(struct map_session_data* sd, int flag)
 		if( pc->checkskill(sd, SG_DEVIL) &&  !pc->nextjobexp(sd) ) //Remove perma blindness due to skill-reset. [Skotlex]
 			clif->sc_end(&sd->bl, sd->bl.id, SELF, SI_DEVIL1);
 		i = sd->sc.option;
-		if( i&OPTION_RIDING && (!pc->checkskill(sd, KN_RIDING) || (sd->class_&MAPID_THIRDMASK) == MAPID_RUNE_KNIGHT) )
+		if( i&OPTION_RIDING && pc->checkskill(sd, KN_RIDING) )
 			i &= ~OPTION_RIDING;
 		if( i&OPTION_FALCON && pc->checkskill(sd, HT_FALCON) )
 			i &= ~OPTION_FALCON;
@@ -6687,6 +6694,21 @@ int pc_resetskill(struct map_session_data* sd, int flag)
 	if( flag&2 || !skill_point ) return skill_point;
 
 	sd->status.skill_point += skill_point;
+
+
+	if( !(flag&2) ) {
+		// Remove all SCs that can't be inactivated without a skill
+		if( sd->sc.data[SC_STORMKICK_READY] )
+			status_change_end(&sd->bl, SC_STORMKICK_READY, INVALID_TIMER);
+		if( sd->sc.data[SC_DOWNKICK_READY] )
+			status_change_end(&sd->bl, SC_DOWNKICK_READY, INVALID_TIMER);
+		if( sd->sc.data[SC_TURNKICK_READY] )
+			status_change_end(&sd->bl, SC_TURNKICK_READY, INVALID_TIMER);
+		if( sd->sc.data[SC_COUNTERKICK_READY] )
+			status_change_end(&sd->bl, SC_COUNTERKICK_READY, INVALID_TIMER);
+		if( sd->sc.data[SC_DODGE_READY] )
+			status_change_end(&sd->bl, SC_DODGE_READY, INVALID_TIMER);
+	}
 
 	if( flag&1 ) {
 		clif->updatestatus(sd,SP_SKILLPOINT);
@@ -7982,22 +8004,21 @@ int pc_setoption(struct map_session_data *sd,int type)
 	else if (!(type&OPTION_FALCON) && p_type&OPTION_FALCON) //Falcon OFF
 		clif->sc_end(&sd->bl,sd->bl.id,AREA,SI_FALCON);
 
-	if( (sd->class_&MAPID_THIRDMASK) == MAPID_RANGER ) {
-		if( type&OPTION_WUGRIDER && !(p_type&OPTION_WUGRIDER) ) { // Mounting
-			clif->sc_load(&sd->bl,sd->bl.id,AREA,SI_WUGRIDER, 0, 0, 0);
-			status_calc_pc(sd,SCO_NONE);
-		} else if( !(type&OPTION_WUGRIDER) && p_type&OPTION_WUGRIDER ) { // Dismount
-			clif->sc_end(&sd->bl,sd->bl.id,AREA,SI_WUGRIDER);
-			status_calc_pc(sd,SCO_NONE);
-		}
+	if( type&OPTION_WUGRIDER && !(p_type&OPTION_WUGRIDER) ) { // Mounting
+		clif->sc_load(&sd->bl,sd->bl.id,AREA,SI_WUGRIDER, 0, 0, 0);
+		status_calc_pc(sd,SCO_NONE);
+	} else if( !(type&OPTION_WUGRIDER) && p_type&OPTION_WUGRIDER ) { // Dismount
+		clif->sc_end(&sd->bl,sd->bl.id,AREA,SI_WUGRIDER);
+		status_calc_pc(sd,SCO_NONE);
 	}
-	if( (sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC ) {
+
+	if( (type&OPTION_MADOGEAR && !(p_type&OPTION_MADOGEAR))
+	|| (!(type&OPTION_MADOGEAR) && p_type&OPTION_MADOGEAR) ) {
 		int i;
-		if( type&OPTION_MADOGEAR && !(p_type&OPTION_MADOGEAR) )
-			status_calc_pc(sd, SCO_NONE);
-		else if( !(type&OPTION_MADOGEAR) && p_type&OPTION_MADOGEAR )
-			status_calc_pc(sd, SCO_NONE);
-		for( i = 0; i < SC_MAX; i++ ){
+		status_calc_pc(sd, SCO_NONE);
+
+		// End all SCs that can be reset when mado is taken off
+		for( i = 0; i < SC_MAX; i++ ) {
 			if ( !sd->sc.data[i] || !status->get_sc_type(i) )
 				continue;
 			if ( status->get_sc_type(i)&SC_MADO_NO_RESET )
@@ -8117,19 +8138,62 @@ int pc_setriding(TBL_PC* sd, int flag)
 	return 0;
 }
 
-/*==========================================
- * Give player a mado
- *------------------------------------------*/
-int pc_setmadogear(TBL_PC* sd, int flag)
-{
-	if( flag ){
-		if( pc->checkskill(sd,NC_MADOLICENCE) > 0 )
+/**
+ * Gives player a mado
+ * @param flag 1 Set mado
+ **/
+void pc_setmadogear( struct map_session_data *sd, int flag ) {
+	if( flag ) {
+		if( (sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC )
 			pc->setoption(sd, sd->sc.option|OPTION_MADOGEAR);
-	} else if( pc_ismadogear(sd) ){
-			pc->setoption(sd, sd->sc.option&~OPTION_MADOGEAR);
-	}
+	} else if( pc_ismadogear(sd) )
+		pc->setoption(sd, sd->sc.option&~OPTION_MADOGEAR);
 
-	return 0;
+	return;
+}
+
+/**
+ * Determines whether a player can attack based on status changes
+ *  Why not use status_check_skilluse?
+ *  "src MAY be null to indicate we shouldn't check it, this is a ground-based skill attack."
+ *  Even ground-based attacks should be blocked by these statuses
+ * Called from unit_attack and unit_attack_timer_sub
+ * @retval true Can attack
+ **/
+bool pc_can_attack( struct map_session_data *sd, int target_id ) {
+	nullpo_retr(false, sd);
+
+	if( sd->sc.data[SC_BASILICA] ||
+		sd->sc.data[SC__SHADOWFORM] ||
+		sd->sc.data[SC__MANHOLE] ||
+		sd->sc.data[SC_CURSEDCIRCLE_ATKER] ||
+		sd->sc.data[SC_CURSEDCIRCLE_TARGET] ||
+		sd->sc.data[SC_COLD] ||
+		sd->sc.data[SC_ALL_RIDING] || // The client doesn't let you, this is to make cheat-safe
+		sd->sc.data[SC_TRICKDEAD] ||
+		(sd->sc.data[SC_SIREN] && sd->sc.data[SC_SIREN]->val2 == target_id) ||
+		sd->sc.data[SC_BLADESTOP] ||
+		sd->sc.data[SC_DEEP_SLEEP] ||
+		sd->sc.data[SC_FALLENEMPIRE] )
+			return false;
+
+	return true;
+}
+
+/**
+ * Determines whether a player can talk/whisper based on status changes
+ * Called from clif_parse_GlobalMessage and clif_parse_WisMessage
+ * @retval true Can talk
+ **/
+bool pc_can_talk( struct map_session_data *sd ) {
+	nullpo_retr(false, sd);
+
+	if( sd->sc.data[SC_BERSERK] ||
+		(sd->sc.data[SC_DEEP_SLEEP] && sd->sc.data[SC_DEEP_SLEEP]->val2) ||
+		(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOCHAT) )
+		return false;
+
+	return true;
 }
 
 /*==========================================
@@ -10836,6 +10900,8 @@ void pc_defaults(void) {
 	
 	pc->setstand = pc_setstand;
 	pc->candrop = pc_candrop;
+	pc->can_talk = pc_can_talk;
+	pc->can_attack = pc_can_attack;
 	
 	pc->jobid2mapid = pc_jobid2mapid; // Skotlex
 	pc->mapid2jobid = pc_mapid2jobid; // Skotlex

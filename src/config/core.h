@@ -1,8 +1,8 @@
 // Copyright (c) Hercules Dev Team, licensed under GNU GPL.
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
-#ifndef _CONFIG_CORE_H_
-#define _CONFIG_CORE_H_
+#ifndef CONFIG_CORE_H
+#define CONFIG_CORE_H
 
 /// Max number of items on @autolootid list
 #define AUTOLOOTITEM_SIZE 10
@@ -27,7 +27,7 @@
 /// CONSOLE_INPUT allows you to type commands into the server's console,
 /// Disabling it saves one thread.
 #define CONSOLE_INPUT
-/// Maximum number of caracters 'CONSOLE_INPUT' will support per line.
+/// Maximum number of characters 'CONSOLE_INPUT' will support per line.
 #define MAX_CONSOLE_INPUT 150
 
 /// Uncomment to disable Hercules' anonymous stat report
@@ -43,7 +43,7 @@
 /// By default, all range checks in Aegis are of Square shapes, so a weapon range
 /// - of 10 allows you to attack from anywhere within a 21x21 area.
 /// Enabling this changes such checks to circular checks, which is more realistic,
-/// - but is not the official behaviour.
+/// - but is not the official behavior.
 //#define CIRCULAR_AREA
 
 //This is the distance at which @autoloot works,
@@ -79,4 +79,4 @@
  **/
 #include "./const.h"
 
-#endif // _CONFIG_CORE_H_
+#endif // CONFIG_CORE_H

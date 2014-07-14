@@ -2,8 +2,8 @@
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
 
-#ifndef _CHAR_PINCODE_H_
-#define _CHAR_PINCODE_H_
+#ifndef CHAR_PINCODE_H
+#define CHAR_PINCODE_H
 
 #include "char.h"
 #include "../common/conf.h"
@@ -41,4 +41,4 @@ struct pincode_interface *pincode;
 
 void pincode_defaults(void);
 
-#endif /* _CHAR_PINCODE_H_ */
+#endif /* CHAR_PINCODE_H */

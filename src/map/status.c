@@ -485,10 +485,10 @@ void initChangeTables(void) {
 	add_sc(MH_POISON_MIST, SC_BLIND);
 	set_sc(MH_PAIN_KILLER, SC_PAIN_KILLER, SI_PAIN_KILLER, SCB_ASPD);
 
-	add_sc(MH_STYLE_CHANGE		 , SC_STYLE_CHANGE);
-	set_sc( MH_TINDER_BREAKER      , SC_RG_CCONFINE_S   , SI_RG_CCONFINE_S   , SCB_NONE );
+	set_sc( MH_SILENT_BREEZE       , SC_SILENCE         , SI_SILENT_BREEZE    , SCB_NONE );
+	add_sc( MH_STYLE_CHANGE        , SC_STYLE_CHANGE);
+	set_sc( MH_TINDER_BREAKER      , SC_RG_CCONFINE_S    , SI_RG_CCONFINE_S    , SCB_NONE );
 	set_sc( MH_TINDER_BREAKER      , SC_RG_CCONFINE_M    , SI_RG_CCONFINE_M    , SCB_FLEE );
-
 
 	add_sc( MER_CRASH            , SC_STUN            );
 	set_sc( MER_PROVOKE          , SC_PROVOKE         , SI_PROVOKE         , SCB_DEF|SCB_DEF2|SCB_BATK|SCB_WATK );
@@ -636,6 +636,7 @@ void initChangeTables(void) {
 	**/
 	add_sc( SR_DRAGONCOMBO           , SC_STUN            );
 	add_sc( SR_EARTHSHAKER           , SC_STUN            );
+	set_sc( SR_FALLENEMPIRE          , SC_FALLENEMPIRE       , SI_FALLENEMPIRE          , SCB_NONE );
 	set_sc( SR_CRESCENTELBOW         , SC_CRESCENTELBOW      , SI_CRESCENTELBOW         , SCB_NONE );
 	set_sc_with_vfx( SR_CURSEDCIRCLE          , SC_CURSEDCIRCLE_TARGET, SI_CURSEDCIRCLE_TARGET   , SCB_NONE );
 	set_sc( SR_LIGHTNINGWALK         , SC_LIGHTNINGWALK      , SI_LIGHTNINGWALK         , SCB_NONE );
@@ -643,6 +644,7 @@ void initChangeTables(void) {
 	set_sc( SR_GENTLETOUCH_ENERGYGAIN, SC_GENTLETOUCH_ENERGYGAIN      , SI_GENTLETOUCH_ENERGYGAIN, SCB_NONE );
 	set_sc( SR_GENTLETOUCH_CHANGE    , SC_GENTLETOUCH_CHANGE          , SI_GENTLETOUCH_CHANGE    , SCB_ASPD|SCB_MDEF|SCB_MAXHP );
 	set_sc( SR_GENTLETOUCH_REVITALIZE, SC_GENTLETOUCH_REVITALIZE      , SI_GENTLETOUCH_REVITALIZE, SCB_MAXHP|SCB_REGEN );
+	set_sc( SR_FLASHCOMBO            , SC_FLASHCOMBO                  , SI_FLASHCOMBO            , SCB_WATK );
 	/**
 	* Wanderer / Minstrel
 	**/
@@ -1121,8 +1123,8 @@ int status_charge(struct block_list* bl, int64 hp, int64 sp) {
 }
 
 //Inflicts damage on the target with the according walkdelay.
-//If flag&1, damage is passive and does not triggers cancelling status changes.
-//If flag&2, fail if target does not has enough to substract.
+//If flag&1, damage is passive and does not triggers canceling status changes.
+//If flag&2, fail if target does not has enough to subtract.
 //If flag&4, if killed, mob must not give exp/loot.
 //flag will be set to &8 when damaging sp of a dead character
 int status_damage(struct block_list *src,struct block_list *target,int64 in_hp, int64 in_sp, int walkdelay, int flag) {
@@ -1269,7 +1271,7 @@ int status_damage(struct block_list *src,struct block_list *target,int64 in_hp, 
 
 	st->hp = 1; //To let the dead function cast skills and all that.
 	//NOTE: These dead functions should return: [Skotlex]
-	//0: Death cancelled, auto-revived.
+	//0: Death canceled, auto-revived.
 	//Non-zero: Standard death. Clear status, cancel move/attack, etc
 	//&2: Also remove object from map.
 	//&4: Also delete object from memory.
@@ -1284,7 +1286,7 @@ int status_damage(struct block_list *src,struct block_list *target,int64 in_hp, 
 		break;
 	}
 
-	if(!flag) //Death cancelled.
+	if(!flag) //Death canceled.
 		return (int)(hp+sp);
 
 	//Normal death
@@ -1429,7 +1431,7 @@ int status_heal(struct block_list *bl,int64 in_hp,int64 in_sp, int flag) {
 //If rates are > 0, percent is of current HP/SP
 //If rates are < 0, percent is of max HP/SP
 //If !flag, this is heal, otherwise it is damage.
-//Furthermore, if flag==2, then the target must not die from the substraction.
+//Furthermore, if flag==2, then the target must not die from the subtraction.
 int status_percent_change(struct block_list *src,struct block_list *target,signed char hp_rate, signed char sp_rate, int flag) {
 	struct status_data *st;
 	unsigned int hp = 0, sp = 0;
@@ -1633,11 +1635,11 @@ int status_check_skilluse(struct block_list *src, struct block_list *target, uin
 
 	if( sc && sc->count ) {
 
-		if (skill_id != RK_REFRESH && sc->opt1 >0 && !(sc->opt1 == OPT1_CRYSTALIZE && src->type == BL_MOB) && sc->opt1 != OPT1_BURNING && skill_id != SR_GENTLETOUCH_CURE) { //Stuned/Frozen/etc
+		if (skill_id != RK_REFRESH && sc->opt1 >0 && !(sc->opt1 == OPT1_CRYSTALIZE && src->type == BL_MOB) && sc->opt1 != OPT1_BURNING && skill_id != SR_GENTLETOUCH_CURE) { //Stunned/Frozen/etc
 			if (flag != 1) //Can't cast, casted stuff can't damage.
 				return 0;
 			if (!(skill->get_inf(skill_id)&INF_GROUND_SKILL))
-				return 0; //Targetted spells can't come off.
+				return 0; //Targeted spells can't come off.
 		}
 
 		if (
@@ -1782,7 +1784,7 @@ int status_check_skilluse(struct block_list *src, struct block_list *target, uin
 		if( ( tsc->data[SC_STEALTHFIELD] || tsc->data[SC_CAMOUFLAGE] ) && !(st->mode&(MD_BOSS|MD_DETECTOR)) && flag == 4 )
 			return 0;
 	}
-	//If targetting, cloak+hide protect you, otherwise only hiding does.
+	//If targeting, cloak+hide protect you, otherwise only hiding does.
 	hide_flag = flag?OPTION_HIDE:(OPTION_HIDE|OPTION_CLOAK|OPTION_CHASEWALK);
 
 	//You cannot hide from ground skills.
@@ -1815,7 +1817,7 @@ int status_check_skilluse(struct block_list *src, struct block_list *target, uin
 				}
 			}
 			break;
-		case BL_ITEM:	//Allow targetting of items to pick'em up (or in the case of mobs, to loot them).
+		case BL_ITEM:	//Allow targeting of items to pick'em up (or in the case of mobs, to loot them).
 			//TODO: Would be nice if this could be used to judge whether the player can or not pick up the item it targets. [Skotlex]
 			if (st->mode&MD_LOOTER)
 				return 1;
@@ -1891,7 +1893,7 @@ int status_base_amotion_pc(struct map_session_data *sd, struct status_data *st) 
 #ifdef RENEWAL_ASPD
 	short mod = -1;
 
-	switch( sd->weapontype2 ){ // adjustment for dual weilding
+	switch( sd->weapontype2 ){ // adjustment for dual wielding
 		case W_DAGGER:	mod = 0;	break; // 0, 1, 1
 		case W_1HSWORD:
 		case W_1HAXE:	mod = 1;
@@ -2068,6 +2070,7 @@ int status_calc_mob_(struct mob_data* md, enum e_status_calc_opt opt) {
 	struct status_data *mstatus;
 	struct block_list *mbl = NULL;
 	int flag=0;
+	int guardup_lv = 0;
 
 	if(opt&SCO_FIRST) { //Set basic level on respawn.
 		if (md->level > 0 && md->level <= MAX_LEVEL && md->level != md->db->lv)
@@ -2083,7 +2086,8 @@ int status_calc_mob_(struct mob_data* md, enum e_status_calc_opt opt) {
 	if (md->special_state.size)
 		flag|=2;
 
-	if (md->guardian_data && md->guardian_data->guardup_lv)
+	if( md->guardian_data && md->guardian_data->g
+		&& (guardup_lv = guild->checkskill(md->guardian_data->g,GD_GUARDUP)) )
 		flag|=4;
 
 	if (battle_config.slaves_inherit_speed && md->master_id)
@@ -2218,10 +2222,10 @@ int status_calc_mob_(struct mob_data* md, enum e_status_calc_opt opt) {
 				mstatus->mdef += (gc->defense+2)/3;
 			}
 			if(md->class_ != MOBID_EMPERIUM) {
-				mstatus->batk += mstatus->batk * 10*md->guardian_data->guardup_lv/100;
-				mstatus->rhw.atk += mstatus->rhw.atk * 10*md->guardian_data->guardup_lv/100;
-				mstatus->rhw.atk2 += mstatus->rhw.atk2 * 10*md->guardian_data->guardup_lv/100;
-				mstatus->aspd_rate -= 100*md->guardian_data->guardup_lv;
+				mstatus->batk += mstatus->batk * 10*guardup_lv/100;
+				mstatus->rhw.atk += mstatus->rhw.atk * 10*guardup_lv/100;
+				mstatus->rhw.atk2 += mstatus->rhw.atk2 * 10*guardup_lv/100;
+				mstatus->aspd_rate -= 100*guardup_lv;
 			}
 	}
 
@@ -2555,7 +2559,7 @@ int status_calc_pc_(struct map_session_data* sd, enum e_status_calc_opt opt) {
 				return 1;
 		}
 
-		// sanitize the refine level in case someone decreased the value inbetween
+		// sanitize the refine level in case someone decreased the value in between
 		if (sd->status.inventory[index].refine > MAX_REFINE)
 			sd->status.inventory[index].refine = MAX_REFINE;
 
@@ -2583,7 +2587,7 @@ int status_calc_pc_(struct map_session_data* sd, enum e_status_calc_opt opt) {
 				wa->matk += status->refine_info[wlv].bonus[r-1] / 100;
 #endif
 
-			//Overrefine bonus.
+			//Overrefined bonus.
 			if (r)
 				wd->overrefine = status->refine_info[wlv].randombonus_max[r-1] / 100;
 
@@ -3411,6 +3415,8 @@ int status_calc_npc_(struct npc_data *nd, enum e_status_calc_opt opt) {
 void status_calc_regen(struct block_list *bl, struct status_data *st, struct regen_data *regen) {
 	struct map_session_data *sd;
 	int val, skill_lv, reg_flag;
+	nullpo_retv(bl);
+	nullpo_retv(st);
 
 	if( !(bl->type&BL_REGEN) || !regen )
 		return;
@@ -3878,7 +3884,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag) {
 	}
 
 	if(flag&SCB_MATK) {
-		status->get_matk(bl, 0);
+		status->update_matk(bl);
 	}
 
 	if(flag&SCB_ASPD) {
@@ -4637,6 +4643,8 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 		watk += watk * sc->data[SC_TIDAL_WEAPON]->val2 / 100;
 	if(sc->data[SC_ANGRIFFS_MODUS])
 		watk += watk * sc->data[SC_ANGRIFFS_MODUS]->val2/100;
+	if( sc->data[SC_FLASHCOMBO] )
+		watk += sc->data[SC_FLASHCOMBO]->val2;
 
 	return (unsigned short)cap_value(watk,0,USHRT_MAX);
 }
@@ -5980,15 +5988,18 @@ int status_get_guild_id(struct block_list *bl) {
 		if (((TBL_PET*)bl)->msd)
 			return ((TBL_PET*)bl)->msd->status.guild_id;
 		break;
-	case BL_MOB: {
+	case BL_MOB:
+	{
 		struct map_session_data *msd;
 		struct mob_data *md = (struct mob_data *)bl;
-		if (md->guardian_data)	//Guardian's guild [Skotlex]
-			return md->guardian_data->guild_id;
-		if (md->special_state.ai && (msd = map->id2sd(md->master_id)) != NULL)
+		if( md->guardian_data ) { //Guardian's guild [Skotlex]
+			// Guardian guild data may not been available yet, castle data is always set
+			return (md->guardian_data->g)?md->guardian_data->g->guild_id:md->guardian_data->castle->guild_id;
+		}
+		if( md->special_state.ai && (msd = map->id2sd(md->master_id)) != NULL )
 			return msd->status.guild_id; //Alchemist's mobs [Skotlex]
-				 }
-				 break;
+		break;
+	}
 	case BL_HOM:
 		if (((TBL_HOM*)bl)->master)
 			return ((TBL_HOM*)bl)->master->status.guild_id;
@@ -6024,7 +6035,7 @@ int status_get_emblem_id(struct block_list *bl) {
 		struct map_session_data *msd;
 		struct mob_data *md = (struct mob_data *)bl;
 		if (md->guardian_data)	//Guardian's guild [Skotlex]
-			return md->guardian_data->emblem_id;
+			return (md->guardian_data->g) ? md->guardian_data->g->emblem_id:0;
 		if (md->special_state.ai && (msd = map->id2sd(md->master_id)) != NULL)
 			return msd->guild_emblem_id; //Alchemist's mobs [Skotlex]
 				 }
@@ -8095,22 +8106,25 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				}
 				break;
 
-			case SC_COMBOATTACK: {
+			case SC_COMBOATTACK:
+			{
 				//val1: Skill ID
 				//val2: When given, target (for autotargetting skills)
 				//val3: When set, this combo time should NOT delay attack/movement
+				//val3: If set to 2 this combo will delay ONLY attack
 				//val3: TK: Last used kick
 				//val4: TK: Combo time
 				struct unit_data *ud = unit->bl2ud(bl);
-				if (ud && !val3) {
+				if( ud && (!val3 || val3 == 2) ) {
 					tick += 300 * battle_config.combo_delay_rate/100;
 					ud->attackabletime = timer->gettick()+tick;
-					unit->set_walkdelay(bl, timer->gettick(), tick, 1);
+					if( !val3 )
+						unit->set_walkdelay(bl, timer->gettick(), tick, 1);
 				}
 				val3 = 0;
 				val4 = tick;
-								 }
-								 break;
+				break;
+			}
 			case SC_EARTHSCROLL:
 				val2 = 11-val1; //Chance to consume: 11-skill_lv%
 				break;
@@ -8830,16 +8844,34 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_STONE_SHIELD_OPTION:
 				val2 = 100;	// Elemental modifier.
 				break;
+			case SC_TROPIC:
+			case SC_CHILLY_AIR:
+			case SC_WILD_STORM:
+			case SC_UPHEAVAL:
+				val2 += 10;
+			case SC_HEATER:
+			case SC_COOLER:
+			case SC_BLAST:
+			case SC_CURSED_SOIL:
+				val2 += 10;
+			case SC_PYROTECHNIC:
+			case SC_AQUAPLAY:
+			case SC_GUST:
+			case SC_PETROLOGY:
+				val2 += 5;
+				val3 += 9000;
 			case SC_CIRCLE_OF_FIRE:
+			case SC_WATER_SCREEN:
+			case SC_WIND_STEP:
+			case SC_SOLID_SKIN:
 			case SC_FIRE_CLOAK:
 			case SC_WATER_DROP:
-			case SC_WATER_SCREEN:
 			case SC_WIND_CURTAIN:
-			case SC_WIND_STEP:
 			case SC_STONE_SHIELD:
-			case SC_SOLID_SKIN:
-				val2 = 10;
-				tick_time = 2000; // [GodLesZ] tick time
+				val2 += 5;
+				val3 += 1000;
+				val4 = tick;
+				tick_time = val3;
 				break;
 			case SC_WATER_BARRIER:
 				val2 = 40;	// Increasement. Mdef1 ???
@@ -8982,8 +9014,14 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val1 = 1002; // default poring
 				break;
 			case SC_ALL_RIDING:
-				unit->stop_attack(bl);
 				tick = -1;
+				break;
+			case SC_FLASHCOMBO:
+				/**
+				 * val1 = <IN>skill_id
+				 * val2 = <OUT>attack addition
+				 **/
+				val2 = 20+(20*val1);
 				break;
 			default:
 				if( calc_flag == SCB_NONE && status->SkillChangeTable[type] == 0 && status->IconChangeTable[type] == 0 )
@@ -9171,6 +9209,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			// Cancel cast when get status [LuzZza]
 			if (battle_config.sc_castcancel&bl->type)
 				unit->skillcastcancel(bl, 0);
+		case SC_FALLENEMPIRE:
 		case SC_WHITEIMPRISON:
 			unit->stop_attack(bl);
 		case SC_STOP:
@@ -9204,6 +9243,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_WEIGHTOVER90:
 		case SC_CAMOUFLAGE:
 		case SC_SIREN:
+		case SC_ALL_RIDING:
 			unit->stop_attack(bl);
 			break;
 		case SC_SILENCE:
@@ -9474,7 +9514,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			{
 				struct unit_data *ud = unit->bl2ud(bl);
 				if( ud )
-					ud->state.running = unit->run(bl);
+					ud->state.running = unit->run(bl, NULL, SC_RUN);
 			}
 			break;
 		case SC_CASH_BOSS_ALARM:
@@ -9493,7 +9533,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			{
 				struct unit_data *ud = unit->bl2ud(bl);
 				if( ud )
-					ud->state.running = unit->wugdash(bl, sd);
+					ud->state.running = unit->run(bl, sd, SC_WUGDASH);
 			}
 			break;
 		case SC_COMBOATTACK:
@@ -11125,22 +11165,31 @@ int status_change_timer(int tid, int64 tick, int id, intptr_t data) {
 			}
 			break;
 
+		case SC_TROPIC:
+		case SC_CHILLY_AIR:
+		case SC_WILD_STORM:
+		case SC_UPHEAVAL:
+		case SC_HEATER:
+		case SC_COOLER:
+		case SC_BLAST:
+		case SC_CURSED_SOIL:
+		case SC_PYROTECHNIC:
+		case SC_AQUAPLAY:
+		case SC_GUST:
+		case SC_PETROLOGY:
 		case SC_CIRCLE_OF_FIRE:
+		case SC_WATER_SCREEN:
+		case SC_WIND_STEP:
+		case SC_SOLID_SKIN:
 		case SC_FIRE_CLOAK:
 		case SC_WATER_DROP:
-		case SC_WATER_SCREEN:
 		case SC_WIND_CURTAIN:
-		case SC_WIND_STEP:
 		case SC_STONE_SHIELD:
-		case SC_SOLID_SKIN:
-			if( !status->charge(bl,0,sce->val2) ){
-				struct block_list *s_bl = battle->get_master(bl);
-				if( s_bl )
-					status_change_end(s_bl,type+1,INVALID_TIMER);
-				status_change_end(bl,type,INVALID_TIMER);
-				break;
-			}
-			sc_timer_next(2000 + tick, status->change_timer, bl->id, data);
+			if(status->charge(bl, 0, sce->val2) && (sce->val4==-1 || (sce->val4-=sce->val3)>=0))
+				sc_timer_next(sce->val3 + tick, status->change_timer, bl->id, data);
+			else
+				if (bl->type == BL_ELEM)
+					elemental->change_mode(BL_CAST(BL_ELEM,bl),MAX_ELESKILLTREE);
 			return 0;
 
 		case SC_STOMACHACHE:
@@ -11324,88 +11373,149 @@ int status_get_weapon_atk(struct block_list *bl, struct weapon_atk *watk, int fl
 #endif
 }
 
-#define GETRANDMATK(st) do {\
-	if( (st)->matk_max > (st)->matk_min ) \
-		return (st)->matk_min + rnd()%((st)->matk_max - (st)->matk_min); \
-	else \
-		return (st)->matk_min; \
-	} while(0)
+/**
+ * Gets a random matk value depending on min matk and max matk
+ **/
+unsigned short status_get_rand_matk( unsigned short matk_max, unsigned short matk_min ) {
+		if( matk_max > matk_min )
+			return matk_min + rnd()%(matk_max - matk_min);
+		else
+			return matk_min;
+}
 
-/*==========================================
-*  flag [malufett]
-*	0 - update matk values
-*	1 - get matk w/o SC bonuses
-*	2 - get modified matk
-*	3 - get matk w/o eatk & SC bonuses
-*------------------------------------------*/
-int status_get_matk(struct block_list *bl, int flag) {
+/**
+ * Get bl's matk_max and matk_min values depending on flag
+ * @param flag
+ *			0 - Get MATK
+ *			1 - Get MATK w/o SC bonuses
+ *			3 - Get MATK w/o EATK & SC bonuses
+ **/
+void status_get_matk_sub( struct block_list *bl, int flag, unsigned short *matk_max, unsigned short *matk_min ) {
 	struct status_data *st;
 	struct status_change *sc;
 	struct map_session_data *sd;
 
 	if( bl == NULL )
-		return 1;
+		return;
+
+	if( flag != 0 && flag != 1 && flag != 3 ) {
+		ShowError("status_get_matk_sub: Unknown flag %d!\n", flag);
+		return;
+	}
 
 	st = status->get_status_data(bl);
 	sc = status->get_sc(bl);
 	sd = BL_CAST(BL_PC, bl);
-
-	if( flag == 2 ) // just get matk
-		GETRANDMATK(st);
 
 #ifdef RENEWAL
 	/**
 	 * RE MATK Formula (from irowiki:http://irowiki.org/wiki/MATK)
 	 * MATK = (sMATK + wMATK + eMATK) * Multiplicative Modifiers
 	 **/
-	st->matk_min = status->base_matk(st, status->get_lv(bl));
+	*matk_min = status->base_matk(st, status->get_lv(bl));
 
 	//  Any +MATK you get from skills and cards, including cards in weapon, is added here.
 	if( sd && sd->bonus.ematk > 0 && flag != 3 )
-		st->matk_min += sd->bonus.ematk;
+		*matk_min += sd->bonus.ematk;
 	if( flag != 3 )
-		st->matk_min = status->calc_ematk(bl, sc, st->matk_min);
+		*matk_min = status->calc_ematk(bl, sc, *matk_min);
 
-	st->matk_max = st->matk_min;
+	*matk_max = *matk_min;
 
 	//This is the only portion in MATK that varies depending on the weapon level and refinement rate.
 	if( bl->type&BL_PC && (st->rhw.matk + st->lhw.matk) > 0 ) {
 		int wMatk = st->rhw.matk + st->lhw.matk; // Left and right matk stacks
 		int variance = wMatk * st->rhw.wlv / 10; // Only use right hand weapon level
-		st->matk_min += wMatk - variance;
-		st->matk_max += wMatk + variance;
+		*matk_min += wMatk - variance;
+		*matk_max += wMatk + variance;
 	} else if( bl->type&BL_MOB ) {
-		st->matk_min = st->matk_max = status_get_int(bl) + status->get_lv(bl);
-		st->matk_min += 70 * ((TBL_MOB*)bl)->status.rhw.atk2 / 100;
-		st->matk_max += 130 * ((TBL_MOB*)bl)->status.rhw.atk2 / 100;
+		*matk_min = *matk_max = status_get_int(bl) + status->get_lv(bl);
+		*matk_min += 70 * ((TBL_MOB*)bl)->status.rhw.atk2 / 100;
+		*matk_max += 130 * ((TBL_MOB*)bl)->status.rhw.atk2 / 100;
 	}
 #else // not RENEWAL
-	st->matk_min = status_base_matk_min(st) + (sd?sd->bonus.ematk:0);
-	st->matk_max = status_base_matk_max(st) + (sd?sd->bonus.ematk:0);
+	*matk_min = status_base_matk_min(st) + (sd?sd->bonus.ematk:0);
+	*matk_max = status_base_matk_max(st) + (sd?sd->bonus.ematk:0);
 #endif
+
 	if (sd && sd->matk_rate != 100) {
-		st->matk_max = st->matk_max * sd->matk_rate/100;
-		st->matk_min = st->matk_min * sd->matk_rate/100;
+		*matk_max = (*matk_max) * sd->matk_rate/100;
+		*matk_min = (*matk_min) * sd->matk_rate/100;
 	}
 
 	if ((bl->type&BL_HOM && battle_config.hom_setting&0x20)  //Hom Min Matk is always the same as Max Matk
 		|| (sc && sc->data[SC_RECOGNIZEDSPELL]))
-		st->matk_min = st->matk_max;
+		*matk_min = *matk_max;
 
 #ifdef RENEWAL
-	if( sd && sd->right_weapon.overrefine > 0){
-		st->matk_min++;
-		st->matk_max += sd->right_weapon.overrefine - 1;
+	if( sd && sd->right_weapon.overrefine > 0 ) {
+		(*matk_min)++;
+		*matk_max += sd->right_weapon.overrefine - 1;
 	}
 #endif
+	return;
+}
 
-	if( flag ) // get unmodified from sc matk
-		GETRANDMATK(st);
+/**
+ * Get bl's matk value depending on flag
+ * @param flag [malufett]
+ *			1 - Get MATK w/o SC bonuses
+ *			2 - Get modified MATK
+ *			3 - Get MATK w/o eATK & SC bonuses
+ * @retval 1 failure
+ * @retval MATK success
+ *
+ * Shouldn't change _any_ value! [Panikon]
+ **/
+int status_get_matk( struct block_list *bl, int flag ) {
+	struct status_data *st;
+	unsigned short matk_max, matk_min;
 
-	st->matk_min = status->calc_matk(bl, sc, st->matk_min, true);
-	st->matk_max = status->calc_matk(bl, sc, st->matk_max, true);
+	if( bl == NULL )
+		return 1;
 
-	return 0;
+	if( flag < 1 || flag > 3 ) {
+		ShowError("status_get_matk: Unknown flag %d!\n", flag);
+		return 1;
+	}
+
+	if( (st = status->get_status_data(bl)) == NULL )
+		return 0;
+
+	// Just get matk
+	if( flag == 2 )
+		return status_get_rand_matk(st->matk_max, st->matk_min);
+
+	status_get_matk_sub( bl, flag, &matk_max, &matk_min );
+
+	// Get unmodified from sc matk
+	return status_get_rand_matk(matk_max, matk_min);
+}
+
+/**
+ * Updates bl's MATK values
+ **/
+void status_update_matk( struct block_list *bl ) {
+	struct status_data *st;
+	struct status_change *sc;
+	unsigned short matk_max, matk_min;
+
+	if( bl == NULL )
+		return;
+
+	if( (st = status->get_status_data(bl)) == NULL )
+		return;
+
+	if( (sc = status->get_sc(bl)) == NULL )
+		return;
+
+	status_get_matk_sub( bl, 0, &matk_max, &matk_min );
+
+	// Update matk
+	st->matk_min = status->calc_matk(bl, sc, matk_min, true);
+	st->matk_max = status->calc_matk(bl, sc, matk_max, true);
+
+	return;
 }
 
 /*==========================================
@@ -12079,6 +12189,7 @@ void status_defaults(void) {
 	status->get_total_def = status_get_total_def;
 
 	status->get_matk = status_get_matk;
+	status->update_matk = status_update_matk;
 
 	status->readdb = status_readdb;
 	status->init = do_init_status;

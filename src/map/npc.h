@@ -2,8 +2,8 @@
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
 
-#ifndef _MAP_NPC_H_
-#define _MAP_NPC_H_
+#ifndef MAP_NPC_H
+#define MAP_NPC_H
 
 #include "map.h" // struct block_list
 #include "status.h" // struct status_change
@@ -121,7 +121,7 @@ enum actor_classes {
 #define MAX_NPC_CLASS 1000
 // New NPC range
 #define MAX_NPC_CLASS2_START 10000
-#define MAX_NPC_CLASS2_END 10070
+#define MAX_NPC_CLASS2_END 10110
 
 //Checks if a given id is a valid npc id. [Skotlex]
 //Since new npcs are added all the time, the max valid value is the one before the first mob (Scorpion = 1001)
@@ -347,4 +347,4 @@ struct pcre_interface *libpcre;
 void npc_chat_defaults(void);
 #endif
 
-#endif /* _MAP_NPC_H_ */
+#endif /* MAP_NPC_H */

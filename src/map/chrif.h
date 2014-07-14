@@ -2,8 +2,8 @@
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
 
-#ifndef _MAP_CHRIF_H_
-#define _MAP_CHRIF_H_
+#ifndef MAP_CHRIF_H
+#define MAP_CHRIF_H
 
 #include <time.h>
 
@@ -53,7 +53,7 @@ struct chrif_interface {
 	int other_mapserver_count; //Holds count of how many other map servers are online (apart of this instance) [Skotlex]
 
 	/* */
-	struct eri *auth_db_ers; //For reutilizing player login structures.
+	struct eri *auth_db_ers; //For re-utilizing player login structures.
 	DBMap* auth_db; // int id -> struct auth_node*
 	/* */
 	int packet_len_table[CHRIF_PACKET_LEN_TABLE_SIZE];
@@ -154,4 +154,4 @@ void chrif_defaults(void);
 // There's no need for another function when a simple macro can do exactly the same effect
 #define chrif_char_offline(x) chrif->char_offline_nsd((x)->status.account_id,(x)->status.char_id)
 
-#endif /* _MAP_CHRIF_H_ */
+#endif /* MAP_CHRIF_H */

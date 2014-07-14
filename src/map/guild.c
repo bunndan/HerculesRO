@@ -61,7 +61,7 @@ int guild_skill_get_max (int id) {
 	return guild->skill_tree[id-GD_SKILLBASE].max;
 }
 
-// Retrive skill_lv learned by guild
+// Retrieve skill_lv learned by guild
 int guild_checkskill(struct guild *g, int id) {
     int idx = id - GD_SKILLBASE;
     if (idx < 0 || idx >= MAX_GUILDSKILL)
@@ -487,21 +487,27 @@ int guild_recv_info(struct guild *sg) {
 				}
 
 				for( sd = (TBL_PC*)mapit->first(iter); mapit->exists(iter); sd = (TBL_PC*)mapit->next(iter) ) {
-					if( sd->status.guild_id ) {
-						if( sd->status.guild_id == sg->guild_id ) {
-							clif->chsys_join(channel,sd);
-							sd->guild = g;
-						}
-						
+					if (!sd->status.guild_id)
+						continue; // Not interested in guildless users
+
+					if (sd->status.guild_id == sg->guild_id) {
+						// Guild member
+						clif->chsys_join(channel,sd);
+						sd->guild = g;
+
 						for (i = 0; i < MAX_GUILDALLIANCE; i++) {
-							if( sg->alliance[i].opposition == 0 && sg->alliance[i].guild_id ) {
-								if( sg->alliance[i].guild_id == sd->status.guild_id ) {
-									clif->chsys_join(channel,sd);
-								} else if( tg[i] != NULL ) {
-									if( !(tg[i]->channel->banned && idb_exists(tg[i]->channel->banned, sd->status.account_id)))
-										clif->chsys_join(tg[i]->channel,sd);
-								}
-							}
+							// Join channels from allied guilds
+							if (tg[i] && !(tg[i]->channel->banned && idb_exists(tg[i]->channel->banned, sd->status.account_id)))
+								clif->chsys_join(tg[i]->channel, sd);
+						}
+						continue;
+					}
+
+					for (i = 0; i < MAX_GUILDALLIANCE; i++) {
+						if (tg[i] && sd->status.guild_id == tg[i]->guild_id) { // Shortcut to skip the alliance checks again
+							// Alliance member
+							if( !(channel->banned && idb_exists(channel->banned, sd->status.account_id)))
+								clif->chsys_join(channel, sd);
 						}
 					}
 				}
@@ -621,9 +627,12 @@ int guild_invite(struct map_session_data *sd, struct map_session_data *tsd) {
 		return 0;
 	}
 
-	if( tsd->status.guild_id > 0
-	 || tsd->guild_invite > 0
-	 || ((map->agit_flag || map->agit2_flag) && map->list[tsd->bl.m].flag.gvg_castle)
+ 	if( tsd->status.guild_id > 0
+ 	 || tsd->guild_invite > 0
+	 || ( (map->agit_flag || map->agit2_flag)
+		   && map->list[tsd->bl.m].flag.gvg_castle
+		   && !battle_config.guild_castle_invite
+		   )
 	) {
 		//Can't invite people inside castles. [Skotlex]
 		clif->guild_inviteack(sd,0);
@@ -755,7 +764,7 @@ int guild_member_added(int guild_id,int account_id,int char_id,int flag) {
 		return 0;
 
 	if(sd==NULL || sd->guild_invite==0){
-		// cancel if player not present or invalide guild_id invitation
+		// cancel if player not present or invalid guild_id invitation
 		if (flag == 0) {
 			ShowError("guild: member added error %d is not online\n",account_id);
 			intif->guild_leave(guild_id,account_id,char_id,0,"** Data Error **");
@@ -806,10 +815,13 @@ int guild_leave(struct map_session_data* sd, int guild_id, int account_id, int c
 		return 0;
 
 	if( sd->status.account_id != account_id
-	 || sd->status.char_id != char_id
-	 || sd->status.guild_id != guild_id
-	 || ((map->agit_flag || map->agit2_flag) && map->list[sd->bl.m].flag.gvg_castle)
-	)
+ 	 || sd->status.char_id != char_id
+ 	 || sd->status.guild_id != guild_id
+	 // Can't leave inside castles
+	 || ((map->agit_flag || map->agit2_flag)
+			&& map->list[sd->bl.m].flag.gvg_castle
+			&& !battle_config.guild_castle_expulsion)
+		)
 		return 0;
 
 	intif->guild_leave(sd->status.guild_id, sd->status.account_id, sd->status.char_id,0,mes);
@@ -838,10 +850,12 @@ int guild_expulsion(struct map_session_data* sd, int guild_id, int account_id, i
 		return 0;	//Expulsion permission
 
 	//Can't leave inside guild castles.
-	if ((tsd = map->id2sd(account_id))
-	 && tsd->status.char_id == char_id
-	 && ((map->agit_flag || map->agit2_flag) && map->list[tsd->bl.m].flag.gvg_castle)
-	)
+ 	if ((tsd = map->id2sd(account_id))
+ 	 && tsd->status.char_id == char_id
+	 && ((map->agit_flag || map->agit2_flag)
+			&& map->list[sd->bl.m].flag.gvg_castle
+			&& !battle_config.guild_castle_expulsion)
+			)
 		return 0;
 
 	// find the member and perform expulsion
@@ -868,7 +882,7 @@ int guild_member_withdraw(int guild_id, int account_id, int char_id, int flag, c
 
 	online_member_sd = guild->getavailablesd(g);
 	if(online_member_sd == NULL)
-		return 0; // noone online to inform
+		return 0; // no one online to inform
 		
 #ifdef GP_BOUND_ITEMS
 	//Guild bound item check
@@ -1199,7 +1213,7 @@ int guild_emblem_changed(int len,int guild_id,int emblem_id,const char *data)
 				TBL_MOB* md = (gc->guardian[i].id ? map->id2md(gc->guardian[i].id) : NULL);
 				if( md == NULL || md->guardian_data == NULL )
 					continue;
-				md->guardian_data->emblem_id = emblem_id;
+
 				clif->guild_emblem_area(&md->bl);
 			}
 			// update temporary guardians
@@ -1207,7 +1221,7 @@ int guild_emblem_changed(int len,int guild_id,int emblem_id,const char *data)
 				TBL_MOB* md = (gc->temp_guardians[i] ? map->id2md(gc->temp_guardians[i]) : NULL);
 				if( md == NULL || md->guardian_data == NULL )
 					continue;
-				md->guardian_data->emblem_id = emblem_id;
+
 				clif->guild_emblem_area(&md->bl);
 			}
 		}
@@ -2001,8 +2015,8 @@ int guild_castledatasave(int castle_id, int index, int value)
 
 void guild_castle_reconnect_sub(void *key, void *data, va_list ap)
 {
-	int castle_id = GetWord((int)__64BPTRSIZE(key), 0);
-	int index = GetWord((int)__64BPTRSIZE(key), 1);
+	int castle_id = GetWord((int)h64BPTRSIZE(key), 0);
+	int index = GetWord((int)h64BPTRSIZE(key), 1);
 	intif->guild_castle_datasave(castle_id, index, *(int *)data);
 	aFree(data);
 }
@@ -2023,7 +2037,7 @@ void guild_castle_reconnect(int castle_id, int index, int value)
 		int *data;
 		CREATE(data, int, 1);
 		*data = value;
-		linkdb_replace(&gc_save_pending, (void*)__64BPTRSIZE((MakeDWord(castle_id, index))), data);
+		linkdb_replace(&gc_save_pending, (void*)h64BPTRSIZE((MakeDWord(castle_id, index))), data);
 	}
 }
 
@@ -2359,7 +2373,7 @@ void guild_defaults(void) {
 	guild->agit_end = guild_agit_end;
 	guild->agit2_start = guild_agit2_start;
 	guild->agit2_end = guild_agit2_end;
-	/* guild flag cachin */
+	/* guild flag caching */
 	guild->flag_add = guild_flag_add;
 	guild->flag_remove = guild_flag_remove;
 	guild->flags_clear = guild_flags_clear;

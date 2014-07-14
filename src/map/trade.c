@@ -61,7 +61,7 @@ void trade_traderequest(struct map_session_data *sd, struct map_session_data *ta
 		if( previous_sd ){
 			previous_sd->trade_partner = 0;
 			clif->tradecancelled(previous_sd);
-		} // Once cancelled then continue to the new one.
+		} // Once canceled then continue to the new one.
 		sd->trade_partner = 0;
 		clif->tradecancelled(sd);
 	}
@@ -166,11 +166,13 @@ void trade_tradeack(struct map_session_data *sd, int type) {
 	clif->tradestart(sd, type);
 }
 
-/*==========================================
- * Check here hacker for duplicate item in trade
- * normal client refuse to have 2 same types of item (except equipment) in same trade window
- * normal client authorise only no equiped item and only from inventory
- *------------------------------------------*/
+/**
+ * Checks if an impossible trade will occur
+ *  Normal clients refuse to have 2 items of the same type (except equipment) in the same trade window
+ *  Normal clients authorize only no equipped items and only items from inventory
+ * @retval 0 The trade can continue
+ * @retval 1 Hack attempt
+ **/
 int impossible_trade_check(struct map_session_data *sd)
 {
 	struct item inventory[MAX_INVENTORY];
@@ -179,17 +181,15 @@ int impossible_trade_check(struct map_session_data *sd)
 
 	nullpo_retr(1, sd);
 
-	if(sd->deal.zeny > sd->status.zeny) {
-		pc_setglobalreg(sd,script->add_str("ZENY_HACKER"),1);
-		return -1;
-	}
+	if( sd->deal.zeny > sd->status.zeny )
+		return 1;
 
 	// get inventory of player
 	memcpy(&inventory, &sd->status.inventory, sizeof(struct item) * MAX_INVENTORY);
 
-	// remove this part: arrows can be trade and equiped
+	// remove this part: arrows can be trade and equipped
 	// re-added! [celest]
-	// remove equiped items (they can not be trade)
+	// remove equipped items (they can not be trade)
 	for (i = 0; i < MAX_INVENTORY; i++)
 		if (inventory[i].nameid > 0 && inventory[i].equip && !(inventory[i].equip & EQP_AMMO))
 			memset(&inventory[i], 0, sizeof(struct item));
@@ -457,7 +457,7 @@ void trade_tradeok(struct map_session_data *sd) {
 }
 
 /*==========================================
- * 'Cancel' is pressed. (or trade was force-cancelled by the code)
+ * 'Cancel' is pressed. (or trade was force-canceled by the code)
  *------------------------------------------*/
 void trade_tradecancel(struct map_session_data *sd) {
 	struct map_session_data *target_sd;
@@ -466,7 +466,7 @@ void trade_tradecancel(struct map_session_data *sd) {
 	target_sd = map->id2sd(sd->trade_partner);
 
 	if(!sd->state.trading)
-	{ // Not trade acepted
+	{ // Not trade accepted
 		if( target_sd ) {
 			target_sd->trade_partner = 0;
 			clif->tradecancelled(target_sd);

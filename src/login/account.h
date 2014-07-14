@@ -2,8 +2,8 @@
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
 
-#ifndef _LOGIN_ACCOUNT_H_
-#define _LOGIN_ACCOUNT_H_
+#ifndef LOGIN_ACCOUNT_H
+#define LOGIN_ACCOUNT_H
 
 #include "../common/cbasetypes.h"
 #include "../common/mmo.h" // ACCOUNT_REG2_NUM
@@ -26,7 +26,7 @@ struct mmo_account
 	char email[40];             // e-mail (by default: a@a.com)
 	int group_id;               // player group id
 	uint8 char_slots;           // this accounts maximum character slots (maximum is limited to MAX_CHARS define in char server)
-	unsigned int state;         // packet 0x006a value + 1 (0: compte OK)
+	unsigned int state;         // packet 0x006a value + 1 (0: complete OK)
 	time_t unban_time;          // (timestamp): ban time limit of the account (0 = no ban)
 	time_t expiration_time;     // (timestamp): validity limit of the account (0 = unlimited)
 	unsigned int logincount;    // number of successful auth attempts
@@ -140,4 +140,4 @@ Sql *account_db_sql_up(AccountDB* self);
 void mmo_send_accreg2(AccountDB* self, int fd, int account_id, int char_id);
 void mmo_save_accreg2(AccountDB* self, int fd, int account_id, int char_id);
 
-#endif /* _LOGIN_ACCOUNT_H_ */
+#endif /* LOGIN_ACCOUNT_H */

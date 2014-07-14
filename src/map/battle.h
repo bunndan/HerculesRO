@@ -2,8 +2,8 @@
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
 
-#ifndef _MAP_BATTLE_H_
-#define _MAP_BATTLE_H_
+#ifndef MAP_BATTLE_H
+#define MAP_BATTLE_H
 
 #include "map.h" //ELE_MAX
 #include "../common/cbasetypes.h"
@@ -79,7 +79,7 @@ enum e_battle_check_target { //New definitions [Skotlex]
  * Structures
  **/
 
-// dammage structure
+// damage structure
 struct Damage {
 	int64 damage,damage2; //right, left dmg
 	int type,div_; //chk clif_damage for type @TODO add an enum ? ;  nb of hit
@@ -469,6 +469,8 @@ struct Battle_Config {
 	int mon_trans_disable_in_gvg;
 
 	int case_sensitive_aegisnames;
+	int guild_castle_invite;
+	int guild_castle_expulsion;
 };
 
 extern struct Battle_Config battle_config;
@@ -487,7 +489,7 @@ enum e_battle_config_idletime {
 	BCIDLE_ATCOMMAND     = 0x200,
 };
 
-// Dammage delayed info
+// Damage delayed info
 struct delay_damage {
 	int src_id;
 	int target_id;
@@ -569,7 +571,7 @@ struct battle_interface {
 	int (*check_target) (struct block_list *src, struct block_list *target,int flag);
 	/* is src and bl within range? */
 	bool (*check_range) (struct block_list *src,struct block_list *bl,int range);
-	/* consume amo for this skill and lv */
+	/* consume ammo for this skill and lv */
 	void (*consume_ammo) (struct map_session_data* sd, int skill_id, int lv);
 	int (*get_targeted_sub) (struct block_list *bl, va_list ap);
 	int (*get_enemy_sub) (struct block_list *bl, va_list ap);
@@ -601,4 +603,4 @@ struct battle_interface {
 struct battle_interface *battle;
 
 void battle_defaults(void);
-#endif /* _MAP_BATTLE_H_ */
+#endif /* MAP_BATTLE_H */

@@ -1,8 +1,8 @@
 // Copyright (c) Hercules Dev Team, licensed under GNU GPL.
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
-#ifndef _CONFIG_SECURE_H_
-#define _CONFIG_SECURE_H_
+#ifndef CONFIG_SECURE_H
+#define CONFIG_SECURE_H
 
 /**
  * Hercules configuration file (http://hercules.ws)
@@ -49,7 +49,7 @@
 
 /**
  * Uncomment to disable
- * while enabled, movement of invisible (cloaking, hide, etca [not chase walk]) units is not informed to nearby foes,
+ * while enabled, movement of invisible (cloaking, hide, etc [not chase walk]) units is not informed to nearby foes,
  * rendering any client-side cheat, that would otherwise make these units visible, to not function.
  * - "Why is this a setting?" because theres a cost, while enabled if a hidden character uses a skill with cast time,
  * - for example "cloaking -> walk a bit -> soul break another player" the character display will be momentarily abrupted
@@ -58,4 +58,4 @@
  **/
 #define ANTI_MAYAP_CHEAT
 
-#endif // _CONFIG_SECURE_H_
+#endif // CONFIG_SECURE_H

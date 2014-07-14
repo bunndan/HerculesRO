@@ -2,8 +2,8 @@
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
 
-#ifndef _MAP_VENDING_H_
-#define _MAP_VENDING_H_
+#ifndef MAP_VENDING_H
+#define MAP_VENDING_H
 
 #include "../common/cbasetypes.h"
 #include "../common/db.h"
@@ -13,8 +13,8 @@ struct s_search_store_search;
 
 struct s_vending {
 	short index; //cart index (return item data)
-	short amount; //amout of the item for vending
-	unsigned int value; //at wich price
+	short amount; //amount of the item for vending
+	unsigned int value; //at which price
 };
 
 struct vending_interface {
@@ -36,4 +36,4 @@ struct vending_interface *vending;
 
 void vending_defaults(void);
 
-#endif /* _MAP_VENDING_H_ */
+#endif /* MAP_VENDING_H */

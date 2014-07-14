@@ -2,15 +2,15 @@
 // See the LICENSE file
 // Portions Copyright (c) Athena Dev Teams
 
-#ifndef _COMMON_CONF_H_
-#define _COMMON_CONF_H_
+#ifndef COMMON_CONF_H
+#define COMMON_CONF_H
 
 #include "../common/cbasetypes.h"
 
 #include "../../3rdparty/libconfig/libconfig.h"
 
 /**
- * The libconfig interface -- specially for plugins, but we enforce it throughought the core to be consistent
+ * The libconfig interface -- specially for plugins, but we enforce it throughout the core to be consistent
  **/
 struct libconfig_interface {
 	int (*read) (config_t *config, FILE *stream);
@@ -107,4 +107,4 @@ struct libconfig_interface *libconfig;
 
 void libconfig_defaults(void);
 
-#endif // _COMMON_CONF_H_
+#endif // COMMON_CONF_H
