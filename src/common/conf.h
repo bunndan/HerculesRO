@@ -91,16 +91,16 @@ struct libconfig_interface {
 	int (*setting_copy) (config_setting_t *parent, const config_setting_t *src);
 	/* Functions to get other types */
 	bool (*setting_get_bool_real) ( const config_setting_t *setting );
-	unsigned int (*setting_get_uint) ( config_setting_t *setting );
+	unsigned int (*setting_get_uint32) ( config_setting_t *setting );
 	uint16 (*setting_get_uint16) ( config_setting_t *setting );
-	short (*setting_get_short) ( config_setting_t *setting );
+	short (*setting_get_int16) ( config_setting_t *setting );
 
 	int (*setting_lookup_bool_real) ( const config_setting_t *setting, const char *name, bool *value );
-	int (*setting_lookup_uint) ( const config_setting_t *setting, const char *name, unsigned int *value );
+	int (*setting_lookup_uint32) ( const config_setting_t *setting, const char *name, unsigned int *value );
 	int (*setting_lookup_uint16) ( const config_setting_t *setting, const char *name, uint16 *value );
-	int (*setting_lookup_short) ( const config_setting_t *setting, const char *name, short *value );
-	int (*setting_lookup_string_char) ( config_setting_t *setting, const char *setting_name, char *setting_variable, size_t sv_size );
-	int (*lookup_string_char) ( config_t *config, const char *setting_name, char *setting_variable, size_t sv_size );
+	int (*setting_lookup_int16) ( const config_setting_t *setting, const char *name, short *value );
+	int (*setting_lookup_mutable_string) ( config_setting_t *setting, const char *setting_name, char *setting_variable, size_t sv_size );
+	int (*lookup_mutable_string) ( config_t *config, const char *setting_name, char *setting_variable, size_t sv_size );
 };
 
 struct libconfig_interface *libconfig;

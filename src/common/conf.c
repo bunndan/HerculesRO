@@ -145,19 +145,19 @@ int config_setting_lookup_bool_real( const config_setting_t *setting, const char
 }
 
 /**
- * Converts and returns a configuration that is CONFIG_TYPE_INT to unsigned int
+ * Converts and returns a configuration that is CONFIG_TYPE_INT to unsigned int (uint32)
  **/
-unsigned int config_setting_get_uint( config_setting_t *setting ) {
+uint32 config_setting_get_uint32( config_setting_t *setting ) {
 	if( setting == NULL || setting->type != CONFIG_TYPE_INT )
 		return 0;
 
 	if( setting->value.ival < 0 )
 		setting->value.ival = 0;
 
-	return (unsigned int)setting->value.ival;
+	return (uint32)setting->value.ival;
 }
 
-int config_setting_lookup_uint( const config_setting_t *setting, const char *name, unsigned int *value ) {
+int config_setting_lookup_uint32( const config_setting_t *setting, const char *name, uint32 *value ) {
 	config_setting_t *member = config_setting_get_member(setting, name);
 
 	if( !member )
@@ -166,7 +166,7 @@ int config_setting_lookup_uint( const config_setting_t *setting, const char *nam
 	if( config_setting_type(member) != CONFIG_TYPE_INT )
 		return CONFIG_FALSE;
 
-	*value = config_setting_get_uint(member);
+	*value = config_setting_get_uint32(member);
 
 	return CONFIG_TRUE;
 }
@@ -178,8 +178,10 @@ uint16 config_setting_get_uint16( config_setting_t *setting ) {
 	if( setting == NULL || setting->type != CONFIG_TYPE_INT )
 		return 0;
 
-	if( setting->value.ival > _UI16_MAX )
-		setting->value.ival = _UI16_MAX;
+	if( setting->value.ival > UINT16_MAX )
+		setting->value.ival = UINT16_MAX;
+	if( setting->value.ival < UINT16_MIN )
+		setting->value.ival = UINT16_MIN;
 
 	return (uint16)setting->value.ival;
 }
@@ -199,19 +201,21 @@ int config_setting_lookup_uint16( const config_setting_t *setting, const char *n
 }
 
 /**
- * Converts and returns a configuration that is CONFIG_TYPE_INT to short
+ * Converts and returns a configuration that is CONFIG_TYPE_INT to short (int16)
  **/
-short config_setting_get_short( config_setting_t *setting ) {
+int16 config_setting_get_int16( config_setting_t *setting ) {
 	if( setting == NULL || setting->type != CONFIG_TYPE_INT )
 		return 0;
 
-	if( setting->value.ival > SHRT_MAX )
-		setting->value.ival = SHRT_MAX;
+	if( setting->value.ival > SINT16_MAX )
+		setting->value.ival = SINT16_MAX;
+	if( setting->value.ival < SINT16_MIN )
+		setting->value.ival = SINT16_MIN;
 
-	return (short)setting->value.ival;
+	return (int16)setting->value.ival;
 }
 
-int config_setting_lookup_short( const config_setting_t *setting, const char *name, short *value ) {
+int config_setting_lookup_int16( const config_setting_t *setting, const char *name, int16 *value ) {
 	config_setting_t *member = config_setting_get_member(setting, name);
 
 	if( !member )
@@ -220,7 +224,7 @@ int config_setting_lookup_short( const config_setting_t *setting, const char *na
 	if( config_setting_type(member) != CONFIG_TYPE_INT )
 		return CONFIG_FALSE;
 
-	*value = config_setting_get_short(member);
+	*value = config_setting_get_int16(member);
 
 	return CONFIG_TRUE;
 }
@@ -230,7 +234,7 @@ int config_setting_lookup_short( const config_setting_t *setting, const char *na
  * @param sv_size sizeof(setting_variable)
  * @retval CONFIG_TRUE in case of success
  **/
-int config_setting_lookup_string_char( config_setting_t *setting, const char *setting_name, char *setting_variable, size_t sv_size ) {
+int config_setting_lookup_mutable_string( config_setting_t *setting, const char *setting_name, char *setting_variable, size_t sv_size ) {
 	const char *str;
 
 	if( libconfig->setting_lookup_string(setting, setting_name, &str) == CONFIG_TRUE ) {
@@ -246,7 +250,7 @@ int config_setting_lookup_string_char( config_setting_t *setting, const char *se
  * @param sv_size sizeof(setting_variable)
  * @retval CONFIG_TRUE in case of success
  **/
-int config_lookup_string_char( config_t *config, const char *setting_name, char *setting_variable, size_t sv_size ) {
+int config_lookup_mutable_string( config_t *config, const char *setting_name, char *setting_variable, size_t sv_size ) {
 	const char *str;
 
 	if( libconfig->lookup_string(config, setting_name, &str) == CONFIG_TRUE ) {
@@ -337,15 +341,15 @@ void libconfig_defaults(void) {
 
 	/* Functions to get different types */
 	libconfig->setting_get_bool_real = config_setting_get_bool_real;
-	libconfig->setting_get_uint = config_setting_get_uint;
+	libconfig->setting_get_uint32 = config_setting_get_uint32;
 	libconfig->setting_get_uint16 = config_setting_get_uint16;
-	libconfig->setting_get_short = config_setting_get_short;
+	libconfig->setting_get_int16 = config_setting_get_int16;
 
 	/* Functions to lookup different types */
-	libconfig->setting_lookup_short = config_setting_lookup_short;
+	libconfig->setting_lookup_int16 = config_setting_lookup_int16;
 	libconfig->setting_lookup_bool_real = config_setting_lookup_bool_real;
-	libconfig->setting_lookup_uint = config_setting_lookup_uint;
+	libconfig->setting_lookup_uint32 = config_setting_lookup_uint32;
 	libconfig->setting_lookup_uint16 = config_setting_lookup_uint16;
-	libconfig->setting_lookup_string_char = config_setting_lookup_string_char;
-	libconfig->lookup_string_char = config_lookup_string_char;
+	libconfig->setting_lookup_mutable_string = config_setting_lookup_mutable_string;
+	libconfig->lookup_mutable_string = config_lookup_mutable_string;
 }
