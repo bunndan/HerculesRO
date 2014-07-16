@@ -101,7 +101,7 @@ void ipban_final(void)
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool ipban_config_read_dynamic( const char* cfgName, config_t *config ) {
+static bool ipban_config_read_dynamic( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.account.ipban.dynamic_pass_failure")) ) {
@@ -112,9 +112,9 @@ bool ipban_config_read_dynamic( const char* cfgName, config_t *config ) {
 	}
 
 	libconfig->setting_lookup_bool_real(setting, "enabled", &login_config.dynamic_pass_failure_ban);
-	libconfig->setting_lookup_uint(setting, "ban_interval", &login_config.dynamic_pass_failure_ban_interval);
-	libconfig->setting_lookup_uint(setting, "ban_limit", &login_config.dynamic_pass_failure_ban_limit);
-	libconfig->setting_lookup_uint(setting, "ban_duration", &login_config.dynamic_pass_failure_ban_duration);
+	libconfig->setting_lookup_uint32(setting, "ban_interval", &login_config.dynamic_pass_failure_ban_interval);
+	libconfig->setting_lookup_uint32(setting, "ban_limit", &login_config.dynamic_pass_failure_ban_limit);
+	libconfig->setting_lookup_uint32(setting, "ban_duration", &login_config.dynamic_pass_failure_ban_duration);
 
 	return true;
 }
@@ -124,7 +124,7 @@ bool ipban_config_read_dynamic( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool ipban_config_read_connection( const char* cfgName, config_t *config ) {
+static bool ipban_config_read_connection( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.account.ipban.sql_connection")) ) {
@@ -133,12 +133,12 @@ bool ipban_config_read_connection( const char* cfgName, config_t *config ) {
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "db_hostname", ipban_db_hostname, sizeof(ipban_db_hostname));
-	libconfig->setting_lookup_string_char(setting, "db_database", ipban_db_database, sizeof(ipban_db_database));
+	libconfig->setting_lookup_mutable_string(setting, "db_hostname", ipban_db_hostname, sizeof(ipban_db_hostname));
+	libconfig->setting_lookup_mutable_string(setting, "db_database", ipban_db_database, sizeof(ipban_db_database));
 
-	libconfig->setting_lookup_string_char(setting, "db_username", ipban_db_username, sizeof(ipban_db_username));
-	libconfig->setting_lookup_string_char(setting, "db_password", ipban_db_password, sizeof(ipban_db_password));
-	libconfig->setting_lookup_string_char(setting, "codepage", ipban_codepage, sizeof(ipban_codepage));
+	libconfig->setting_lookup_mutable_string(setting, "db_username", ipban_db_username, sizeof(ipban_db_username));
+	libconfig->setting_lookup_mutable_string(setting, "db_password", ipban_db_password, sizeof(ipban_db_password));
+	libconfig->setting_lookup_mutable_string(setting, "codepage", ipban_codepage, sizeof(ipban_codepage));
 	libconfig->setting_lookup_uint16(setting, "db_port", &ipban_db_port);
 
 	return true;
@@ -150,7 +150,7 @@ bool ipban_config_read_connection( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool ipban_config_read_inter( const char* cfgName ) {
+static bool ipban_config_read_inter( const char* cfgName ) {
 	config_t config;
 	config_setting_t *setting;
 
@@ -161,7 +161,7 @@ bool ipban_config_read_inter( const char* cfgName ) {
 		ShowError("ipban_config_read: inter_configuration.database_names was not found!\n");
 		return false;
 	}
-	libconfig->setting_lookup_string_char(setting, "ipban_table", ipban_table, sizeof(ipban_table));
+	libconfig->setting_lookup_mutable_string(setting, "ipban_table", ipban_table, sizeof(ipban_table));
 
 	return true;
 }
@@ -183,7 +183,7 @@ bool ipban_config_read( const char* cfgName, config_t *config ) {
 	}
 
 	libconfig->setting_lookup_bool_real(setting, "enabled", &login_config.ipban);
-	libconfig->setting_lookup_uint(setting, "cleanup_interval", &login_config.ipban_cleanup_interval);
+	libconfig->setting_lookup_uint32(setting, "cleanup_interval", &login_config.ipban_cleanup_interval);
 
 	ipban_config_read_inter("conf/inter-server.conf");
 	ipban_config_read_connection(cfgName, config);

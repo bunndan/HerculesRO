@@ -266,7 +266,7 @@ enum equip_pos {
 
 struct point {
 	unsigned short map;
-	short x,y;
+	int16 x,y;
 };
 
 enum e_skill_flag

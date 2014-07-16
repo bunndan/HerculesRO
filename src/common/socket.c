@@ -54,6 +54,8 @@
  **/
 struct socket_interface sockt_s;
 
+char *SOCKET_CONF_FILENAME = "conf/packet.conf";
+
 #ifdef SEND_SHORTLIST
 	// Add a fd to the shortlist so that it'll be recognized as a fd that needs
 	// sending done on it.
@@ -89,8 +91,6 @@ static int sock_arr_len = 0;
 /// @param fd Target fd.
 /// @return Socket
 #define fd2sock(fd) sock_arr[fd]
-
-char *SOCKET_CONF_FILENAME = "conf/packet.conf";
 
 /// Returns the first fd associated with the socket.
 /// Returns -1 if the socket is not found.
@@ -1150,7 +1150,7 @@ int access_ipmask(const char* str, AccessControl* acc)
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-bool socket_config_read_ddos( const char* cfgName, config_t *config ) {
+static bool socket_config_read_ddos( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "socket_configuration.ddos")) ) {
@@ -1196,7 +1196,7 @@ int access_list_add( config_setting_t *setting, const char *list_name, AccessCon
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-bool socket_config_read_iprules( const char* cfgName, config_t *config ) {
+static bool socket_config_read_iprules( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 	const char *temp;
 
@@ -1241,6 +1241,8 @@ int socket_config_read( const char* cfgName ) {
 	config_setting_t *setting;
 
 	const char *import;
+	int temp;
+	int32 temp32;
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false;
@@ -1250,14 +1252,17 @@ int socket_config_read( const char* cfgName ) {
 		return false;
 	}
 
-	if( libconfig->setting_lookup_int64(setting, "stall_time", &(int64)sockt->stall_time) == CONFIG_TRUE ) {
-		if( sockt->stall_time < 3 )
-			sockt->stall_time = 3;/* a minimum is required to refrain it from killing itself */
+	if( libconfig->setting_lookup_int(setting, "stall_time", &temp) == CONFIG_TRUE ) {
+		if (temp < 3)
+			temp = 3; /* a minimum is required in order to refrain from killing itself */
+		sockt->stall_time = temp;
 	}
 
 #ifndef MINICORE
 	libconfig->setting_lookup_bool(setting, "debug", &access_debug);
-	libconfig->setting_lookup_uint(setting, "socket_max_client_packet", &(unsigned int)socket_max_client_packet);
+	if (libconfig->setting_lookup_uint32(setting, "socket_max_client_packet", &temp32) == CONFIG_TRUE) {
+		socket_max_client_packet = temp32;
+	}
 
 	socket_config_read_iprules(cfgName, &config);
 	socket_config_read_ddos(cfgName, &config);

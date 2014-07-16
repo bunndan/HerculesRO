@@ -333,7 +333,7 @@ bool mapreg_config_read(config_setting_t *setting) {
 	if( !setting )
 		return false;
 
-	if( libconfig->setting_lookup_string_char(setting,"mapreg_db", mapreg->table, sizeof(mapreg->table)) != CONFIG_TRUE )
+	if( libconfig->setting_lookup_mutable_string(setting,"mapreg_db", mapreg->table, sizeof(mapreg->table)) != CONFIG_TRUE )
 		return false;
 
 	return true;

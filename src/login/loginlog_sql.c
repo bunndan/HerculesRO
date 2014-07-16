@@ -130,13 +130,13 @@ bool loginlog_config_read_log( const char *cfgName, config_t *config ) {
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "db_hostname", log_db_hostname, sizeof(log_db_hostname));
-	libconfig->setting_lookup_string_char(setting, "db_database", log_db_database, sizeof(log_db_database));
-	libconfig->setting_lookup_string_char(setting, "db_username", log_db_username, sizeof(log_db_username));
-	libconfig->setting_lookup_string_char(setting, "db_password", log_db_password, sizeof(log_db_password));
+	libconfig->setting_lookup_mutable_string(setting, "db_hostname", log_db_hostname, sizeof(log_db_hostname));
+	libconfig->setting_lookup_mutable_string(setting, "db_database", log_db_database, sizeof(log_db_database));
+	libconfig->setting_lookup_mutable_string(setting, "db_username", log_db_username, sizeof(log_db_username));
+	libconfig->setting_lookup_mutable_string(setting, "db_password", log_db_password, sizeof(log_db_password));
 
 	libconfig->setting_lookup_uint16(setting, "db_port", &log_db_port);
-	libconfig->setting_lookup_string_char(setting, "codepage", log_codepage, sizeof(log_codepage));
+	libconfig->setting_lookup_mutable_string(setting, "codepage", log_codepage, sizeof(log_codepage));
 
 	return true;
 }
@@ -155,7 +155,7 @@ bool loginlog_config_read_names( const char *cfgName, config_t *config ) {
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "login_db", log_login_db, sizeof(log_login_db));
+	libconfig->setting_lookup_mutable_string(setting, "login_db", log_login_db, sizeof(log_login_db));
 
 	return true;
 }

@@ -158,7 +158,6 @@ void pincode_decrypt(unsigned int userSeed, char* pin) {
  **/
 bool pincode_config_read( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.pincode")) ) {
 		ShowError("char_config_read: char_configuration.pincode was not found in %s!\n", cfgName);

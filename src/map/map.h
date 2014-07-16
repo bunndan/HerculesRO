@@ -866,7 +866,7 @@ struct map_interface {
 	char server_db[32];
 	Sql* mysql_handle;
 	
-	int port;
+	uint16 port;
 	int users;
 	int enable_grf;	//To enable/disable reading maps from GRF files, bypassing mapcache [blackhole89]
 	bool ip_set;
@@ -1051,7 +1051,7 @@ struct map_interface {
 	int (*waterheight) (char *mapname);
 	int (*readgat) (struct map_data *m);
 	int (*readallmaps) (void);
-	int (*config_read) (char *cfgName);
+	int (*config_read) (const char *cfgName);
 	bool (*srcfile_load) ( enum srcfile_type type, char *cfgName, const char *list, const char *rlist );
 	void (*reloadnpc_sub) (char *cfgName);
 	bool (*inter_config_read) (const char *cfgName);

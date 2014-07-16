@@ -3417,7 +3417,7 @@ int map_readallmaps (void) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool map_config_read_map_list( const char *cfgName, config_t *config ) {
+static bool map_config_read_map_list( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 	int count;
 
@@ -3447,14 +3447,14 @@ bool map_config_read_map_list( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool map_config_read_database( const char *cfgName, config_t *config ) {
+static bool map_config_read_database( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_configuration.database")) ) {
 		ShowError("map_config_read: map_configuration.database was not found in %s!\n", cfgName);
 		return false;
 	}
-	libconfig->setting_lookup_string_char(setting,"db_path",map->db_path,sizeof(map->db_path));
+	libconfig->setting_lookup_mutable_string(setting,"db_path",map->db_path,sizeof(map->db_path));
 	libconfig->setting_lookup_int(setting,"save_settings",&map->save_settings);
 
 	if( libconfig->setting_lookup_int(setting,"autosave_time",&map->autosave_interval) == CONFIG_TRUE ) {
@@ -3476,11 +3476,11 @@ bool map_config_read_database( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool map_config_read_inter( const char *cfgName, config_t *config ) {
+static bool map_config_read_inter( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 	char temp[24];
-	short port;
+	uint16 port;
 
 	if( !(setting = libconfig->lookup(config, "map_configuration.inter")) ) {
 		ShowError("map_config_read: map_configuration.inter was not found in %s!\n", cfgName);
@@ -3488,22 +3488,22 @@ bool map_config_read_inter( const char *cfgName, config_t *config ) {
 	}
 
 	// Login information
-	if( libconfig->setting_lookup_string_char(setting, "userid", temp, sizeof(temp)) == CONFIG_TRUE )
+	if( libconfig->setting_lookup_mutable_string(setting, "userid", temp, sizeof(temp)) == CONFIG_TRUE )
 		chrif->setuserid(temp);
-	if( libconfig->setting_lookup_string_char(setting, "passwd", temp, sizeof(temp)) == CONFIG_TRUE )
+	if( libconfig->setting_lookup_mutable_string(setting, "passwd", temp, sizeof(temp)) == CONFIG_TRUE )
 		chrif->setpasswd(temp);
 
 	// Char and map-server information
 	if( libconfig->setting_lookup_string(setting, "char_ip", &str) == CONFIG_TRUE )
 		map->char_ip_set = chrif->setip(str);
-	if( libconfig->setting_lookup_short(setting, "char_port", &port) == CONFIG_TRUE )
+	if( libconfig->setting_lookup_uint16(setting, "char_port", &port) == CONFIG_TRUE )
 		chrif->setport(port);
 	
 	if( libconfig->setting_lookup_string(setting, "map_ip", &str) == CONFIG_TRUE )
 		map->ip_set = clif->setip(str);
-	if( libconfig->setting_lookup_short(setting, "map_port", &port) == CONFIG_TRUE ) {
+	if( libconfig->setting_lookup_uint16(setting, "map_port", &port) == CONFIG_TRUE ) {
 		clif->setport(port);
-		map->port = (int)port;
+		map->port = port;
 	}
 	if( libconfig->setting_lookup_string(setting, "bind_ip", &str) == CONFIG_TRUE )
 		clif->setbindip(str);
@@ -3516,18 +3516,18 @@ bool map_config_read_inter( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool map_config_read_connection( const char *cfgName, config_t *config ) {
+static bool map_config_read_connection( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_configuration.sql_connection")) ) {
 		ShowError("map_config_read: map_configuration.sql_connection was not found in %s!\n", cfgName);
 	} else {
 		libconfig->setting_lookup_int(setting, "db_port", &map->server_port);
-		libconfig->setting_lookup_string_char(setting, "db_hostname", map->server_ip, sizeof(map->server_ip));
-		libconfig->setting_lookup_string_char(setting, "db_username", map->server_id, sizeof(map->server_id));
-		libconfig->setting_lookup_string_char(setting, "db_password", map->server_pw, sizeof(map->server_pw));
-		libconfig->setting_lookup_string_char(setting, "db_database", map->server_db, sizeof(map->server_db));
-		libconfig->setting_lookup_string_char(setting, "default_codepage", map->default_codepage, sizeof(map->default_codepage));
+		libconfig->setting_lookup_mutable_string(setting, "db_hostname", map->server_ip, sizeof(map->server_ip));
+		libconfig->setting_lookup_mutable_string(setting, "db_username", map->server_id, sizeof(map->server_id));
+		libconfig->setting_lookup_mutable_string(setting, "db_password", map->server_pw, sizeof(map->server_pw));
+		libconfig->setting_lookup_mutable_string(setting, "db_database", map->server_db, sizeof(map->server_db));
+		libconfig->setting_lookup_mutable_string(setting, "default_codepage", map->default_codepage, sizeof(map->default_codepage));
 		return true;
 	}
 	ShowWarning("map_config_read_connection: Defaulting sql_connection...");
@@ -3539,7 +3539,7 @@ bool map_config_read_connection( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool map_config_read_console( const char* cfgName, config_t *config ) {
+static bool map_config_read_console( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_configuration.console")) ) {
@@ -3547,7 +3547,7 @@ bool map_config_read_console( const char* cfgName, config_t *config ) {
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "timestamp_format", timestamp_format, sizeof(timestamp_format));
+	libconfig->setting_lookup_mutable_string(setting, "timestamp_format", timestamp_format, sizeof(timestamp_format));
 	libconfig->setting_lookup_bool(setting, "stdout_with_ansisequence", &stdout_with_ansisequence); 
 	if( libconfig->setting_lookup_int(setting, "console_silent", &msg_silent) == CONFIG_TRUE ) {
 		if( msg_silent ) /* only bother if its actually enabled */
@@ -3561,10 +3561,10 @@ bool map_config_read_console( const char* cfgName, config_t *config ) {
 /**
  * Reads map-server configuration files (map-server.conf) and initialises required variables
  **/
-int map_config_read( char *cfgName ) {
+int map_config_read( const char *cfgName ) {
 	config_t config;
 	config_setting_t *setting;
-	char *import;
+	const char *import;
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false;
@@ -3574,9 +3574,9 @@ int map_config_read( char *cfgName ) {
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting,"help_txt",map->help_txt,sizeof(map->help_txt));
-	libconfig->setting_lookup_string_char(setting,"help2_txt",map->help2_txt,sizeof(map->help2_txt));
-	libconfig->setting_lookup_string_char(setting,"charhelp_txt",map->charhelp_txt,sizeof(map->charhelp_txt));
+	libconfig->setting_lookup_mutable_string(setting,"help_txt",map->help_txt,sizeof(map->help_txt));
+	libconfig->setting_lookup_mutable_string(setting,"help2_txt",map->help2_txt,sizeof(map->help2_txt));
+	libconfig->setting_lookup_mutable_string(setting,"charhelp_txt",map->charhelp_txt,sizeof(map->charhelp_txt));
 	libconfig->setting_lookup_bool(setting,"enable_spy",&map->enable_spy);
 	libconfig->setting_lookup_bool(setting,"enable_grf",&map->enable_grf);
 
@@ -3752,10 +3752,10 @@ bool inter_config_read_connection( const char* cfgName, config_t *config ) {
 		return false;
 	}
 	libconfig->setting_lookup_int(setting, "port", &logs->db_port);
-	libconfig->setting_lookup_string_char(setting, "db_hostname", logs->db_ip, sizeof(logs->db_ip));
-	libconfig->setting_lookup_string_char(setting, "db_username", logs->db_id, sizeof(logs->db_id));
-	libconfig->setting_lookup_string_char(setting, "db_password", logs->db_pw, sizeof(logs->db_pw));
-	libconfig->setting_lookup_string_char(setting, "db_database", logs->db_name, sizeof(logs->db_name));
+	libconfig->setting_lookup_mutable_string(setting, "db_hostname", logs->db_ip, sizeof(logs->db_ip));
+	libconfig->setting_lookup_mutable_string(setting, "db_username", logs->db_id, sizeof(logs->db_id));
+	libconfig->setting_lookup_mutable_string(setting, "db_password", logs->db_pw, sizeof(logs->db_pw));
+	libconfig->setting_lookup_mutable_string(setting, "db_database", logs->db_name, sizeof(logs->db_name));
 
 	return true;
 }
@@ -3773,23 +3773,23 @@ bool inter_config_read_database_names( const char* cfgName, config_t *config ) {
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "item_db_db", map->item_db_db, sizeof(map->item_db_db));
-	libconfig->setting_lookup_string_char(setting, "item_db_re_db", map->item_db_re_db, sizeof(map->item_db_re_db));
-	libconfig->setting_lookup_string_char(setting, "item_db2_db", map->item_db2_db, sizeof(map->item_db2_db));
-	libconfig->setting_lookup_string_char(setting, "mob_db_db", map->mob_db_db, sizeof(map->mob_db_db));
-	libconfig->setting_lookup_string_char(setting, "mob_db2_db", map->mob_db2_db, sizeof(map->mob_db2_db));
-	libconfig->setting_lookup_string_char(setting, "mob_skill_db_db", map->mob_skill_db_db, sizeof(map->mob_skill_db_db));
-	libconfig->setting_lookup_string_char(setting, "mob_skill_db2_db", map->mob_skill_db2_db, sizeof(map->mob_skill_db2_db));
-	libconfig->setting_lookup_string_char(setting, "autotrade_merchants_db", map->autotrade_merchants_db, sizeof(map->autotrade_merchants_db));
-	libconfig->setting_lookup_string_char(setting, "autotrade_data_db", map->autotrade_data_db, sizeof(map->autotrade_data_db));
-	libconfig->setting_lookup_string_char(setting, "npc_market_data_db", map->npc_market_data_db, sizeof(map->npc_market_data_db));
+	libconfig->setting_lookup_mutable_string(setting, "item_db_db", map->item_db_db, sizeof(map->item_db_db));
+	libconfig->setting_lookup_mutable_string(setting, "item_db_re_db", map->item_db_re_db, sizeof(map->item_db_re_db));
+	libconfig->setting_lookup_mutable_string(setting, "item_db2_db", map->item_db2_db, sizeof(map->item_db2_db));
+	libconfig->setting_lookup_mutable_string(setting, "mob_db_db", map->mob_db_db, sizeof(map->mob_db_db));
+	libconfig->setting_lookup_mutable_string(setting, "mob_db2_db", map->mob_db2_db, sizeof(map->mob_db2_db));
+	libconfig->setting_lookup_mutable_string(setting, "mob_skill_db_db", map->mob_skill_db_db, sizeof(map->mob_skill_db_db));
+	libconfig->setting_lookup_mutable_string(setting, "mob_skill_db2_db", map->mob_skill_db2_db, sizeof(map->mob_skill_db2_db));
+	libconfig->setting_lookup_mutable_string(setting, "autotrade_merchants_db", map->autotrade_merchants_db, sizeof(map->autotrade_merchants_db));
+	libconfig->setting_lookup_mutable_string(setting, "autotrade_data_db", map->autotrade_data_db, sizeof(map->autotrade_data_db));
+	libconfig->setting_lookup_mutable_string(setting, "npc_market_data_db", map->npc_market_data_db, sizeof(map->npc_market_data_db));
 	mapreg->config_read(setting);
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.registry")) ) {
 		ShowError("inter_config_read: inter_configuration.database_names.registry was not found in %s!\n", cfgName);
 		return false;
 	}
-	libconfig->setting_lookup_string_char(setting, "interreg_db", map->interreg_db, sizeof(map->interreg_db));
+	libconfig->setting_lookup_mutable_string(setting, "interreg_db", map->interreg_db, sizeof(map->interreg_db));
 	return true;
 }
 
@@ -3827,7 +3827,7 @@ bool inter_config_read( const char *cfgName ) {
 	map->inter_config_read_connection(cfgName, &config);
 
 	// import should overwrite any previous configuration, so it should be called last
-	if( libconfig->lookup_string_char(&config, "import", import, sizeof(import)) == CONFIG_TRUE ) {
+	if( libconfig->lookup_mutable_string(&config, "import", import, sizeof(import)) == CONFIG_TRUE ) {
 		if( !strcmp(import, cfgName) || !strcmp(import, map->INTER_CONF_NAME) )
 			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
 		else

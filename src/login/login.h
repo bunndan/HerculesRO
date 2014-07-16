@@ -68,8 +68,8 @@ struct Login_Config {
 
 	uint32 login_ip;                                // the address to bind to
 	uint16 login_port;                              // the port to bind to
-	unsigned int ipban_cleanup_interval;            // interval (in seconds) to clean up expired IP bans
-	unsigned int ip_sync_interval;                  // interval (in minutes) to execute a DNS/IP update (for dynamic IPs)
+	uint32 ipban_cleanup_interval;                  // interval (in seconds) to clean up expired IP bans
+	uint32 ip_sync_interval;                        // interval (in minutes) to execute a DNS/IP update (for dynamic IPs)
 	bool log_login;                                 // whether to log login server actions or not
 	char date_format[32];                           // date format used in messages
 	bool new_account_flag,new_acc_length_limit;     // auto-registration via _M/_F ? / if yes minimum length is 4?
@@ -82,9 +82,9 @@ struct Login_Config {
 
 	bool ipban;                                     // perform IP blocking (via contents of `ipbanlist`) ?
 	bool dynamic_pass_failure_ban;                  // automatic IP blocking due to failed login attemps ?
-	unsigned int dynamic_pass_failure_ban_interval; // how far to scan the loginlog for password failures
-	unsigned int dynamic_pass_failure_ban_limit;    // number of failures needed to trigger the ipban
-	unsigned int dynamic_pass_failure_ban_duration; // duration of the ipban
+	uint32 dynamic_pass_failure_ban_interval;       // how far to scan the loginlog for password failures
+	uint32 dynamic_pass_failure_ban_limit;          // number of failures needed to trigger the ipban
+	uint32 dynamic_pass_failure_ban_duration;       // duration of the ipban
 	bool use_dnsbl;                                 // dns blacklist blocking ?
 	char **dnsbl_servers;                           // List of dnsbl servers
 	size_t dnsbl_servers_count;						// First dimension size of dnsbl_servers

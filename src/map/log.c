@@ -443,31 +443,31 @@ bool log_config_read_database( const char *cfgName, config_t *config ) {
 
 	// map_log.database defaults are defined in order to not make unecessary calls to safestrncpy [Panikon]
 
-	if( libconfig->setting_lookup_string_char(setting, "log_branch_db",
+	if( libconfig->setting_lookup_mutable_string(setting, "log_branch_db",
 		logs->config.log_branch, sizeof(logs->config.log_branch)) == CONFIG_FALSE )
 		safestrncpy(logs->config.log_branch, "branchlog", sizeof(logs->config.log_branch));
 
-	if( libconfig->setting_lookup_string_char(setting, "log_pick_db",
+	if( libconfig->setting_lookup_mutable_string(setting, "log_pick_db",
 		logs->config.log_pick, sizeof(logs->config.log_pick)) == CONFIG_FALSE )
 		safestrncpy(logs->config.log_pick, "picklog", sizeof(logs->config.log_pick));
 
-	if( libconfig->setting_lookup_string_char(setting, "log_zeny_db",
+	if( libconfig->setting_lookup_mutable_string(setting, "log_zeny_db",
 		logs->config.log_zeny, sizeof(logs->config.log_zeny)) == CONFIG_FALSE )
 		safestrncpy(logs->config.log_zeny, "zenylog", sizeof(logs->config.log_zeny));
 
-	if( libconfig->setting_lookup_string_char(setting, "log_mvpdrop_db",
+	if( libconfig->setting_lookup_mutable_string(setting, "log_mvpdrop_db",
 		logs->config.log_mvpdrop, sizeof(logs->config.log_mvpdrop)) == CONFIG_FALSE )
 		safestrncpy(logs->config.log_mvpdrop, "mvplog", sizeof(logs->config.log_mvpdrop));
 
-	if( libconfig->setting_lookup_string_char(setting, "log_gm_db",
+	if( libconfig->setting_lookup_mutable_string(setting, "log_gm_db",
 		logs->config.log_gm, sizeof(logs->config.log_gm)) == CONFIG_FALSE )
 		safestrncpy(logs->config.log_gm, "atcommandlog", sizeof(logs->config.log_gm));
 
-	if( libconfig->setting_lookup_string_char(setting, "log_npc_db",
+	if( libconfig->setting_lookup_mutable_string(setting, "log_npc_db",
 		logs->config.log_npc, sizeof(logs->config.log_npc)) == CONFIG_FALSE )
 		safestrncpy(logs->config.log_npc, "npclog", sizeof(logs->config.log_npc));
 
-	if( libconfig->setting_lookup_string_char(setting, "log_chat_db",
+	if( libconfig->setting_lookup_mutable_string(setting, "log_chat_db",
 		logs->config.log_chat, sizeof(logs->config.log_chat)) == CONFIG_FALSE )
 		safestrncpy(logs->config.log_chat, "chatlog", sizeof(logs->config.log_chat));
 
@@ -503,6 +503,7 @@ bool log_config_read( const char *cfgName ) {
 	config_t config;
 	config_setting_t *setting;
 	const char *target; // Type of storage 'file'/'table'
+	int temp;
 
 	log_set_defaults();
 
@@ -514,7 +515,9 @@ bool log_config_read( const char *cfgName ) {
 		return false;
 	}
 
-	libconfig->setting_lookup_int(setting, "enable", &(int)logs->config.enable_logs); // e_log_pick_type
+	if (libconfig->setting_lookup_int(setting, "enable", &temp) == CONFIG_TRUE) {
+		logs->config.enable_logs = temp&LOG_TYPE_ALL; // e_log_pick_type
+	}
 	libconfig->setting_lookup_int(setting, "log_zeny", &logs->config.zeny);
 	libconfig->setting_lookup_bool_real(setting, "log_branch", &logs->config.branch);
 	libconfig->setting_lookup_bool_real(setting, "log_mvpdrop", &logs->config.mvpdrop);

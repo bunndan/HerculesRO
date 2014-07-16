@@ -320,10 +320,10 @@ bool subnet_config_read(const char *cfgName)
 	for( i = 0; i < count; i++ ) {
 		config_setting_t *obj = libconfig->setting_get_elem(setting, i);
 
-		if( libconfig->setting_lookup_string(obj, "net-submask", &str) == CONFIG_TRUE )
+		if( libconfig->setting_lookup_string(obj, "netmask", &str) == CONFIG_TRUE )
 			subnet[subnet_count].mask = str2ip(str);
 		else {
-			ShowError("subnet_config_read: Missing 'net-submask', entry %d, skipping...\n", i);
+			ShowError("subnet_config_read: Missing 'netmask', entry %d, skipping...\n", i);
 			continue;
 		}
 
@@ -1632,7 +1632,6 @@ void login_config_set_dnsbl_servers( config_setting_t *setting ) {
 
 	for( i = 0; i < count; i++ ) {
 		const char *string = libconfig->setting_get_string_elem(setting, i);
-		char *temp = NULL;
 
 		if( string == NULL )
 			continue;
@@ -1649,7 +1648,7 @@ void login_config_set_dnsbl_servers( config_setting_t *setting ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool login_config_read_permission_blacklist( const char *cfgName, config_t *config ) {
+static bool login_config_read_permission_blacklist( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.permission.DNS_blacklist")) ) {
@@ -1715,23 +1714,26 @@ void login_config_set_md5hash( config_setting_t *setting ) {
 			continue;
 		}
 
-		if( libconfig->setting_lookup_string_char(item, "hash", md5, sizeof(md5)) != CONFIG_TRUE ) {
+		if( libconfig->setting_lookup_mutable_string(item, "hash", md5, sizeof(md5)) != CONFIG_TRUE ) {
 			ShowWarning("login_config_set_md5hash: entry (%d) is missing hash! Ignoring...\n", i);
 			continue;
 		}
 
 		CREATE(nnode, struct client_hash_node, 1);
-		for( j = 0; j < 32; j += 2 ) {
-			char buf[3];
-			unsigned int byte;
+		if( strcmp(md5, "disabled") == 0 )
+			nnode->hash[0] = '\0';
+		else {
+			for( j = 0; j < 32; j += 2 ) {
+				char buf[3];
+				unsigned int byte;
 
-			memcpy(buf, &md5[j], 2);
-			buf[2] = 0;
+				memcpy(buf, &md5[j], 2);
+				buf[2] = 0;
 
-			sscanf(buf, "%x", &byte);
-			nnode->hash[j / 2] = (uint8)(byte & 0xFF);
+				sscanf(buf, "%x", &byte);
+				nnode->hash[j / 2] = (uint8)(byte & 0xFF);
+			}
 		}
-
 		nnode->group_id = group_id;
 		nnode->next = login_config.client_hash_nodes; // login_config.client_hash_nodes is initialized before calling this function
 		login_config.client_hash_nodes = nnode;
@@ -1745,7 +1747,7 @@ void login_config_set_md5hash( config_setting_t *setting ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool login_config_read_permission_hash( const char *cfgName, config_t *config ) {
+static bool login_config_read_permission_hash( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.permission.hash")) ) {
@@ -1766,7 +1768,7 @@ bool login_config_read_permission_hash( const char *cfgName, config_t *config ) 
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool login_config_read_permission( const char *cfgName, config_t *config ) {
+static bool login_config_read_permission( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.permission")) ) {
@@ -1777,7 +1779,7 @@ bool login_config_read_permission( const char *cfgName, config_t *config ) {
 	libconfig->setting_lookup_int(setting, "group_id_to_connect", &login_config.group_id_to_connect);
 	libconfig->setting_lookup_int(setting, "min_group_id_to_connect", &login_config.min_group_id_to_connect);
 	libconfig->setting_lookup_bool_real(setting, "check_client_version", &login_config.check_client_version);
-	libconfig->setting_lookup_uint(setting, "client_version_to_connect", &login_config.client_version_to_connect);
+	libconfig->setting_lookup_uint32(setting, "client_version_to_connect", &login_config.client_version_to_connect);
 
 
 	login_config_read_permission_hash(cfgName, config);
@@ -1791,7 +1793,7 @@ bool login_config_read_permission( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool login_config_read_account( const char* cfgName, config_t *config ) {
+static bool login_config_read_account( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 	AccountDB* db = account_engine[0].db;
 
@@ -1819,7 +1821,7 @@ bool login_config_read_account( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool login_config_read_log( const char* cfgName, config_t *config ) {
+static bool login_config_read_log( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.log")) ) {
@@ -1828,7 +1830,7 @@ bool login_config_read_log( const char* cfgName, config_t *config ) {
 	}
 
 	libconfig->setting_lookup_bool_real(setting, "log_login", &login_config.log_login);
-	libconfig->setting_lookup_string_char(setting, "date_format",
+	libconfig->setting_lookup_mutable_string(setting, "date_format",
 											login_config.date_format,
 											sizeof(login_config.date_format)
 											);
@@ -1840,7 +1842,7 @@ bool login_config_read_log( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool login_config_read_console( const char* cfgName, config_t *config ) {
+static bool login_config_read_console( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.console")) ) {
@@ -1849,7 +1851,7 @@ bool login_config_read_console( const char* cfgName, config_t *config ) {
 	}
 
 	libconfig->setting_lookup_bool(setting, "stdout_with_ansisequence", &stdout_with_ansisequence);
-	libconfig->setting_lookup_string_char(setting, "timestamp_format", timestamp_format, sizeof(timestamp_format));
+	libconfig->setting_lookup_mutable_string(setting, "timestamp_format", timestamp_format, sizeof(timestamp_format));
 
 	if( libconfig->setting_lookup_int(setting, "console_silent", &msg_silent) == CONFIG_TRUE ) {
 		if( msg_silent ) /* only bother if its actually enabled */
@@ -1863,7 +1865,7 @@ bool login_config_read_console( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool login_config_read_inter( const char* cfgName, config_t *config ) {
+static bool login_config_read_inter( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 
@@ -1874,7 +1876,7 @@ bool login_config_read_inter( const char* cfgName, config_t *config ) {
 
 	libconfig->setting_lookup_uint16(setting, "login_port", &login_config.login_port);
 
-	if( libconfig->setting_lookup_uint(setting, "ip_sync_interval", &login_config.ip_sync_interval) == CONFIG_TRUE )
+	if( libconfig->setting_lookup_uint32(setting, "ip_sync_interval", &login_config.ip_sync_interval) == CONFIG_TRUE )
 		login_config.ip_sync_interval *= 1000*60; // In minutes
 
 	if( libconfig->setting_lookup_string(setting, "bind_ip", &str) == CONFIG_TRUE ) {

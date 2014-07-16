@@ -168,7 +168,7 @@ static bool account_db_sql_get_property(AccountDB* self, const char* key, char* 
 	 * If anyone is interested in this functionality you can contact
 	 * me in our boards and I'll try to add it sooner (Pan) [Panikon]
 	 **/
-	/*
+#if 0
 	AccountDB_SQL* db = (AccountDB_SQL*)self;
 	const char* signature;
 
@@ -253,7 +253,8 @@ static bool account_db_sql_get_property(AccountDB* self, const char* key, char* 
 		return true;
 	}
 
-	return false;// not found*/
+	return false;// not found
+#endif // #if 0
 	return false;
 }
 
@@ -274,15 +275,15 @@ bool account_db_read_inter( AccountDB_SQL* db, const char* cfgName ) {
 		ShowError("account_db_sql_set_property: inter_configuration.database_names was not found!\n");
 		return false;
 	}
-	libconfig->setting_lookup_string_char(setting, "account_db", db->account_db, sizeof(db->account_db));
+	libconfig->setting_lookup_mutable_string(setting, "account_db", db->account_db, sizeof(db->account_db));
 
 	if( !(setting = libconfig->lookup(&config, "inter_configuration.database_names.registry")) ) {
 		ShowError("account_db_sql_set_property: inter_configuration.database_names.registry was not found!\n");
 		return false;
 	}
-	libconfig->setting_lookup_string_char(setting, "global_acc_reg_str_db",
+	libconfig->setting_lookup_mutable_string(setting, "global_acc_reg_str_db",
 									db->global_acc_reg_str_db, sizeof(db->global_acc_reg_str_db));
-	libconfig->setting_lookup_string_char(setting, "global_acc_reg_num_db",
+	libconfig->setting_lookup_mutable_string(setting, "global_acc_reg_num_db",
 										db->global_acc_reg_num_db, sizeof(db->global_acc_reg_num_db));
 
 	return true;
@@ -298,11 +299,11 @@ static bool account_db_sql_set_property(AccountDB* self, config_t *config) {
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "db_hostname", db->db_hostname, sizeof(db->db_hostname));
-	libconfig->setting_lookup_string_char(setting, "db_username", db->db_username, sizeof(db->db_username));
-	libconfig->setting_lookup_string_char(setting, "db_password", db->db_password, sizeof(db->db_password));
-	libconfig->setting_lookup_string_char(setting, "db_database", db->db_database, sizeof(db->db_database));
-	libconfig->setting_lookup_string_char(setting, "codepage", db->codepage, sizeof(db->codepage));
+	libconfig->setting_lookup_mutable_string(setting, "db_hostname", db->db_hostname, sizeof(db->db_hostname));
+	libconfig->setting_lookup_mutable_string(setting, "db_username", db->db_username, sizeof(db->db_username));
+	libconfig->setting_lookup_mutable_string(setting, "db_password", db->db_password, sizeof(db->db_password));
+	libconfig->setting_lookup_mutable_string(setting, "db_database", db->db_database, sizeof(db->db_database));
+	libconfig->setting_lookup_mutable_string(setting, "codepage", db->codepage, sizeof(db->codepage));
 	libconfig->setting_lookup_uint16(setting, "db_port", &db->db_port);
 
 	libconfig->setting_lookup_bool_real(setting, "case_sensitive", &db->case_sensitive);

@@ -1673,7 +1673,7 @@ int make_new_char_sql(struct char_session_data* sd, char* name_, int str, int ag
 
 		if( start_item[k].stackable ) {
 			if( SQL_ERROR == SQL->Query(sql_handle,
-				"INSERT INTO `%s` (`char_id`,`nameid`, `amount`, `identify`) VALUES ('%d', '%d', '%d', '%d', '%d')",
+				"INSERT INTO `%s` (`char_id`,`nameid`, `amount`, `identify`) VALUES ('%d', '%d', '%d', '%d')",
 				inventory_db, char_id, start_item[k].id, start_item[k].amount, 1)
 				)
 				Sql_ShowDebug(sql_handle);
@@ -1687,7 +1687,6 @@ int make_new_char_sql(struct char_session_data* sd, char* name_, int str, int ag
 					inventory_db, char_id, start_item[k].id, 1, loc, 1)
 					)
 					Sql_ShowDebug(sql_handle);
-				ShowDebug("loc: %d\n", loc);
 			}
 		}
 	}
@@ -5049,10 +5048,10 @@ int subnet_config_read(const char *cfgName)
 	for( i = 0; i < count; i++ ) {
 		config_setting_t *obj = libconfig->setting_get_elem(setting, i);
 
-		if( libconfig->setting_lookup_string(obj, "net-submask", &str) == CONFIG_TRUE )
+		if( libconfig->setting_lookup_string(obj, "netmask", &str) == CONFIG_TRUE )
 			subnet[subnet_count].mask = str2ip(str);
 		else {
-			ShowError("subnet_config_read: Missing 'net-submask', entry %d, skipping...\n", i);
+			ShowError("subnet_config_read: Missing 'netmask', entry %d, skipping...\n", i);
 			continue;
 		}
 
@@ -5091,23 +5090,22 @@ int subnet_config_read(const char *cfgName)
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool sql_config_read_guild( const char* cfgName, config_t *config ) {
+static bool sql_config_read_guild( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.guild")) ) {
 		ShowError("sql_config_read: inter_configuration.database_names.guild was not found in %s!\n", cfgName);
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "main_db", guild_db, sizeof(guild_db));
-	libconfig->setting_lookup_string_char(setting, "alliance_db", guild_alliance_db, sizeof(guild_alliance_db));
-	libconfig->setting_lookup_string_char(setting, "castle_db", guild_castle_db, sizeof(guild_castle_db));
-	libconfig->setting_lookup_string_char(setting, "expulsion_db", guild_expulsion_db, sizeof(guild_expulsion_db));
-	libconfig->setting_lookup_string_char(setting, "member_db", guild_member_db, sizeof(guild_member_db));
-	libconfig->setting_lookup_string_char(setting, "skill_db", guild_skill_db, sizeof(guild_skill_db));
-	libconfig->setting_lookup_string_char(setting, "position_db", guild_position_db, sizeof(guild_position_db));
-	libconfig->setting_lookup_string_char(setting, "storage_db", guild_storage_db, sizeof(guild_storage_db));
+	libconfig->setting_lookup_mutable_string(setting, "main_db", guild_db, sizeof(guild_db));
+	libconfig->setting_lookup_mutable_string(setting, "alliance_db", guild_alliance_db, sizeof(guild_alliance_db));
+	libconfig->setting_lookup_mutable_string(setting, "castle_db", guild_castle_db, sizeof(guild_castle_db));
+	libconfig->setting_lookup_mutable_string(setting, "expulsion_db", guild_expulsion_db, sizeof(guild_expulsion_db));
+	libconfig->setting_lookup_mutable_string(setting, "member_db", guild_member_db, sizeof(guild_member_db));
+	libconfig->setting_lookup_mutable_string(setting, "skill_db", guild_skill_db, sizeof(guild_skill_db));
+	libconfig->setting_lookup_mutable_string(setting, "position_db", guild_position_db, sizeof(guild_position_db));
+	libconfig->setting_lookup_mutable_string(setting, "storage_db", guild_storage_db, sizeof(guild_storage_db));
 
 	return true;
 }
@@ -5117,34 +5115,33 @@ bool sql_config_read_guild( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool sql_config_read_pc( const char* cfgName, config_t *config ) {
+static bool sql_config_read_pc( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.pc")) ) {
 		ShowError("sql_config_read: inter_configuration.database_names.pc was not found in %s!\n", cfgName);
 		return false;
 	}
-	libconfig->setting_lookup_string_char(setting, "hotkey_db", hotkey_db, sizeof(hotkey_db));
-	libconfig->setting_lookup_string_char(setting, "scdata_db", scdata_db, sizeof(scdata_db));
-	libconfig->setting_lookup_string_char(setting, "inventory_db", inventory_db, sizeof(inventory_db));
+	libconfig->setting_lookup_mutable_string(setting, "hotkey_db", hotkey_db, sizeof(hotkey_db));
+	libconfig->setting_lookup_mutable_string(setting, "scdata_db", scdata_db, sizeof(scdata_db));
+	libconfig->setting_lookup_mutable_string(setting, "inventory_db", inventory_db, sizeof(inventory_db));
 	// cart_inventory is not used
-	libconfig->setting_lookup_string_char(setting, "charlog_db", charlog_db, sizeof(charlog_db));
-	libconfig->setting_lookup_string_char(setting, "storage_db", storage_db, sizeof(storage_db));
-	libconfig->setting_lookup_string_char(setting, "skill_db", skill_db, sizeof(skill_db));
-	libconfig->setting_lookup_string_char(setting, "memo_db", memo_db, sizeof(memo_db));
-	libconfig->setting_lookup_string_char(setting, "party_db", party_db, sizeof(party_db));
-	libconfig->setting_lookup_string_char(setting, "pet_db", pet_db, sizeof(pet_db));
-	libconfig->setting_lookup_string_char(setting, "friend_db", friend_db, sizeof(friend_db));
-	libconfig->setting_lookup_string_char(setting, "mail_db", mail_db, sizeof(mail_db));
-	libconfig->setting_lookup_string_char(setting, "auction_db", auction_db, sizeof(auction_db));
-	libconfig->setting_lookup_string_char(setting, "quest_db", quest_db, sizeof(quest_db));
-	libconfig->setting_lookup_string_char(setting, "homunculus_db", homunculus_db, sizeof(homunculus_db));
-	libconfig->setting_lookup_string_char(setting, "skill_homunculus_db", skill_homunculus_db, sizeof(skill_homunculus_db));
-	libconfig->setting_lookup_string_char(setting, "mercenary_db", mercenary_db, sizeof(mercenary_db));
-	libconfig->setting_lookup_string_char(setting, "mercenary_owner_db", mercenary_owner_db, sizeof(mercenary_owner_db));
-	libconfig->setting_lookup_string_char(setting, "elemental_db", elemental_db, sizeof(elemental_db));
-	libconfig->setting_lookup_string_char(setting, "account_data_db", account_data_db, sizeof(account_data_db));
+	libconfig->setting_lookup_mutable_string(setting, "charlog_db", charlog_db, sizeof(charlog_db));
+	libconfig->setting_lookup_mutable_string(setting, "storage_db", storage_db, sizeof(storage_db));
+	libconfig->setting_lookup_mutable_string(setting, "skill_db", skill_db, sizeof(skill_db));
+	libconfig->setting_lookup_mutable_string(setting, "memo_db", memo_db, sizeof(memo_db));
+	libconfig->setting_lookup_mutable_string(setting, "party_db", party_db, sizeof(party_db));
+	libconfig->setting_lookup_mutable_string(setting, "pet_db", pet_db, sizeof(pet_db));
+	libconfig->setting_lookup_mutable_string(setting, "friend_db", friend_db, sizeof(friend_db));
+	libconfig->setting_lookup_mutable_string(setting, "mail_db", mail_db, sizeof(mail_db));
+	libconfig->setting_lookup_mutable_string(setting, "auction_db", auction_db, sizeof(auction_db));
+	libconfig->setting_lookup_mutable_string(setting, "quest_db", quest_db, sizeof(quest_db));
+	libconfig->setting_lookup_mutable_string(setting, "homunculus_db", homunculus_db, sizeof(homunculus_db));
+	libconfig->setting_lookup_mutable_string(setting, "skill_homunculus_db", skill_homunculus_db, sizeof(skill_homunculus_db));
+	libconfig->setting_lookup_mutable_string(setting, "mercenary_db", mercenary_db, sizeof(mercenary_db));
+	libconfig->setting_lookup_mutable_string(setting, "mercenary_owner_db", mercenary_owner_db, sizeof(mercenary_owner_db));
+	libconfig->setting_lookup_mutable_string(setting, "elemental_db", elemental_db, sizeof(elemental_db));
+	libconfig->setting_lookup_mutable_string(setting, "account_data_db", account_data_db, sizeof(account_data_db));
 
 	return true;
 }
@@ -5154,20 +5151,19 @@ bool sql_config_read_pc( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool sql_config_read_registry( const char* cfgName, config_t *config ) {
+static bool sql_config_read_registry( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.registry")) ) {
 		ShowError("sql_config_read: inter_configuration.database_names.registry was not found in %s!\n", cfgName);
 		return false;
 	}
 	// Not all registries are read by char-server
-	libconfig->setting_lookup_string_char(setting, "char_reg_num_db", char_reg_num_db, sizeof(char_reg_num_db));
-	libconfig->setting_lookup_string_char(setting, "char_reg_str_db", char_reg_str_db, sizeof(char_reg_str_db));
-	libconfig->setting_lookup_string_char(setting, "acc_reg_str_db", acc_reg_str_db, sizeof(acc_reg_str_db));
-	libconfig->setting_lookup_string_char(setting, "acc_reg_num_db", acc_reg_num_db, sizeof(acc_reg_num_db));
-	libconfig->setting_lookup_string_char(setting, "interreg_db", interreg_db, sizeof(interreg_db));
+	libconfig->setting_lookup_mutable_string(setting, "char_reg_num_db", char_reg_num_db, sizeof(char_reg_num_db));
+	libconfig->setting_lookup_mutable_string(setting, "char_reg_str_db", char_reg_str_db, sizeof(char_reg_str_db));
+	libconfig->setting_lookup_mutable_string(setting, "acc_reg_str_db", acc_reg_str_db, sizeof(acc_reg_str_db));
+	libconfig->setting_lookup_mutable_string(setting, "acc_reg_num_db", acc_reg_num_db, sizeof(acc_reg_num_db));
+	libconfig->setting_lookup_mutable_string(setting, "interreg_db", interreg_db, sizeof(interreg_db));
 
 	return true;
 }
@@ -5186,9 +5182,9 @@ bool sql_config_read(const char* cfgName)
 		config_destroy(&config);
 		return false;
 	}
-	libconfig->setting_lookup_string_char(setting, "char_db", char_db, sizeof(char_db));
-	libconfig->setting_lookup_string_char(setting, "interlog_db", interlog_db, sizeof(interlog_db));
-	libconfig->setting_lookup_string_char(setting, "ragsrvinfo_db", ragsrvinfo_db, sizeof(ragsrvinfo_db));
+	libconfig->setting_lookup_mutable_string(setting, "char_db", char_db, sizeof(char_db));
+	libconfig->setting_lookup_mutable_string(setting, "interlog_db", interlog_db, sizeof(interlog_db));
+	libconfig->setting_lookup_mutable_string(setting, "ragsrvinfo_db", ragsrvinfo_db, sizeof(ragsrvinfo_db));
 
 	sql_config_read_registry(cfgName, &config);
 	sql_config_read_pc(cfgName, &config);
@@ -5212,7 +5208,7 @@ bool sql_config_read(const char* cfgName)
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_database( const char* cfgName, config_t *config ) {
+static bool char_config_read_database( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 
@@ -5239,9 +5235,8 @@ bool char_config_read_database( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_console( const char* cfgName, config_t *config ) {
+static bool char_config_read_console( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.console")) ) {
 		ShowError("char_config_read: char_configuration.console was not found in %s!\n", cfgName); 
@@ -5254,7 +5249,7 @@ bool char_config_read_console( const char* cfgName, config_t *config ) {
 		if( msg_silent ) /* only bother if its actually enabled */
 			ShowInfo("Console Silent Setting: %d\n", msg_silent);
 	}
-	libconfig->setting_lookup_string_char(setting, "timestamp_format", timestamp_format, sizeof(timestamp_format));
+	libconfig->setting_lookup_mutable_string(setting, "timestamp_format", timestamp_format, sizeof(timestamp_format));
 
 	return true;
 }
@@ -5264,9 +5259,8 @@ bool char_config_read_console( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_player_fame( const char* cfgName, config_t *config ) {
+static bool char_config_read_player_fame( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.player.fame")) ) {
 		ShowError("char_config_read: char_configuration.player.fame was not found in %s!\n", cfgName);
@@ -5298,9 +5292,8 @@ bool char_config_read_player_fame( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_player_deletion( const char* cfgName, config_t *config ) {
+static bool char_config_read_player_deletion( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
-	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.player.deletion")) ) {
 		ShowError("char_config_read: char_configuration.player.deletion was not found in %s!\n", cfgName);
@@ -5319,7 +5312,7 @@ bool char_config_read_player_deletion( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_player_name( const char* cfgName, config_t *config ) {
+static bool char_config_read_player_name( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.player.name")) ) {
@@ -5327,8 +5320,8 @@ bool char_config_read_player_name( const char* cfgName, config_t *config ) {
 		return false;
 	}
 
-	libconfig->setting_lookup_string_char(setting, "unknown_char_name", unknown_char_name, sizeof(unknown_char_name));
-	libconfig->setting_lookup_string_char(setting, "name_letters", char_name_letters, sizeof(char_name_letters));
+	libconfig->setting_lookup_mutable_string(setting, "unknown_char_name", unknown_char_name, sizeof(unknown_char_name));
+	libconfig->setting_lookup_mutable_string(setting, "name_letters", char_name_letters, sizeof(char_name_letters));
 
 	libconfig->setting_lookup_int(setting, "name_option", &char_name_option);
 	libconfig->setting_lookup_bool_real(setting, "name_ignoring_case", &name_ignoring_case);
@@ -5390,7 +5383,7 @@ void char_config_set_start_item( config_setting_t *setting ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_player_new( const char* cfgName, config_t *config ) {
+static bool char_config_read_player_new( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 
@@ -5417,8 +5410,8 @@ bool char_config_read_player_new( const char* cfgName, config_t *config ) {
 			if( !start_point.map )
 				ShowError("char_config_read_player_new: Specified start_point %s not found in map-index cache.\n", str);
 
-			libconfig->setting_lookup_short(setting, "x", &start_point.x);
-			libconfig->setting_lookup_short(setting, "y", &start_point.y);
+			libconfig->setting_lookup_int16(setting, "x", &start_point.x);
+			libconfig->setting_lookup_int16(setting, "y", &start_point.y);
 		}
 	}
 	
@@ -5430,7 +5423,7 @@ bool char_config_read_player_new( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_player( const char* cfgName, config_t *config ) {
+static bool char_config_read_player( const char* cfgName, config_t *config ) {
 
 	char_config_read_player_new( cfgName, config );
 	char_config_read_player_name( cfgName, config );
@@ -5444,7 +5437,7 @@ bool char_config_read_player( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_permission( const char* cfgName, config_t *config ) {
+static bool char_config_read_permission( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.permission")) ) {
@@ -5493,7 +5486,7 @@ void char_config_set_ip( const char *type, const char *value, uint32 *type_ip, c
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_inter( const char* cfgName, config_t *config ) {
+static bool char_config_read_inter( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 
@@ -5503,8 +5496,8 @@ bool char_config_read_inter( const char* cfgName, config_t *config ) {
 	}
 
 	// Login information
-	libconfig->setting_lookup_string_char(setting, "userid", userid, sizeof(userid));
-	libconfig->setting_lookup_string_char(setting, "passwd", passwd, sizeof(passwd));
+	libconfig->setting_lookup_mutable_string(setting, "userid", userid, sizeof(userid));
+	libconfig->setting_lookup_mutable_string(setting, "passwd", passwd, sizeof(passwd));
 
 	// Login-server and character-server information
 	if( libconfig->setting_lookup_string(setting, "login_ip", &str) == CONFIG_TRUE )
@@ -5527,7 +5520,7 @@ bool char_config_read_inter( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_first_nest( const char* cfgName, config_t *config ) {
+static bool char_config_read_first_nest( const char* cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration")) ) {
@@ -5536,14 +5529,14 @@ bool char_config_read_first_nest( const char* cfgName, config_t *config ) {
 	}
 
 	// char_configuration.server_name
-	if( libconfig->setting_lookup_string_char(setting, "server_name", server_name, sizeof(server_name)) == CONFIG_TRUE ) {
+	if( libconfig->setting_lookup_mutable_string(setting, "server_name", server_name, sizeof(server_name)) == CONFIG_TRUE ) {
 		ShowInfo("server name %s\n", server_name);
 	} else {
 		ShowWarning("char_config_read: server_name was not set! Defaulting to 'Hercules'\n");
 		safestrncpy(server_name, "Hercules", sizeof(server_name));
 	}
 	// char_configuration.wisp_server_name
-	if( libconfig->setting_lookup_string_char(setting, "wisp_server_name", wisp_server_name, sizeof(wisp_server_name)) == CONFIG_TRUE ) {
+	if( libconfig->setting_lookup_mutable_string(setting, "wisp_server_name", wisp_server_name, sizeof(wisp_server_name)) == CONFIG_TRUE ) {
 		// wisp_server_name should _always_ be equal or bigger than 4 characters!
 		if( strlen(wisp_server_name) < 4 ) {
 			ShowWarning("char_config_read: char_configuration.wisp_server_name is too small!\n"

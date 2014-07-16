@@ -45,7 +45,7 @@ char char_server_pw[32] = "ragnarok";
 char char_server_db[32] = "ragnarok";
 char default_codepage[32] = ""; //Feature by irmin.
 
-unsigned int party_share_level = 10;
+uint32 party_share_level = 10;
 
 // recv. packet list
 int inter_recv_packet_length[] = {
@@ -915,11 +915,11 @@ bool char_config_read_connection( const char* cfgName, config_t *config ) {
 		ShowError("char_config_read: char_configuration.sql_connection was not found in %s!\n", cfgName);
 	} else {
 		libconfig->setting_lookup_int(setting, "db_port", &char_server_port);
-		libconfig->setting_lookup_string_char(setting, "db_hostname", char_server_ip, sizeof(char_server_ip));
-		libconfig->setting_lookup_string_char(setting, "db_username", char_server_id, sizeof(char_server_id));
-		libconfig->setting_lookup_string_char(setting, "db_password", char_server_pw, sizeof(char_server_pw));
-		libconfig->setting_lookup_string_char(setting, "db_database", char_server_db, sizeof(char_server_db));
-		libconfig->setting_lookup_string_char(setting, "default_codepage", default_codepage, sizeof(default_codepage));
+		libconfig->setting_lookup_mutable_string(setting, "db_hostname", char_server_ip, sizeof(char_server_ip));
+		libconfig->setting_lookup_mutable_string(setting, "db_username", char_server_id, sizeof(char_server_id));
+		libconfig->setting_lookup_mutable_string(setting, "db_password", char_server_pw, sizeof(char_server_pw));
+		libconfig->setting_lookup_mutable_string(setting, "db_database", char_server_db, sizeof(char_server_db));
+		libconfig->setting_lookup_mutable_string(setting, "default_codepage", default_codepage, sizeof(default_codepage));
 		return true;
 	}
 	ShowWarning("char_config_read_connection: Defaulting sql_connection...");
@@ -943,7 +943,7 @@ static int inter_config_read(const char* cfgName)
 		ShowError("inter_config_read: inter_configuration was not found in %s!\n", cfgName);
 		return 0;
 	}
-	libconfig->setting_lookup_int(setting, "party_share_level", &party_share_level);
+	libconfig->setting_lookup_uint32(setting, "party_share_level", &party_share_level);
 	libconfig->setting_lookup_bool_real(setting, "log_inter", &log_inter);
 
 	ShowInfo ("Done reading %s.\n", cfgName);
