@@ -1242,7 +1242,6 @@ int socket_config_read( const char* cfgName ) {
 
 	const char *import;
 	int temp;
-	int32 temp32;
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false;
@@ -1259,9 +1258,12 @@ int socket_config_read( const char* cfgName ) {
 	}
 
 #ifndef MINICORE
-	libconfig->setting_lookup_bool(setting, "debug", &access_debug);
-	if (libconfig->setting_lookup_uint32(setting, "socket_max_client_packet", &temp32) == CONFIG_TRUE) {
-		socket_max_client_packet = temp32;
+	{
+		uint32 temp32;
+		libconfig->setting_lookup_bool(setting, "debug", &access_debug);
+		if (libconfig->setting_lookup_uint32(setting, "socket_max_client_packet", &temp32) == CONFIG_TRUE) {
+			socket_max_client_packet = temp32;
+		}
 	}
 
 	socket_config_read_iprules(cfgName, &config);

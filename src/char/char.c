@@ -5031,8 +5031,9 @@ int subnet_config_read(const char *cfgName)
 	config_setting_t *setting;
 
 	const char *str;
-	int i, count = 0, subnet_count = 0;
+	int i, count = 0;
 
+	subnet_count = 0;
 
 	if( libconfig->read_file(&config, cfgName) )
 		return 0; // Error message is already shown by libconfig->read_file
