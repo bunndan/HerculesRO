@@ -1917,7 +1917,7 @@ bool login_config_read(const char* cfgName)
 	// import should overwrite any previous configuration, so it should be called last
 	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
 		if( !strcmp(import, cfgName) || !strcmp(import, LOGIN_CONF_NAME) )
-			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
+			ShowWarning("login_config_read: Loop detected! Skipping 'import'...\n");
 		else
 			login_config_read(import);
 	}

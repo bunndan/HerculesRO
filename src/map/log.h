@@ -120,7 +120,7 @@ struct log_interface {
 	void (*branch_sub) (struct map_session_data* sd);
 	void (*mvpdrop_sub) (struct map_session_data* sd, int monster_id, int* log_mvp);
 	
-	bool (*config_read) (const char* cfgName);
+	bool (*config_read) (const char* cfgName, bool imported);
 	void (*config_done) (void);
 	void (*sql_init) (void);
 	void (*sql_final) (void);

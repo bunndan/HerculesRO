@@ -162,12 +162,20 @@ bool loginlog_config_read_names( const char *cfgName, config_t *config ) {
 
 bool loginlog_config_read( const char* cfgName ) {
 	config_t config;
+	const char *import;
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false; // Error message is already shown by libconfig->read_file
 
 	loginlog_config_read_names(cfgName, &config);
 	loginlog_config_read_log(cfgName, &config);
+
+	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
+		if( !strcmp(import, cfgName) || !strcmp(import, "conf/inter-server.conf") )
+			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
+		else
+			loginlog_config_read(import);
+	}
 
 	return true;
 }

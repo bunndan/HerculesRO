@@ -383,7 +383,7 @@ void log_sql_final(void) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-bool log_config_read_filter_chat( const char *cfgName, config_t *config ) {
+static bool log_config_read_filter_chat( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_log.filter.chat")) ) {
@@ -400,7 +400,7 @@ bool log_config_read_filter_chat( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-bool log_config_read_filter_item( const char *cfgName, config_t *config ) {
+static bool log_config_read_filter_item( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_log.filter.item")) ) {
@@ -420,7 +420,7 @@ bool log_config_read_filter_item( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-bool log_config_read_filter( const char *cfgName, config_t *config ) {
+static bool log_config_read_filter( const char *cfgName, config_t *config ) {
 
 	log_config_read_filter_item(cfgName, config);
 	log_config_read_filter_chat(cfgName, config);
@@ -432,7 +432,7 @@ bool log_config_read_filter( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-bool log_config_read_database( const char *cfgName, config_t *config ) {
+static bool log_config_read_database( const char *cfgName, config_t *config ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_log.database")) ) {
@@ -474,10 +474,23 @@ bool log_config_read_database( const char *cfgName, config_t *config ) {
 	return true;
 }
 
+static void log_config_complete(void) {
+	if( logs->config.sql_logs ) {
+		logs->pick_sub = log_pick_sub_sql;
+		logs->zeny_sub = log_zeny_sub_sql;
+		logs->npc_sub = log_npc_sub_sql;
+		logs->chat_sub = log_chat_sub_sql;
+		logs->atcommand_sub = log_atcommand_sub_sql;
+		logs->branch_sub = log_branch_sub_sql;
+		logs->mvpdrop_sub = log_mvpdrop_sub_sql;
+	}
+}
+
 /**
+ * Called from log_config_read
  * Initializes logs->config variables
  **/
-void log_set_defaults( void ) {
+static void log_set_defaults( void ) {
 	memset(&logs->config, 0, sizeof(logs->config));
 	//map_log default values
 	logs->config.enable_logs = 0xFFFFF;
@@ -497,15 +510,19 @@ void log_set_defaults( void ) {
 
 /**
  * Reads 'map_log' and initializes required variables
+ * @param imported Is this call not supposed to set defaults?
  * @retval false failure
  **/
-bool log_config_read( const char *cfgName ) {
+bool log_config_read( const char *cfgName, bool imported ) {
 	config_t config;
 	config_setting_t *setting;
+	const char *import;
+
 	const char *target; // Type of storage 'file'/'table'
 	int temp;
 
-	log_set_defaults();
+	if( !imported )
+		log_set_defaults();
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false;
@@ -552,22 +569,22 @@ bool log_config_read( const char *cfgName ) {
 
 	logs->config_done();
 
+	// import should overwrite any previous configuration, so it should be called last
+	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
+		if( !strcmp(import, cfgName) || !strcmp(import, map->LOG_CONF_NAME) )
+			ShowWarning("log_config_read: Loop detected! Skipping 'import'...\n");
+		else
+			logs->config_read(import, true);
+	}
+
 	return true;
 }
 
-void log_config_complete(void) {
-	if( logs->config.sql_logs ) {
-		logs->pick_sub = log_pick_sub_sql;
-		logs->zeny_sub = log_zeny_sub_sql;
-		logs->npc_sub = log_npc_sub_sql;
-		logs->chat_sub = log_chat_sub_sql;
-		logs->atcommand_sub = log_atcommand_sub_sql;
-		logs->branch_sub = log_branch_sub_sql;
-		logs->mvpdrop_sub = log_mvpdrop_sub_sql;
-	}
-}
-
-void log_defaults(void) {
+/**
+ * Called from map_load_defaults
+ * Initializes log defaults
+ **/
+void log_defaults( void ) {
 	logs = &log_s;
 	
 	sprintf(logs->db_ip,"127.0.0.1");
