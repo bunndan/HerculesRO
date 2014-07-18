@@ -908,11 +908,11 @@ int inter_accreg_fromsql(int account_id,int char_id, int fd, int type)
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool char_config_read_connection( const char* cfgName, config_t *config ) {
+bool char_config_read_connection( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.sql_connection")) ) {
-		ShowError("char_config_read: char_configuration.sql_connection was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration.sql_connection was not found in %s!\n", cfgName);
 	} else {
 		libconfig->setting_lookup_int(setting, "db_port", &char_server_port);
 		libconfig->setting_lookup_mutable_string(setting, "db_hostname", char_server_ip, sizeof(char_server_ip));
@@ -929,8 +929,7 @@ bool char_config_read_connection( const char* cfgName, config_t *config ) {
 /*==========================================
  * read config file
  *------------------------------------------*/
-static int inter_config_read(const char* cfgName)
-{
+static int inter_config_read( const char* cfgName, bool imported ) {
 	config_t config;
 	config_setting_t *setting;
 
@@ -940,7 +939,7 @@ static int inter_config_read(const char* cfgName)
 		return 0;
 
 	if( !(setting = libconfig->lookup(&config, "inter_configuration")) ) {
-		ShowError("inter_config_read: inter_configuration was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("inter_config_read: inter_configuration was not found in %s!\n", cfgName);
 		return 0;
 	}
 	libconfig->setting_lookup_uint32(setting, "party_share_level", &party_share_level);
@@ -953,7 +952,7 @@ static int inter_config_read(const char* cfgName)
 		if( !strcmp(import, cfgName) || !strcmp(import, INTER_CONF_NAME) )
 			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			inter_config_read(import);
+			inter_config_read(import, true);
 	}
 
 	config_destroy(&config);
@@ -998,11 +997,9 @@ int inter_log(char* fmt, ...) {
 }
 
 // initialize
-int inter_init_sql(const char *file)
-{
-	//int i;
+int inter_init_sql(const char *file) {
 
-	inter_config_read(file);
+	inter_config_read(file, false);
 
 	//DB connection initialized
 	sql_handle = SQL->Malloc();

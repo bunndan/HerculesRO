@@ -156,11 +156,11 @@ void pincode_decrypt(unsigned int userSeed, char* pin) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool pincode_config_read( const char* cfgName, config_t *config ) {
+bool pincode_config_read( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.pincode")) ) {
-		ShowError("char_config_read: char_configuration.pincode was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration.pincode was not found in %s!\n", cfgName);
 		return false;
 	}
 

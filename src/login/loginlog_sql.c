@@ -122,11 +122,11 @@ bool loginlog_final(void)
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool loginlog_config_read_log( const char *cfgName, config_t *config ) {
+bool loginlog_config_read_log( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.log.sql_connection")) ) {
-		ShowError("loginlog_config_read: inter_configuration.log.sql_connection was not found!\n");
+		if( !imported ) ShowError("loginlog_config_read: inter_configuration.log.sql_connection was not found!\n");
 		return false;
 	}
 
@@ -147,11 +147,11 @@ bool loginlog_config_read_log( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool loginlog_config_read_names( const char *cfgName, config_t *config ) {
+bool loginlog_config_read_names( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names")) ) {
-		ShowError("loginlog_config_read: inter_configuration.database_names was not found!\n");
+		if( !imported ) ShowError("loginlog_config_read: inter_configuration.database_names was not found!\n");
 		return false;
 	}
 
@@ -160,21 +160,21 @@ bool loginlog_config_read_names( const char *cfgName, config_t *config ) {
 	return true;
 }
 
-bool loginlog_config_read( const char* cfgName ) {
+bool loginlog_config_read( const char* cfgName, bool imported ) {
 	config_t config;
 	const char *import;
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false; // Error message is already shown by libconfig->read_file
 
-	loginlog_config_read_names(cfgName, &config);
-	loginlog_config_read_log(cfgName, &config);
+	loginlog_config_read_names(cfgName, &config, imported);
+	loginlog_config_read_log(cfgName, &config, imported);
 
 	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
 		if( !strcmp(import, cfgName) || !strcmp(import, "conf/inter-server.conf") )
 			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			loginlog_config_read(import);
+			loginlog_config_read(import, imported);
 	}
 
 	return true;

@@ -1051,12 +1051,12 @@ struct map_interface {
 	int (*waterheight) (char *mapname);
 	int (*readgat) (struct map_data *m);
 	int (*readallmaps) (void);
-	int (*config_read) (const char *cfgName);
+	int (*config_read) (const char *cfgName, bool imported);
 	bool (*srcfile_load) ( enum srcfile_type type, char *cfgName, const char *list, const char *rlist );
 	void (*reloadnpc_sub) (char *cfgName);
-	bool (*inter_config_read) (const char *cfgName);
-	bool (*inter_config_read_database_names) ( const char* cfgName, config_t *config );
-	bool (*inter_config_read_connection) ( const char* cfgName, config_t *config );
+	bool (*inter_config_read) (const char *cfgName, bool imported);
+	bool (*inter_config_read_database_names) ( const char* cfgName, config_t *config, bool imported );
+	bool (*inter_config_read_connection) ( const char* cfgName, config_t *config, bool imported );
 	int (*sql_init) (void);
 	int (*sql_close) (void);
 	bool (*zone_mf_cache) (int m, char *flag, char *params);

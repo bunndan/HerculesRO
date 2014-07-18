@@ -20,7 +20,7 @@ bool ipban_check(uint32 ip);
 void ipban_log(uint32 ip);
 
 // parses configuration option
-bool ipban_config_read( const char* cfgName, config_t *config );
+bool ipban_config_read( const char* cfgName, config_t *config, bool imported );
 
 
 #endif /* LOGIN_IPBAN_H */

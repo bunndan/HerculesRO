@@ -964,7 +964,7 @@ void hercules_mysql_error_handler(unsigned int ecode) {
 /**
  * Parses mysql_reconnect from inter_configuration
  **/
-void Sql_inter_server_read(const char* cfgName) {
+void Sql_inter_server_read( const char* cfgName, bool imported ) {
 	config_t config;
 	config_setting_t *setting;
 
@@ -974,7 +974,7 @@ void Sql_inter_server_read(const char* cfgName) {
 		return;
 
 	if( !(setting = libconfig->lookup(&config, "inter_configuration.mysql_reconnect")) ) {
-		ShowError("Sql_inter_server_read: inter_configuration.mysql_reconnect was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("Sql_inter_server_read: inter_configuration.mysql_reconnect was not found in %s!\n", cfgName);
 		config_destroy(&config);
 		return;
 	}
@@ -995,7 +995,7 @@ void Sql_inter_server_read(const char* cfgName) {
 		if( !strcmp(import, cfgName) || !strcmp(import, "conf/inter-server.conf") )
 			ShowWarning("Sql_inter_server_read: Loop detected! Skipping 'import'...\n");
 		else
-			Sql_inter_server_read(import);
+			Sql_inter_server_read(import, true);
 	}
 
 	config_destroy(&config);
@@ -1100,7 +1100,7 @@ void Sql_HerculesUpdateSkip(Sql* self,const char *filename) {
 }
 
 void Sql_Init(void) {
-	Sql_inter_server_read("conf/inter-server.conf");
+	Sql_inter_server_read("conf/inter-server.conf", false);
 }
 void sql_defaults(void) {
 	SQL = &sql_s;

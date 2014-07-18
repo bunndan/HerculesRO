@@ -59,7 +59,7 @@ typedef struct AccountDBIterator_SQL
 static bool account_db_sql_init(AccountDB* self);
 static void account_db_sql_destroy(AccountDB* self);
 static bool account_db_sql_get_property(AccountDB* self, const char* key, char* buf, size_t buflen);
-static bool account_db_sql_set_property(AccountDB* self, config_t *config);
+static bool account_db_sql_set_property(AccountDB* self, config_t *config, bool imported);
 static bool account_db_sql_create(AccountDB* self, struct mmo_account* acc);
 static bool account_db_sql_remove(AccountDB* self, const int account_id);
 static bool account_db_sql_save(AccountDB* self, const struct mmo_account* acc);
@@ -264,7 +264,7 @@ static bool account_db_sql_get_property(AccountDB* self, const char* key, char* 
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool account_db_read_inter( AccountDB_SQL* db, const char* cfgName ) {
+bool account_db_read_inter( AccountDB_SQL* db, const char* cfgName, bool imported ) {
 	config_t config;
 	config_setting_t *setting;
 
@@ -272,13 +272,13 @@ bool account_db_read_inter( AccountDB_SQL* db, const char* cfgName ) {
 		return false; // Error message is already shown by libconfig->read_file
 
 	if( !(setting = libconfig->lookup(&config, "inter_configuration.database_names")) ) {
-		ShowError("account_db_sql_set_property: inter_configuration.database_names was not found!\n");
+		if( !imported ) ShowError("account_db_sql_set_property: inter_configuration.database_names was not found!\n");
 		return false;
 	}
 	libconfig->setting_lookup_mutable_string(setting, "account_db", db->account_db, sizeof(db->account_db));
 
 	if( !(setting = libconfig->lookup(&config, "inter_configuration.database_names.registry")) ) {
-		ShowError("account_db_sql_set_property: inter_configuration.database_names.registry was not found!\n");
+		if( !imported ) ShowError("account_db_sql_set_property: inter_configuration.database_names.registry was not found!\n");
 		return false;
 	}
 	libconfig->setting_lookup_mutable_string(setting, "global_acc_reg_str_db",
@@ -290,12 +290,12 @@ bool account_db_read_inter( AccountDB_SQL* db, const char* cfgName ) {
 }
 
 /// if the option is supported, adjusts the internal state
-static bool account_db_sql_set_property(AccountDB* self, config_t *config) {
+bool account_db_sql_set_property(AccountDB* self, config_t *config, bool imported) {
 	AccountDB_SQL* db = (AccountDB_SQL*)self;
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.account.sql_connection")) ) {
-		ShowError("account_db_sql_set_property: login_configuration.account.sql_connection was not found!\n");
+		if( !imported ) ShowError("account_db_sql_set_property: login_configuration.account.sql_connection was not found!\n");
 		return false;
 	}
 
@@ -308,7 +308,7 @@ static bool account_db_sql_set_property(AccountDB* self, config_t *config) {
 
 	libconfig->setting_lookup_bool_real(setting, "case_sensitive", &db->case_sensitive);
 
-	account_db_read_inter(db, "conf/inter-server.conf");
+	account_db_read_inter(db, "conf/inter-server.conf", imported);
 
 	return true;
 }

@@ -1150,11 +1150,11 @@ int access_ipmask(const char* str, AccessControl* acc)
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-static bool socket_config_read_ddos( const char* cfgName, config_t *config ) {
+static bool socket_config_read_ddos( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "socket_configuration.ddos")) ) {
-		ShowError("socket_config_read: socket_configuration.ddos was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("socket_config_read: socket_configuration.ddos was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -1196,12 +1196,12 @@ int access_list_add( config_setting_t *setting, const char *list_name, AccessCon
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-static bool socket_config_read_iprules( const char* cfgName, config_t *config ) {
+static bool socket_config_read_iprules( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 	const char *temp;
 
 	if( !(setting = libconfig->lookup(config, "socket_configuration.ip_rules")) ) {
-		ShowError("socket_config_read: socket_configuration.ip_rules was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("socket_config_read: socket_configuration.ip_rules was not found in %s!\n", cfgName);
 		return false;
 	}
 	libconfig->setting_lookup_bool(setting, "enable", &ip_rules);
@@ -1219,12 +1219,12 @@ static bool socket_config_read_iprules( const char* cfgName, config_t *config ) 
 	}
 
 	if( !(setting = libconfig->lookup(config, "socket_configuration.ip_rules.allow_list")) )
-		ShowError("socket_config_read: socket_configuration.ip_rules.allow_list was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("socket_config_read: socket_configuration.ip_rules.allow_list was not found in %s!\n", cfgName);
 	else
 		access_list_add(setting, "allow_list", access_allow, &access_allownum);
 
 	if( !(setting = libconfig->lookup(config, "socket_configuration.ip_rules.deny_list")) )
-		ShowError("socket_config_read: socket_configuration.ip_rules.deny_list was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("socket_config_read: socket_configuration.ip_rules.deny_list was not found in %s!\n", cfgName);
 	else
 		access_list_add(setting, "deny_list", access_deny, &access_denynum);
 
@@ -1236,7 +1236,7 @@ static bool socket_config_read_iprules( const char* cfgName, config_t *config ) 
  * Reads 'socket_configuration' and initializes required variables
  * @retval false in case of failure
  **/
-int socket_config_read( const char* cfgName ) {
+int socket_config_read( const char* cfgName, bool imported ) {
 	config_t config;
 	config_setting_t *setting;
 
@@ -1247,7 +1247,7 @@ int socket_config_read( const char* cfgName ) {
 		return false;
 
 	if( !(setting = libconfig->lookup(&config, "socket_configuration")) ) {
-		ShowError("socket_config_read: socket_configuration was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("socket_config_read: socket_configuration was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -1266,8 +1266,8 @@ int socket_config_read( const char* cfgName ) {
 		}
 	}
 
-	socket_config_read_iprules(cfgName, &config);
-	socket_config_read_ddos(cfgName, &config);
+	socket_config_read_iprules(cfgName, &config, imported);
+	socket_config_read_ddos(cfgName, &config, imported);
 #endif
 
 	// import should overwrite any previous configuration, so it should be called last
@@ -1275,7 +1275,7 @@ int socket_config_read( const char* cfgName ) {
 		if( !strcmp(import, cfgName) || !strcmp(import, SOCKET_CONF_FILENAME) )
 			ShowWarning("socket_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			socket_config_read(import);
+			socket_config_read(import, true);
 	}
 
 	return true;
@@ -1475,7 +1475,7 @@ void socket_init(void)
 
 	CREATE(session, struct socket_data *, FD_SETSIZE);
 	
-	socket_config_read(SOCKET_CONF_FILENAME);
+	socket_config_read(SOCKET_CONF_FILENAME, false);
 
 	// initialize last send-receive tick
 	sockt->last_tick = time(NULL);

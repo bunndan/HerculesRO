@@ -3406,7 +3406,7 @@ int map_readallmaps (void) {
 	ShowInfo("Successfully loaded '"CL_WHITE"%d"CL_RESET"' maps."CL_CLL"\n",map->count);
 	instance->start_id = map->count; // Next Map Index will be instances
 
-	if (maps_removed)
+	if( maps_removed )
 		ShowNotice("Maps removed: '"CL_WHITE"%d"CL_RESET"'\n",maps_removed);
 
 	return 0;
@@ -3417,12 +3417,12 @@ int map_readallmaps (void) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool map_config_read_map_list( const char *cfgName, config_t *config ) {
+static bool map_config_read_map_list( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 	int count;
 
 	if( !(setting = libconfig->lookup(config, "map_configuration.map_list")) ) {
-		ShowError("map_config_read: map_configuration.map_list was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("map_config_read: map_configuration.map_list was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -3447,11 +3447,11 @@ static bool map_config_read_map_list( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool map_config_read_database( const char *cfgName, config_t *config ) {
+static bool map_config_read_database( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_configuration.database")) ) {
-		ShowError("map_config_read: map_configuration.database was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("map_config_read: map_configuration.database was not found in %s!\n", cfgName);
 		return false;
 	}
 	libconfig->setting_lookup_mutable_string(setting,"db_path",map->db_path,sizeof(map->db_path));
@@ -3476,14 +3476,14 @@ static bool map_config_read_database( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool map_config_read_inter( const char *cfgName, config_t *config ) {
+static bool map_config_read_inter( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 	char temp[24];
 	uint16 port;
 
 	if( !(setting = libconfig->lookup(config, "map_configuration.inter")) ) {
-		ShowError("map_config_read: map_configuration.inter was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("map_config_read: map_configuration.inter was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -3516,11 +3516,11 @@ static bool map_config_read_inter( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool map_config_read_connection( const char *cfgName, config_t *config ) {
+static bool map_config_read_connection( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_configuration.sql_connection")) ) {
-		ShowError("map_config_read: map_configuration.sql_connection was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("map_config_read: map_configuration.sql_connection was not found in %s!\n", cfgName);
 	} else {
 		libconfig->setting_lookup_int(setting, "db_port", &map->server_port);
 		libconfig->setting_lookup_mutable_string(setting, "db_hostname", map->server_ip, sizeof(map->server_ip));
@@ -3539,11 +3539,11 @@ static bool map_config_read_connection( const char *cfgName, config_t *config ) 
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool map_config_read_console( const char* cfgName, config_t *config ) {
+static bool map_config_read_console( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_configuration.console")) ) {
-		ShowError("map_config_read: map_configuration.console was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("map_config_read: map_configuration.console was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -3561,7 +3561,7 @@ static bool map_config_read_console( const char* cfgName, config_t *config ) {
 /**
  * Reads map-server configuration files (map-server.conf) and initialises required variables
  **/
-int map_config_read( const char *cfgName ) {
+int map_config_read( const char *cfgName, bool imported ) {
 	config_t config;
 	config_setting_t *setting;
 	const char *import;
@@ -3570,7 +3570,7 @@ int map_config_read( const char *cfgName ) {
 		return false;
 
 	if( !(setting = libconfig->lookup(&config, "map_configuration")) ) {
-		ShowError("map_config_read: map_configuration was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("map_config_read: map_configuration was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -3580,18 +3580,18 @@ int map_config_read( const char *cfgName ) {
 	libconfig->setting_lookup_bool(setting,"enable_spy",&map->enable_spy);
 	libconfig->setting_lookup_bool(setting,"enable_grf",&map->enable_grf);
 
-	map_config_read_console(cfgName, &config);
-	map_config_read_connection(cfgName, &config);
-	map_config_read_inter(cfgName, &config);
-	map_config_read_database(cfgName, &config);
-	map_config_read_map_list(cfgName, &config);
+	map_config_read_console(cfgName, &config, imported);
+	map_config_read_connection(cfgName, &config, imported);
+	map_config_read_inter(cfgName, &config, imported);
+	map_config_read_database(cfgName, &config, imported);
+	map_config_read_map_list(cfgName, &config, imported);
 
 	// import should overwrite any previous configuration, so it should be called last
 	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
 		if( !strcmp(import, cfgName) || !strcmp(import, map->MAP_CONF_NAME) )
 			ShowWarning("map_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			map->config_read(import);
+			map->config_read(import, true);
 	}
 
 	libconfig->destroy(&config);
@@ -3744,11 +3744,11 @@ void map_reloadnpc(bool clear, const char * const *extra_scripts, int extra_scri
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool inter_config_read_connection( const char* cfgName, config_t *config ) {
+bool inter_config_read_connection( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.log.sql_connection")) ) {
-		ShowError("inter_config_read: inter_configuration.log.sql_connection was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("inter_config_read: inter_configuration.log.sql_connection was not found in %s!\n", cfgName);
 		return false;
 	}
 	libconfig->setting_lookup_int(setting, "port", &logs->db_port);
@@ -3765,11 +3765,11 @@ bool inter_config_read_connection( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-bool inter_config_read_database_names( const char* cfgName, config_t *config ) {
+bool inter_config_read_database_names( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names")) ) {
-		ShowError("inter_config_read: inter_configuration.database_names was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("inter_config_read: inter_configuration.database_names was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -3786,7 +3786,7 @@ bool inter_config_read_database_names( const char* cfgName, config_t *config ) {
 	mapreg->config_read(setting);
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.registry")) ) {
-		ShowError("inter_config_read: inter_configuration.database_names.registry was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("inter_config_read: inter_configuration.database_names.registry was not found in %s!\n", cfgName);
 		return false;
 	}
 	libconfig->setting_lookup_mutable_string(setting, "interreg_db", map->interreg_db, sizeof(map->interreg_db));
@@ -3796,7 +3796,7 @@ bool inter_config_read_database_names( const char* cfgName, config_t *config ) {
 /**
  * Reads inter-server.conf and initialises required variables
  **/
-bool inter_config_read( const char *cfgName ) {
+bool inter_config_read( const char *cfgName, bool imported ) {
 	config_t config;
 	config_setting_t *setting;
 
@@ -3806,7 +3806,7 @@ bool inter_config_read( const char *cfgName ) {
 		return false;
 
 	if( !(setting = libconfig->lookup(&config, "inter_configuration")) ) {
-		ShowError("inter_config_read: inter_configuration was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("inter_config_read: inter_configuration was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -3823,15 +3823,15 @@ bool inter_config_read( const char *cfgName ) {
 		ShowStatus ("Using monster skill database as SQL: '%s'\n", map->mob_skill_db_db);
 
 
-	map->inter_config_read_database_names(cfgName, &config);
-	map->inter_config_read_connection(cfgName, &config);
+	map->inter_config_read_database_names(cfgName, &config, imported);
+	map->inter_config_read_connection(cfgName, &config, imported);
 
 	// import should overwrite any previous configuration, so it should be called last
 	if( libconfig->lookup_mutable_string(&config, "import", import, sizeof(import)) == CONFIG_TRUE ) {
 		if( !strcmp(import, cfgName) || !strcmp(import, map->INTER_CONF_NAME) )
 			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			map->inter_config_read(import);
+			map->inter_config_read(import, true);
 	}
 
 	config_destroy(&config);
@@ -5855,7 +5855,7 @@ int do_init(int argc, char *argv[])
 	}
 	minimal = map->minimal;/* temp (perhaps make minimal a mask with options of what to load? e.g. plugin 1 does minimal |= mob_db; */
 	if (!minimal) {
-		map->config_read(map->MAP_CONF_NAME);
+		map->config_read(map->MAP_CONF_NAME, false);
 		CREATE(map->list,struct map_data,map->count);
 		map->count = 0;
 		map->srcfile_load( SRC_MAP,
@@ -5888,10 +5888,10 @@ int do_init(int argc, char *argv[])
 
 		battle->config_read(map->BATTLE_CONF_FILENAME);
 		atcommand->msg_read(map->MSG_CONF_NAME, false);
-		map->inter_config_read(map->INTER_CONF_NAME);
+		map->inter_config_read(map->INTER_CONF_NAME, false);
 		logs->config_read(map->LOG_CONF_NAME, false);
 	}
-	script->config_read(map->SCRIPT_CONF_NAME);
+	script->config_read(map->SCRIPT_CONF_NAME, false);
 
 	map->id_db     = idb_alloc(DB_OPT_BASE);
 	map->pc_db     = idb_alloc(DB_OPT_BASE); //Added for reliable map->id2sd() use. [Skotlex]

@@ -602,7 +602,7 @@ struct script_interface {
 	void (*run_autobonus) (const char *autobonus,int id, int pos);
 	void (*cleararray_pc) (struct map_session_data* sd, const char* varname, void* value);
 	void (*setarray_pc) (struct map_session_data* sd, const char* varname, uint32 idx, void* value, int* refcache);
-	bool (*config_read) (const char *cfgName);
+	bool (*config_read) (const char *cfgName, bool imported);
 	int (*add_str) (const char* p);
 	const char* (*get_str) (int id);
 	int (*search_str) (const char* p);

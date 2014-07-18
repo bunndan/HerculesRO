@@ -101,13 +101,15 @@ void ipban_final(void)
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-static bool ipban_config_read_dynamic( const char* cfgName, config_t *config ) {
+static bool ipban_config_read_dynamic( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.account.ipban.dynamic_pass_failure")) ) {
-		ShowError("account_db_sql_set_property: login_configuration.account.ipban.dynamic_pass_failure"
+		if( !imported ) {
+			ShowError("account_db_sql_set_property: login_configuration.account.ipban.dynamic_pass_failure"
 					"was not found in %s!\n",
 					cfgName);
+		}
 		return false;
 	}
 
@@ -124,11 +126,11 @@ static bool ipban_config_read_dynamic( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-static bool ipban_config_read_connection( const char* cfgName, config_t *config ) {
+static bool ipban_config_read_connection( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.account.ipban.sql_connection")) ) {
-		ShowError("account_db_sql_set_property: login_configuration.account.ipban.sql_connection was not found in %s!\n",
+		if( !imported ) ShowError("account_db_sql_set_property: login_configuration.account.ipban.sql_connection was not found in %s!\n",
 			cfgName);
 		return false;
 	}
@@ -150,18 +152,28 @@ static bool ipban_config_read_connection( const char* cfgName, config_t *config 
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-static bool ipban_config_read_inter( const char* cfgName ) {
+static bool ipban_config_read_inter( const char* cfgName, bool imported ) {
 	config_t config;
 	config_setting_t *setting;
+
+	const char *import;
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false; // Error message is already shown by libconfig->read_file
 
 	if( !(setting = libconfig->lookup(&config, "inter_configuration.database_names")) ) {
-		ShowError("ipban_config_read: inter_configuration.database_names was not found!\n");
+		if( !imported ) ShowError("ipban_config_read: inter_configuration.database_names was not found!\n");
 		return false;
 	}
 	libconfig->setting_lookup_mutable_string(setting, "ipban_table", ipban_table, sizeof(ipban_table));
+
+	// import should overwrite any previous configuration, so it should be called last
+	if( libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE ) {
+		if( !strcmp(import, cfgName) || !strcmp(import, "conf/inter-server.conf") )
+			ShowWarning("ipban_config_read_inter: Loop detected! Skipping 'import'...\n");
+		else
+			ipban_config_read_inter(import, true);
+	}
 
 	return true;
 }
@@ -171,23 +183,23 @@ static bool ipban_config_read_inter( const char* cfgName ) {
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool ipban_config_read( const char* cfgName, config_t *config ) {
+bool ipban_config_read( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( ipban_inited )
 		return false; // settings can only be changed before init
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.account.ipban")) ) {
-		ShowError("login_config_read: login_configuration.log was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("login_config_read: login_configuration.log was not found in %s!\n", cfgName);
 		return false;
 	}
 
 	libconfig->setting_lookup_bool_real(setting, "enabled", &login_config.ipban);
 	libconfig->setting_lookup_uint32(setting, "cleanup_interval", &login_config.ipban_cleanup_interval);
 
-	ipban_config_read_inter("conf/inter-server.conf");
-	ipban_config_read_connection(cfgName, config);
-	ipban_config_read_dynamic(cfgName, config);
+	ipban_config_read_inter("conf/inter-server.conf", imported);
+	ipban_config_read_connection(cfgName, config, imported);
+	ipban_config_read_dynamic(cfgName, config, imported);
 
 	return true;
 }

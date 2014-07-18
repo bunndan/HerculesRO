@@ -4149,7 +4149,7 @@ void run_script_main(struct script_state *st) {
  * Reads 'script_configuration' and initializes required variables
  * @retval false in case of failure
  **/
-bool script_config_read( const char *cfgName ) {
+bool script_config_read( const char *cfgName, bool imported ) {
 	config_t config;
 	config_setting_t *setting;
 
@@ -4159,7 +4159,7 @@ bool script_config_read( const char *cfgName ) {
 		return false;
 
 	if( !(setting = libconfig->lookup(&config, "script_configuration")) ) {
-		ShowError("script_config_read: script_configuration was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("script_config_read: script_configuration was not found in %s!\n", cfgName);
 		return 0;
 	}
 
@@ -4175,7 +4175,7 @@ bool script_config_read( const char *cfgName ) {
 		if( !strcmp(import, cfgName) || !strcmp(import, map->SCRIPT_CONF_NAME) )
 			ShowWarning("script_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			script->config_read(import);
+			script->config_read(import, true);
 	}
 
 	return true;

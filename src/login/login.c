@@ -1649,11 +1649,11 @@ void login_config_set_dnsbl_servers( config_setting_t *setting ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool login_config_read_permission_blacklist( const char *cfgName, config_t *config ) {
+static bool login_config_read_permission_blacklist( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.permission.DNS_blacklist")) ) {
-		ShowError("login_config_read: login_configuration.permission.DNS_blacklist was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("login_config_read: login_configuration.permission.DNS_blacklist was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -1748,11 +1748,11 @@ void login_config_set_md5hash( config_setting_t *setting ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool login_config_read_permission_hash( const char *cfgName, config_t *config ) {
+static bool login_config_read_permission_hash( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.permission.hash")) ) {
-		ShowError("login_config_read: login_configuration.permission.hash was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("login_config_read: login_configuration.permission.hash was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -1769,11 +1769,11 @@ static bool login_config_read_permission_hash( const char *cfgName, config_t *co
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool login_config_read_permission( const char *cfgName, config_t *config ) {
+static bool login_config_read_permission( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.permission")) ) {
-		ShowError("login_config_read: login_configuration.permission was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("login_config_read: login_configuration.permission was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -1783,8 +1783,8 @@ static bool login_config_read_permission( const char *cfgName, config_t *config 
 	libconfig->setting_lookup_uint32(setting, "client_version_to_connect", &login_config.client_version_to_connect);
 
 
-	login_config_read_permission_hash(cfgName, config);
-	login_config_read_permission_blacklist(cfgName, config);
+	login_config_read_permission_hash(cfgName, config, imported);
+	login_config_read_permission_blacklist(cfgName, config, imported);
 
 	return true;
 }
@@ -1794,12 +1794,12 @@ static bool login_config_read_permission( const char *cfgName, config_t *config 
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool login_config_read_account( const char* cfgName, config_t *config ) {
+static bool login_config_read_account( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 	AccountDB* db = account_engine[0].db;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.account")) ) {
-		ShowError("login_config_read: login_configuration.account was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("login_config_read: login_configuration.account was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -1811,8 +1811,8 @@ static bool login_config_read_account( const char* cfgName, config_t *config ) {
 	libconfig->setting_lookup_int(setting, "start_limited_time", &login_config.start_limited_time);
 	libconfig->setting_lookup_bool_real(setting, "use_MD5_passwords", &login_config.use_md5_passwds);
 
-	db->set_property(db, config);
-	ipban_config_read(cfgName, config);
+	db->set_property(db, config, imported);
+	ipban_config_read(cfgName, config, imported);
 
 	return true;
 }
@@ -1822,11 +1822,11 @@ static bool login_config_read_account( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool login_config_read_log( const char* cfgName, config_t *config ) {
+static bool login_config_read_log( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.log")) ) {
-		ShowError("login_config_read: login_configuration.log was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("login_config_read: login_configuration.log was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -1843,11 +1843,11 @@ static bool login_config_read_log( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool login_config_read_console( const char* cfgName, config_t *config ) {
+static bool login_config_read_console( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.console")) ) {
-		ShowError("login_config_read: login_configuration.console was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("login_config_read: login_configuration.console was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -1866,12 +1866,12 @@ static bool login_config_read_console( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool login_config_read_inter( const char* cfgName, config_t *config ) {
+static bool login_config_read_inter( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "login_configuration.inter")) ) {
-		ShowError("login_config_read: login_configuration.inter was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("login_config_read: login_configuration.inter was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -1896,21 +1896,20 @@ static bool login_config_read_inter( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool login_config_read(const char* cfgName)
-{
+bool login_config_read( const char* cfgName, bool imported ) {
 	config_t config;
 	const char *import;
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false; // Error message is already shown by libconfig->read_file
 
-	login_config_read_inter(cfgName, &config);
-	login_config_read_console(cfgName, &config);
-	login_config_read_log(cfgName, &config);
-	login_config_read_account(cfgName, &config);
-	login_config_read_permission(cfgName, &config);
+	login_config_read_inter(cfgName, &config, imported);
+	login_config_read_console(cfgName, &config, imported);
+	login_config_read_log(cfgName, &config, imported);
+	login_config_read_account(cfgName, &config, imported);
+	login_config_read_permission(cfgName, &config, imported);
 
-	loginlog_config_read("conf/inter-server.conf"); // Only inter-server
+	loginlog_config_read("conf/inter-server.conf", imported); // Only inter-server
 
 	ShowInfo("Finished reading %s.\n", cfgName);
 
@@ -1919,7 +1918,7 @@ bool login_config_read(const char* cfgName)
 		if( !strcmp(import, cfgName) || !strcmp(import, LOGIN_CONF_NAME) )
 			ShowWarning("login_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			login_config_read(import);
+			login_config_read(import, true);
 	}
 
 	config_destroy(&config);
@@ -2015,7 +2014,7 @@ int do_init(int argc, char** argv)
 
 	// read login-server configuration
 	login_set_defaults();
-	login_config_read((argc > 1) ? argv[1] : LOGIN_CONF_NAME);
+	login_config_read((argc > 1) ? argv[1] : LOGIN_CONF_NAME, false);
 	subnet_config_read((argc > 2) ? argv[2] : LAN_CONF_NAME);
 		
 	for( i = 0; i < ARRAYLENGTH(server); ++i )

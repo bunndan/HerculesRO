@@ -5091,11 +5091,11 @@ int subnet_config_read(const char *cfgName)
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool sql_config_read_guild( const char* cfgName, config_t *config ) {
+static bool sql_config_read_guild( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.guild")) ) {
-		ShowError("sql_config_read: inter_configuration.database_names.guild was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("sql_config_read: inter_configuration.database_names.guild was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -5116,11 +5116,11 @@ static bool sql_config_read_guild( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool sql_config_read_pc( const char* cfgName, config_t *config ) {
+static bool sql_config_read_pc( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.pc")) ) {
-		ShowError("sql_config_read: inter_configuration.database_names.pc was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("sql_config_read: inter_configuration.database_names.pc was not found in %s!\n", cfgName);
 		return false;
 	}
 	libconfig->setting_lookup_mutable_string(setting, "hotkey_db", hotkey_db, sizeof(hotkey_db));
@@ -5152,11 +5152,11 @@ static bool sql_config_read_pc( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool sql_config_read_registry( const char* cfgName, config_t *config ) {
+static bool sql_config_read_registry( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "inter_configuration.database_names.registry")) ) {
-		ShowError("sql_config_read: inter_configuration.database_names.registry was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("sql_config_read: inter_configuration.database_names.registry was not found in %s!\n", cfgName);
 		return false;
 	}
 	// Not all registries are read by char-server
@@ -5169,7 +5169,7 @@ static bool sql_config_read_registry( const char* cfgName, config_t *config ) {
 	return true;
 }
 
-bool sql_config_read(const char* cfgName)
+bool sql_config_read( const char* cfgName, bool imported )
 {
 	config_t config;
 	config_setting_t *setting;
@@ -5179,7 +5179,7 @@ bool sql_config_read(const char* cfgName)
 		return false; // Error message is already shown by libconfig->read_file
 
 	if( !(setting = libconfig->lookup(&config, "inter_configuration.database_names")) ) {
-		ShowError("sql_config_read: inter_configuration.database_names was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("sql_config_read: inter_configuration.database_names was not found in %s!\n", cfgName);
 		config_destroy(&config);
 		return false;
 	}
@@ -5187,9 +5187,9 @@ bool sql_config_read(const char* cfgName)
 	libconfig->setting_lookup_mutable_string(setting, "interlog_db", interlog_db, sizeof(interlog_db));
 	libconfig->setting_lookup_mutable_string(setting, "ragsrvinfo_db", ragsrvinfo_db, sizeof(ragsrvinfo_db));
 
-	sql_config_read_registry(cfgName, &config);
-	sql_config_read_pc(cfgName, &config);
-	sql_config_read_guild(cfgName, &config);
+	sql_config_read_registry(cfgName, &config, imported);
+	sql_config_read_pc(cfgName, &config, imported);
+	sql_config_read_guild(cfgName, &config, imported);
 
 	ShowInfo("Done reading %s.\n", cfgName);
 	// import should overwrite any previous configuration, so it should be called last
@@ -5197,7 +5197,7 @@ bool sql_config_read(const char* cfgName)
 		if( !strcmp(import, cfgName) || !strcmp(import, SQL_CONF_NAME) )
 			ShowWarning("sql_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			sql_config_read(import);
+			sql_config_read(import, true);
 	}
 
 	config_destroy(&config);
@@ -5209,12 +5209,12 @@ bool sql_config_read(const char* cfgName)
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_database( const char* cfgName, config_t *config ) {
+static bool char_config_read_database( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.database")) ) {
-		ShowError("char_config_read: char_configuration.database was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration.database was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -5236,11 +5236,11 @@ static bool char_config_read_database( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_console( const char* cfgName, config_t *config ) {
+static bool char_config_read_console( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.console")) ) {
-		ShowError("char_config_read: char_configuration.console was not found in %s!\n", cfgName); 
+		if( !imported ) ShowError("char_config_read: char_configuration.console was not found in %s!\n", cfgName); 
 		return false;
 	}
 
@@ -5260,11 +5260,11 @@ static bool char_config_read_console( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_player_fame( const char* cfgName, config_t *config ) {
+static bool char_config_read_player_fame( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.player.fame")) ) {
-		ShowError("char_config_read: char_configuration.player.fame was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration.player.fame was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -5293,11 +5293,11 @@ static bool char_config_read_player_fame( const char* cfgName, config_t *config 
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_player_deletion( const char* cfgName, config_t *config ) {
+static bool char_config_read_player_deletion( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.player.deletion")) ) {
-		ShowError("char_config_read: char_configuration.player.deletion was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration.player.deletion was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -5313,11 +5313,11 @@ static bool char_config_read_player_deletion( const char* cfgName, config_t *con
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_player_name( const char* cfgName, config_t *config ) {
+static bool char_config_read_player_name( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.player.name")) ) {
-		ShowError("char_config_read: char_configuration.player.name was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration.player.name was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -5384,12 +5384,12 @@ void char_config_set_start_item( config_setting_t *setting ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_player_new( const char* cfgName, config_t *config ) {
+static bool char_config_read_player_new( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.player.new")) ) {
-		ShowError("char_config_read: char_configuration.player.new was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration.player.new was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -5424,12 +5424,12 @@ static bool char_config_read_player_new( const char* cfgName, config_t *config )
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_player( const char* cfgName, config_t *config ) {
+static bool char_config_read_player( const char* cfgName, config_t *config, bool imported ) {
 
-	char_config_read_player_new( cfgName, config );
-	char_config_read_player_name( cfgName, config );
-	char_config_read_player_deletion( cfgName, config );
-	char_config_read_player_fame( cfgName, config );
+	char_config_read_player_new( cfgName, config, imported );
+	char_config_read_player_name( cfgName, config, imported );
+	char_config_read_player_deletion( cfgName, config, imported );
+	char_config_read_player_fame( cfgName, config, imported );
 
 	return true;
 }
@@ -5438,11 +5438,11 @@ static bool char_config_read_player( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_permission( const char* cfgName, config_t *config ) {
+static bool char_config_read_permission( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.permission")) ) {
-		ShowError("char_config_read: char_configuration.permission was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration.permission was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -5487,12 +5487,12 @@ void char_config_set_ip( const char *type, const char *value, uint32 *type_ip, c
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_inter( const char* cfgName, config_t *config ) {
+static bool char_config_read_inter( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 	const char *str = NULL;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration.inter")) ) {
-		ShowError("char_config_read: char_configuration.inter was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration.inter was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -5521,18 +5521,18 @@ static bool char_config_read_inter( const char* cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of fatal error
  **/
-static bool char_config_read_first_nest( const char* cfgName, config_t *config ) {
+static bool char_config_read_first_nest( const char* cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "char_configuration")) ) {
-		ShowError("char_config_read: char_configuration was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("char_config_read: char_configuration was not found in %s!\n", cfgName);
 		return false;
 	}
 
 	// char_configuration.server_name
 	if( libconfig->setting_lookup_mutable_string(setting, "server_name", server_name, sizeof(server_name)) == CONFIG_TRUE ) {
 		ShowInfo("server name %s\n", server_name);
-	} else {
+	} else if( !imported ) {
 		ShowWarning("char_config_read: server_name was not set! Defaulting to 'Hercules'\n");
 		safestrncpy(server_name, "Hercules", sizeof(server_name));
 	}
@@ -5556,22 +5556,21 @@ static bool char_config_read_first_nest( const char* cfgName, config_t *config )
  * @param cfgName path to configuration file
  * @retval false in case of failure
  **/
-bool char_config_read(const char* cfgName)
-{
+bool char_config_read( const char* cfgName, bool imported ) {
 	config_t config;
 	const char *import;
 
 	if( libconfig->read_file(&config, cfgName) )
 		return false; // Error message is already shown by libconfig->read_file
 
-	char_config_read_first_nest(cfgName, &config);
-	char_config_read_inter(cfgName, &config);
-	char_config_read_permission(cfgName, &config);
-	char_config_read_player(cfgName, &config);
-	char_config_read_console(cfgName, &config);
-	char_config_read_database(cfgName, &config);
-	char_config_read_connection(cfgName, &config);
-	pincode->config_read(cfgName, &config);
+	char_config_read_first_nest(cfgName, &config, imported);
+	char_config_read_inter(cfgName, &config, imported);
+	char_config_read_permission(cfgName, &config, imported);
+	char_config_read_player(cfgName, &config, imported);
+	char_config_read_console(cfgName, &config, imported);
+	char_config_read_database(cfgName, &config, imported);
+	char_config_read_connection(cfgName, &config, imported);
+	pincode->config_read(cfgName, &config, imported);
 
 	ShowInfo("Done reading %s.\n", cfgName);
 
@@ -5580,7 +5579,7 @@ bool char_config_read(const char* cfgName)
 		if( !strcmp(import, cfgName) || !strcmp(import, CHAR_CONF_NAME) )
 			ShowWarning("char_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			char_config_read(import);
+			char_config_read(import, true);
 	}
 
 	config_destroy(&config);
@@ -5680,9 +5679,9 @@ int do_init(int argc, char **argv) {
 	safestrncpy(userid, "s1", sizeof(userid));
 	safestrncpy(passwd, "p1", sizeof(passwd));
 		
-	char_config_read((argc < 2) ? CHAR_CONF_NAME : argv[1]);
+	char_config_read((argc < 2) ? CHAR_CONF_NAME : argv[1], false);
 	subnet_config_read((argc > 3) ? argv[3] : LAN_CONF_NAME);
-	sql_config_read(SQL_CONF_NAME);
+	sql_config_read(SQL_CONF_NAME, false);
 
 	if (strcmp(userid, "s1")==0 && strcmp(passwd, "p1")==0) {
 		ShowWarning("Using the default user/password s1/p1 is NOT RECOMMENDED.\n");

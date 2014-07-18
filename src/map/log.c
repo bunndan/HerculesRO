@@ -383,11 +383,11 @@ void log_sql_final(void) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-static bool log_config_read_filter_chat( const char *cfgName, config_t *config ) {
+static bool log_config_read_filter_chat( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_log.filter.chat")) ) {
-		ShowError("log_config_read: map_log.filter.chat was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("log_config_read: map_log.filter.chat was not found in %s!\n", cfgName);
 		return false;
 	}
 	libconfig->setting_lookup_int(setting, "log_chat", &logs->config.chat);
@@ -400,11 +400,11 @@ static bool log_config_read_filter_chat( const char *cfgName, config_t *config )
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-static bool log_config_read_filter_item( const char *cfgName, config_t *config ) {
+static bool log_config_read_filter_item( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_log.filter.item")) ) {
-		ShowError("log_config_read: map_log.filter.item was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("log_config_read: map_log.filter.item was not found in %s!\n", cfgName);
 		return false;
 	}
 	libconfig->setting_lookup_int(setting, "log_filter", &logs->config.filter);
@@ -420,10 +420,10 @@ static bool log_config_read_filter_item( const char *cfgName, config_t *config )
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-static bool log_config_read_filter( const char *cfgName, config_t *config ) {
+static bool log_config_read_filter( const char *cfgName, config_t *config, bool imported ) {
 
-	log_config_read_filter_item(cfgName, config);
-	log_config_read_filter_chat(cfgName, config);
+	log_config_read_filter_item(cfgName, config, imported);
+	log_config_read_filter_chat(cfgName, config, imported);
 	return true;
 }
 
@@ -432,11 +432,11 @@ static bool log_config_read_filter( const char *cfgName, config_t *config ) {
  * @param cfgName path to configuration file (used in error and warning messages)
  * @retval false in case of error
  **/
-static bool log_config_read_database( const char *cfgName, config_t *config ) {
+static bool log_config_read_database( const char *cfgName, config_t *config, bool imported ) {
 	config_setting_t *setting;
 
 	if( !(setting = libconfig->lookup(config, "map_log.database")) ) {
-		ShowError("log_config_read: map_log.database was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("log_config_read: map_log.database was not found in %s!\n", cfgName);
 		return false;
 	}
 	libconfig->setting_lookup_bool_real(setting, "use_sql", &logs->config.sql_logs);
@@ -528,7 +528,7 @@ bool log_config_read( const char *cfgName, bool imported ) {
 		return false;
 
 	if( !(setting = libconfig->lookup(&config, "map_log")) ) {
-		ShowError("log_config_read: map_log was not found in %s!\n", cfgName);
+		if( !imported ) ShowError("log_config_read: map_log was not found in %s!\n", cfgName);
 		return false;
 	}
 
@@ -541,8 +541,8 @@ bool log_config_read( const char *cfgName, bool imported ) {
 	libconfig->setting_lookup_bool_real(setting, "log_commands", &logs->config.commands);
 	libconfig->setting_lookup_bool_real(setting, "log_npc", &logs->config.npc);
 
-	log_config_read_database(cfgName, &config);
-	log_config_read_filter(cfgName, &config);
+	log_config_read_database(cfgName, &config, imported);
+	log_config_read_filter(cfgName, &config, imported);
 
 	target = logs->config.sql_logs ? "table" : "file";
 
