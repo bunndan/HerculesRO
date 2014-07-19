@@ -5,6 +5,7 @@
 #ifndef MAP_STORAGE_H
 #define MAP_STORAGE_H
 
+#include "../map/guild.h"
 #include "../common/cbasetypes.h"
 #include "../common/db.h"
 
@@ -48,7 +49,9 @@ struct guild_storage_interface {
 	void (*init) (bool minimal);
 	void (*final) (void);
 	/* */
-	int (*delete) (int guild_id);
+	bool (*allocate_items) (struct guild_storage *gs);
+	bool (*grow) (struct guild *g);
+	void (*delete) (int guild_id);
 	int (*open) (struct map_session_data *sd);
 	int (*additem) (struct map_session_data *sd,struct guild_storage *stor,struct item *item_data,int amount);
 	int (*delitem) (struct map_session_data *sd,struct guild_storage *stor,int n,int amount);
