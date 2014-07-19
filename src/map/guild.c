@@ -1093,7 +1093,7 @@ int guild_change_position(int guild_id,int idx,int mode,int exp_mode,const char 
 	struct guild_position p;
 
 	exp_mode = cap_value(exp_mode, 0, battle_config.guild_exp_limit);
-	p.mode=mode&GPERM_BOTH; // Invite and Expel
+	p.mode=mode&GPERM_DEFAULT; // Invite and Expel
 	p.exp_mode=exp_mode;
 	safestrncpy(p.name,name,NAME_LENGTH);
 	return intif->guild_position(guild_id,idx,&p);
