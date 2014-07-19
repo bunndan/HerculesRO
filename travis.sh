@@ -61,33 +61,17 @@ case "$MODE" in
 		fi
 		;;
 	test)
-		cat >> conf/import/login_conf.txt << EOF
-ipban.sql.db_username: $DBUSER
-ipban.sql.db_password: $DBPASS
-ipban.sql.db_database: $DBNAME
-account.sql.db_username: $DBUSER
-account.sql.db_password: $DBPASS
-account.sql.db_database: $DBNAME
-account.sql.db_hostname: localhost
-EOF
-		[ $? -eq 0 ] || aborterror "Unable to import configuration, aborting tests."
-		cat >> conf/import/inter_conf.txt << EOF
-sql.db_username: $DBUSER
-sql.db_password: $DBPASS
-sql.db_database: $DBNAME
-sql.db_hostname: localhost
-char_server_id: $DBUSER
-char_server_pw: $DBPASS
-char_server_db: $DBNAME
-char_server_ip: localhost
-map_server_id: $DBUSER
-map_server_pw: $DBPASS
-map_server_db: $DBNAME
-map_server_ip: localhost
-log_db_id: $DBUSER
-log_db_pw: $DBPASS
-log_db_db: $DBNAME
-log_db_ip: localhost
+		# FIXME: Not pretty. We need a way not to overwrite this, but rather override it.
+		cat > conf/global/sql_connection.conf << EOF
+sql_connection: {
+	//default_codepage: "";
+	//case_sensitive: false;
+	db_hostname: "localhost"
+	db_username: "$DBUSER";
+	db_password: "$DBPASS";
+	db_database: "$DBNAME";
+	//codepage:"";
+};
 EOF
 		[ $? -eq 0 ] || aborterror "Unable to import configuration, aborting tests."
 		ARGS="--load-script npc/dev/test.txt "
