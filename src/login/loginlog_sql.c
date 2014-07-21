@@ -174,7 +174,7 @@ bool loginlog_config_read( const char* cfgName, bool imported ) {
 		if( !strcmp(import, cfgName) || !strcmp(import, "conf/inter-server.conf") )
 			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			loginlog_config_read(import, imported);
+			loginlog_config_read(import, true);
 	}
 
 	return true;

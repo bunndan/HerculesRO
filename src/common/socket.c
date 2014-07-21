@@ -1218,14 +1218,16 @@ static bool socket_config_read_iprules( const char* cfgName, config_t *config, b
 			access_order = ACO_MUTUAL_FAILURE;
 	}
 
-	if( !(setting = libconfig->lookup(config, "socket_configuration.ip_rules.allow_list")) )
-		if( !imported ) ShowError("socket_config_read: socket_configuration.ip_rules.allow_list was not found in %s!\n", cfgName);
-	else
+	if( !(setting = libconfig->lookup(config, "socket_configuration.ip_rules.allow_list")) ) {
+		if( !imported ) 
+			ShowError("socket_config_read: socket_configuration.ip_rules.allow_list was not found in %s!\n", cfgName);
+	} else
 		access_list_add(setting, "allow_list", access_allow, &access_allownum);
 
-	if( !(setting = libconfig->lookup(config, "socket_configuration.ip_rules.deny_list")) )
-		if( !imported ) ShowError("socket_config_read: socket_configuration.ip_rules.deny_list was not found in %s!\n", cfgName);
-	else
+	if( !(setting = libconfig->lookup(config, "socket_configuration.ip_rules.deny_list")) ) {
+		if( !imported )
+			ShowError("socket_config_read: socket_configuration.ip_rules.deny_list was not found in %s!\n", cfgName);
+	} else
 		access_list_add(setting, "deny_list", access_deny, &access_denynum);
 
 	return true;
