@@ -5761,6 +5761,10 @@ struct {
 	struct HPMHookPoint *HP_vending_search_post;
 	struct HPMHookPoint *HP_vending_searchall_pre;
 	struct HPMHookPoint *HP_vending_searchall_post;
+	struct HPMHookPoint *HP_vending_iterator_pre;
+	struct HPMHookPoint *HP_vending_iterator_post;
+	struct HPMHookPoint *HP_PRIV__vending_getid_pre;
+	struct HPMHookPoint *HP_PRIV__vending_getid_post;
 } list;
 
 struct {
@@ -11520,6 +11524,10 @@ struct {
 	int HP_vending_search_post;
 	int HP_vending_searchall_pre;
 	int HP_vending_searchall_post;
+	int HP_vending_iterator_pre;
+	int HP_vending_iterator_post;
+	int HP_PRIV__vending_getid_pre;
+	int HP_PRIV__vending_getid_post;
 } count;
 
 struct {
@@ -11579,4 +11587,5 @@ struct {
 	struct trade_interface trade;
 	struct unit_interface unit;
 	struct vending_interface vending;
+	struct vending_interface_p PRIV__vending;
 } source;
