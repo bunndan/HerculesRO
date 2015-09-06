@@ -257,8 +257,11 @@ struct char_interface {
 	int (*check_connect_login_server) (int tid, int64 tick, int id, intptr_t data);
 	int (*online_data_cleanup_sub) (DBKey key, DBData *data, va_list ap);
 	int (*online_data_cleanup) (int tid, int64 tick, int id, intptr_t data);
-	void (*sql_config_read) (const char* cfgName);
 
+	bool (*sql_config_read) (const char *cfgName, bool imported);
+	bool (*sql_config_read_registry) (const char *cfgName, config_t *config, bool imported);
+	bool (*sql_config_read_pc) (const char *cfgName, config_t *config, bool imported);
+	bool (*sql_config_read_guild) (const char *cfgName, config_t *config, bool imported);
 	bool (*config_read) (const char *cfgName, bool imported);
 	bool (*config_read_database) (const char *cfgName, config_t *config, bool imported);
 	bool (*config_read_console) (const char *cfgName, config_t *config, bool imported);

@@ -3706,111 +3706,140 @@ void map_reloadnpc(bool clear) {
 	}
 }
 
-int inter_config_read(char *cfgName) {
-	char line[1024],w1[1024],w2[1024];
-	FILE *fp;
+/**
+ * Reads inter-server.conf and initializes required variables.
+ *
+ * @param cfgName  Path to configuration file
+ * @param imported Whether the current config is from an imported file.
+ *
+ * @retval false in case of error.
+ */
+bool inter_config_read(const char *cfgName, bool imported)
+{
+	config_t config;
+	config_setting_t *setting;
+	const char *import;
+	nullpo_retr(false, cfgName);
 
-	if (!(fp = fopen(cfgName,"r"))) {
-		ShowError("File not found: %s\n",cfgName);
-		return 1;
+	if (libconfig->read_file(&config, cfgName))
+		return false;
+
+	if (!(setting = libconfig->lookup(&config, "inter_configuration"))) {
+		if (!imported) ShowError("inter_config_read: inter_configuration was not found in %s!\n", cfgName);
+		return false;
 	}
-	while (fgets(line, sizeof(line), fp)) {
-		if (line[0] == '/' && line[1] == '/')
-			continue;
-		
-		if (sscanf(line,"%1023[^:]: %1023[^\r\n]", w1, w2) < 2)
-			continue;
-		/* table names */
-		if(strcmpi(w1,"item_db_db")==0)
-			safestrncpy(map->item_db_db, w2, sizeof(map->item_db_db));
-		else if(strcmpi(w1,"mob_db_db")==0)
-			safestrncpy(map->mob_db_db, w2, sizeof(map->mob_db_db));
-		else if(strcmpi(w1,"item_db2_db")==0)
-			safestrncpy(map->item_db2_db, w2, sizeof(map->item_db2_db));
-		else if(strcmpi(w1,"mob_db2_db")==0)
-			safestrncpy(map->mob_db2_db, w2, sizeof(map->mob_db2_db));
-		else if(strcmpi(w1, "mob_skill_db_db") == 0)
-			safestrncpy(map->mob_skill_db_db, w2, sizeof(map->mob_skill_db_db));
-		else if(strcmpi(w1,"mob_skill_db2_db")==0)
-			safestrncpy(map->mob_skill_db2_db, w2, sizeof(map->mob_skill_db2_db));
-		/* map sql stuff */
-		else if(strcmpi(w1,"map_server_ip")==0)
-			safestrncpy(map->server_ip, w2, sizeof(map->server_ip));
-		else if(strcmpi(w1,"map_server_port")==0)
-			map->server_port=atoi(w2);
-		else if(strcmpi(w1,"map_server_id")==0)
-			safestrncpy(map->server_id, w2, sizeof(map->server_id));
-		else if(strcmpi(w1,"map_server_pw")==0)
-			safestrncpy(map->server_pw, w2, sizeof(map->server_pw));
-		else if(strcmpi(w1,"map_server_db")==0)
-			safestrncpy(map->server_db, w2, sizeof(map->server_db));
-		else if(strcmpi(w1,"default_codepage")==0)
-			safestrncpy(map->default_codepage, w2, sizeof(map->default_codepage));
-		else if(strcmpi(w1,"use_sql_item_db")==0) {
-			map->db_use_sql_item_db = config_switch(w2);
-			ShowStatus ("Using item database as SQL: '%s'\n", w2);
-			if (map->db_use_sql_item_db) {
-				// Deprecated 2015-08-09 [Haru]
-				ShowWarning("Support for the SQL item database is deprecated and it will removed in future versions. "
-						"Please upgrade to the non-sql version as soon as possible. "
-						"Bug reports or pull requests concerning the SQL item database are no longer accepted.\n");
-				ShowInfo("Resuming in 10 seconds...\n");
-				HSleep(10);
-			}
-		}
-		else if(strcmpi(w1,"use_sql_mob_db")==0) {
-			map->db_use_sql_mob_db = config_switch(w2);
-			ShowStatus ("Using monster database as SQL: '%s'\n", w2);
-			if (map->db_use_sql_mob_db) {
-				// Deprecated 2015-08-09 [Haru]
-				ShowWarning("Support for the SQL monster database is deprecated and it will removed in future versions. "
-						"Please upgrade to the non-sql version as soon as possible. "
-						"Bug reports or pull requests concerning the SQL monster database are no longer accepted.\n");
-				ShowInfo("Resuming in 10 seconds...\n");
-				HSleep(10);
-			}
-		}
-		else if(strcmpi(w1,"use_sql_mob_skill_db")==0) {
-			map->db_use_sql_mob_skill_db = config_switch(w2);
-			ShowStatus ("Using monster skill database as SQL: '%s'\n", w2);
-			if (map->db_use_sql_mob_skill_db) {
-				// Deprecated 2015-08-09 [Haru]
-				ShowWarning("Support for the SQL monster skill database is deprecated and it will removed in future versions. "
-						"Please upgrade to the non-sql version as soon as possible. "
-						"Bug reports or pull requests concerning the SQL monster skill database are no longer accepted.\n");
-				ShowInfo("Resuming in 10 seconds...\n");
-				HSleep(10);
-			}
-		}
-		else if(strcmpi(w1,"autotrade_merchants_db")==0)
-			safestrncpy(map->autotrade_merchants_db, w2, sizeof(map->autotrade_merchants_db));
-		else if(strcmpi(w1,"autotrade_data_db")==0)
-			safestrncpy(map->autotrade_data_db, w2, sizeof(map->autotrade_data_db));
-		else if(strcmpi(w1,"npc_market_data_db")==0)
-			safestrncpy(map->npc_market_data_db, w2, sizeof(map->npc_market_data_db));
-		/* sql log db */
-		else if(strcmpi(w1,"log_db_ip")==0)
-			safestrncpy(logs->db_ip, w2, sizeof(logs->db_ip));
-		else if(strcmpi(w1,"log_db_id")==0)
-			safestrncpy(logs->db_id, w2, sizeof(logs->db_id));
-		else if(strcmpi(w1,"log_db_pw")==0)
-			safestrncpy(logs->db_pw, w2, sizeof(logs->db_pw));
-		else if(strcmpi(w1,"log_db_port")==0)
-			logs->db_port = atoi(w2);
-		else if(strcmpi(w1,"log_db_db")==0)
-			safestrncpy(logs->db_name, w2, sizeof(logs->db_name));
-		/* mapreg */
-		else if( mapreg->config_read(w1,w2) )
-			continue;
-		/* import */
-		else if(strcmpi(w1,"import")==0)
-			map->inter_config_read(w2);
+
+	if (libconfig->setting_lookup_bool(setting, "use_sql_item", &map->db_use_sql_item_db) == CONFIG_TRUE && map->db_use_sql_item_db == true) {
+		ShowStatus("Using item database as SQL: '%s'\n", map->item_db_db);
+		// Deprecated 2015-08-09 [Haru]
+		ShowWarning("Support for the SQL item database is deprecated and it will removed in future versions. "
+		            "Please upgrade to the non-sql version as soon as possible. "
+		            "Bug reports or pull requests concerning the SQL item database are no longer accepted.\n");
+		ShowInfo("Resuming in 10 seconds...\n");
+		HSleep(10);
+	}
+
+	if (libconfig->setting_lookup_bool(setting, "use_sql_mob_db", &map->db_use_sql_mob_db) == CONFIG_TRUE && map->db_use_sql_mob_db == true) {
+		ShowStatus("Using monster database as SQL: '%s'\n", map->mob_db_db);
+		// Deprecated 2015-08-09 [Haru]
+		ShowWarning("Support for the SQL monster database is deprecated and it will removed in future versions. "
+		            "Please upgrade to the non-sql version as soon as possible. "
+		            "Bug reports or pull requests concerning the SQL monster database are no longer accepted.\n");
+		ShowInfo("Resuming in 10 seconds...\n");
+		HSleep(10);
+	}
+
+	if (libconfig->setting_lookup_bool(setting, "use_sql_mob_skill_db", &map->db_use_sql_mob_skill_db) == CONFIG_TRUE && map->db_use_sql_mob_skill_db == true) {
+		ShowStatus("Using monster skill database as SQL: '%s'\n", map->mob_skill_db_db);
+		// Deprecated 2015-08-09 [Haru]
+		ShowWarning("Support for the SQL monster skill database is deprecated and it will removed in future versions. "
+		            "Please upgrade to the non-sql version as soon as possible. "
+		            "Bug reports or pull requests concerning the SQL monster skill database are no longer accepted.\n");
+		ShowInfo("Resuming in 10 seconds...\n");
+		HSleep(10);
+	}
+
+	map->inter_config_read_database_names(cfgName, &config, imported);
+	map->inter_config_read_connection(cfgName, &config, imported);
+
+	// TODO HPM->parseConf(w1, w2, HPCT_MAP_INTER);
+
+	// import should overwrite any previous configuration, so it should be called last
+	if (libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE) {
+		if (!strcmp(import, cfgName) || !strcmp(import, map->INTER_CONF_NAME))
+			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
 		else
-			HPM->parseConf(w1, w2, HPCT_MAP_INTER);
+			map->inter_config_read(import, true);
 	}
-	fclose(fp);
 
-	return 0;
+	libconfig->destroy(&config);
+	return true;
+}
+
+/**
+ * Reads the 'inter_configuration.log.sql_connection' config entry and initializes required variables.
+ *
+ * @param cfgName  Path to configuration file (used in error and warning messages).
+ * @param config   The current config being parsed.
+ * @param imported Whether the current config is from an imported file.
+ *
+ * @retval false in case of error.
+ */
+bool inter_config_read_connection(const char *cfgName, config_t *config, bool imported)
+{
+	config_setting_t *setting;
+	nullpo_retr(false, cfgName);
+	nullpo_retr(false, config);
+
+	if (!(setting = libconfig->lookup(config, "inter_configuration.log.sql_connection")) ) {
+		if (!imported) ShowError("inter_config_read: inter_configuration.log.sql_connection was not found in %s!\n", cfgName);
+		return false;
+	}
+	libconfig->setting_lookup_int(setting, "port", &logs->db_port);
+	libconfig->setting_lookup_mutable_string(setting, "db_hostname", logs->db_ip, sizeof(logs->db_ip));
+	libconfig->setting_lookup_mutable_string(setting, "db_username", logs->db_id, sizeof(logs->db_id));
+	libconfig->setting_lookup_mutable_string(setting, "db_password", logs->db_pw, sizeof(logs->db_pw));
+	libconfig->setting_lookup_mutable_string(setting, "db_database", logs->db_name, sizeof(logs->db_name));
+
+	return true;
+}
+
+/**
+ * Reads the 'inter_configuration.database_names' config entry and initializes required variables.
+ *
+ * @param cfgName  Path to configuration file (used in error and warning messages).
+ * @param config   The current config being parsed.
+ * @param imported Whether the current config is from an imported file.
+ *
+ * @retval false in case of error.
+ */
+bool inter_config_read_database_names(const char *cfgName, config_t *config, bool imported)
+{
+	config_setting_t *setting;
+	nullpo_retr(false, cfgName);
+	nullpo_retr(false, config);
+
+	if (!(setting = libconfig->lookup(config, "inter_configuration.database_names"))) {
+		if (!imported) ShowError("inter_config_read: inter_configuration.database_names was not found in %s!\n", cfgName);
+		return false;
+	}
+
+	libconfig->setting_lookup_mutable_string(setting, "item_db_db", map->item_db_db, sizeof(map->item_db_db));
+	libconfig->setting_lookup_mutable_string(setting, "item_db2_db", map->item_db2_db, sizeof(map->item_db2_db));
+	libconfig->setting_lookup_mutable_string(setting, "mob_db_db", map->mob_db_db, sizeof(map->mob_db_db));
+	libconfig->setting_lookup_mutable_string(setting, "mob_db2_db", map->mob_db2_db, sizeof(map->mob_db2_db));
+	libconfig->setting_lookup_mutable_string(setting, "mob_skill_db_db", map->mob_skill_db_db, sizeof(map->mob_skill_db_db));
+	libconfig->setting_lookup_mutable_string(setting, "mob_skill_db2_db", map->mob_skill_db2_db, sizeof(map->mob_skill_db2_db));
+	libconfig->setting_lookup_mutable_string(setting, "autotrade_merchants_db", map->autotrade_merchants_db, sizeof(map->autotrade_merchants_db));
+	libconfig->setting_lookup_mutable_string(setting, "autotrade_data_db", map->autotrade_data_db, sizeof(map->autotrade_data_db));
+	libconfig->setting_lookup_mutable_string(setting, "npc_market_data_db", map->npc_market_data_db, sizeof(map->npc_market_data_db));
+	mapreg->config_read(cfgName, setting, imported);
+
+	if (!(setting = libconfig->lookup(config, "inter_configuration.database_names.registry"))) {
+		if (!imported) ShowError("inter_config_read: inter_configuration.database_names.registry was not found in %s!\n", cfgName);
+		return false;
+	}
+	return true;
 }
 
 /*=======================================
@@ -5841,7 +5870,7 @@ int do_init(int argc, char *argv[])
 	
 	map_load_defaults();
 
-	map->INTER_CONF_NAME         = aStrdup("conf/inter-server.conf");
+	map->INTER_CONF_NAME         = aStrdup("conf/common/inter-server.conf");
 	map->LOG_CONF_NAME           = aStrdup("conf/logs.conf");
 	map->MAP_CONF_NAME           = aStrdup("conf/map-server.conf");
 	map->BATTLE_CONF_FILENAME    = aStrdup("conf/battle.conf");
@@ -5890,7 +5919,7 @@ int do_init(int argc, char *argv[])
 
 		battle->config_read(map->BATTLE_CONF_FILENAME);
 		atcommand->msg_read(map->MSG_CONF_NAME, false);
-		map->inter_config_read(map->INTER_CONF_NAME);
+		map->inter_config_read(map->INTER_CONF_NAME, false);
 		logs->config_read(map->LOG_CONF_NAME);
 	}
 	script->config_read(map->SCRIPT_CONF_NAME);
@@ -6060,7 +6089,7 @@ void map_defaults(void) {
 	sprintf(map->mob_skill_db_db, "mob_skill_db");
 	sprintf(map->mob_skill_db2_db, "mob_skill_db2");
 	
-	map->INTER_CONF_NAME="conf/inter-server.conf";
+	map->INTER_CONF_NAME="conf/common/inter-server.conf";
 	map->LOG_CONF_NAME="conf/logs.conf";
 	map->MAP_CONF_NAME = "conf/map-server.conf";
 	map->BATTLE_CONF_FILENAME = "conf/battle.conf";
@@ -6269,6 +6298,8 @@ void map_defaults(void) {
 	map->config_read_sub = map_config_read_sub;
 	map->reloadnpc_sub = map_reloadnpc_sub;
 	map->inter_config_read = inter_config_read;
+	map->inter_config_read_database_names = inter_config_read_database_names;
+	map->inter_config_read_connection = inter_config_read_connection;
 	map->sql_init = map_sql_init;
 	map->sql_close = map_sql_close;
 	map->zone_mf_cache = map_zone_mf_cache;

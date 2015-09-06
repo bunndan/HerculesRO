@@ -12,6 +12,7 @@
 #include "common/db.h"
 #include "common/ers.h"
 #include "common/malloc.h"
+#include "common/nullpo.h"
 #include "common/showmsg.h"
 #include "common/sql.h"
 #include "common/strlib.h"
@@ -326,11 +327,18 @@ void mapreg_init(void) {
 
 /**
  * Loads the mapreg configuration file.
+ *
+ * @param cfgName  Path to configuration file (used in error and warning messages).
+ * @param config   The current config being parsed.
+ * @param imported Whether the current config is from an imported file.
+ *
+ * @retval false in case of error.
  */
-bool mapreg_config_read(const char* w1, const char* w2) {
-	if(!strcmpi(w1, "mapreg_db"))
-		safestrncpy(mapreg->table, w2, sizeof(mapreg->table));
-	else
+bool mapreg_config_read(const char *cfgName, config_setting_t *config, bool imported)
+{
+	nullpo_retr(false, config);
+
+	if (libconfig->setting_lookup_mutable_string(config, "mapreg_db", mapreg->table, sizeof(mapreg->table)) != CONFIG_TRUE)
 		return false;
 
 	return true;

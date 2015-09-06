@@ -20,6 +20,7 @@
 #include "char/int_storage.h"
 #include "char/mapif.h"
 #include "common/cbasetypes.h"
+#include "common/conf.h"
 #include "common/db.h"
 #include "common/malloc.h"
 #include "common/mmo.h"
@@ -45,7 +46,7 @@ char char_server_pw[100] = "ragnarok";
 char char_server_db[32] = "ragnarok";
 char default_codepage[32] = ""; //Feature by irmin.
 
-unsigned int party_share_level = 10;
+uint32 party_share_level = 10;
 
 // recv. packet list
 int inter_recv_packet_length[] = {
@@ -771,50 +772,72 @@ int inter_accreg_fromsql(int account_id,int char_id, int fd, int type)
 	return 1;
 }
 
-/*==========================================
- * read config file
- *------------------------------------------*/
-static int inter_config_read(const char* cfgName)
+/**
+ * Reads the 'char_configuration.sql_connection' config entry and initializes required variables.
+ *
+ * @param cfgName  Path to configuration file (used in error and warning messages).
+ * @param config   The current config being parsed.
+ * @param imported Whether the current config is from an imported file.
+ *
+ * @retval false in case of error.
+ */
+bool inter_config_read_connection(const char* cfgName, config_t *config, bool imported)
 {
-	char line[1024], w1[1024], w2[1024];
-	FILE* fp;
+	config_setting_t *setting;
+	nullpo_retr(false, cfgName);
+	nullpo_retr(false, config);
 
-	nullpo_retr(1, cfgName);
-	fp = fopen(cfgName, "r");
-	if(fp == NULL) {
-		ShowError("File not found: %s\n", cfgName);
-		return 1;
+	if (!(setting = libconfig->lookup(config, "char_configuration.sql_connection"))) {
+		if (!imported) ShowError("char_config_read: char_configuration.sql_connection was not found in %s!\n", cfgName);
+		ShowWarning("inter_config_read_connection: Defaulting sql_connection...");
+		return false;
+	}
+	libconfig->setting_lookup_int(setting, "db_port", &char_server_port);
+	libconfig->setting_lookup_mutable_string(setting, "db_hostname", char_server_ip, sizeof(char_server_ip));
+	libconfig->setting_lookup_mutable_string(setting, "db_username", char_server_id, sizeof(char_server_id));
+	libconfig->setting_lookup_mutable_string(setting, "db_password", char_server_pw, sizeof(char_server_pw));
+	libconfig->setting_lookup_mutable_string(setting, "db_database", char_server_db, sizeof(char_server_db));
+	libconfig->setting_lookup_mutable_string(setting, "default_codepage", default_codepage, sizeof(default_codepage));
+	return true;
+}
+
+/**
+ * Reads the 'inter_configuration' config file and initializes required variables.
+ *
+ * @param cfgName  Path to configuration file
+ * @param imported Whether the current config is from an imported file.
+ *
+ * @retval false in case of error.
+ */
+bool inter_config_read(const char *cfgName, bool imported)
+{
+	config_t config;
+	config_setting_t *setting;
+	const char *import;
+	nullpo_retr(false, cfgName);
+
+	if (libconfig->read_file(&config, cfgName))
+		return false;
+
+	if (!(setting = libconfig->lookup(&config, "inter_configuration"))) {
+		if (!imported) ShowError("inter_config_read: inter_configuration was not found in %s!\n", cfgName);
+		return false;
+	}
+	libconfig->setting_lookup_uint32(setting, "party_share_level", &party_share_level);
+	libconfig->setting_lookup_bool_real(setting, "log_inter", &log_inter);
+
+	ShowInfo("Done reading %s.\n", cfgName);
+
+	// import should overwrite any previous configuration, so it should be called last
+	if (libconfig->lookup_string(&config, "import", &import) == CONFIG_TRUE) {
+		if (!strcmp(import, cfgName) || !strcmp(import, chr->INTER_CONF_NAME))
+			ShowWarning("inter_config_read: Loop detected! Skipping 'import'...\n");
+		else
+			inter->config_read(import, true);
 	}
 
-	while (fgets(line, sizeof(line), fp)) {
-		int i = sscanf(line, "%1023[^:]: %1023[^\r\n]", w1, w2);
-		if(i != 2)
-			continue;
-
-		if(!strcmpi(w1,"char_server_ip")) {
-			safestrncpy(char_server_ip, w2, sizeof(char_server_ip));
-		} else if(!strcmpi(w1,"char_server_port")) {
-			char_server_port = atoi(w2);
-		} else if(!strcmpi(w1,"char_server_id")) {
-			safestrncpy(char_server_id, w2, sizeof(char_server_id));
-		} else if(!strcmpi(w1,"char_server_pw")) {
-			safestrncpy(char_server_pw, w2, sizeof(char_server_pw));
-		} else if(!strcmpi(w1,"char_server_db")) {
-			safestrncpy(char_server_db, w2, sizeof(char_server_db));
-		} else if(!strcmpi(w1,"default_codepage")) {
-			safestrncpy(default_codepage, w2, sizeof(default_codepage));
-		} else if(!strcmpi(w1,"party_share_level"))
-			party_share_level = atoi(w2);
-		else if(!strcmpi(w1,"log_inter"))
-			log_inter = atoi(w2);
-		else if(!strcmpi(w1,"import"))
-			inter->config_read(w2);
-	}
-	fclose(fp);
-
-	ShowInfo ("Done reading %s.\n", cfgName);
-
-	return 0;
+	libconfig->destroy(&config);
+	return true;
 }
 
 /**
@@ -859,9 +882,7 @@ int inter_log(char* fmt, ...)
 // initialize
 int inter_init_sql(const char *file)
 {
-	//int i;
-
-	inter->config_read(file);
+	inter->config_read(file, false);
 
 	//DB connection initialized
 	inter->sql_handle = SQL->Malloc();
@@ -1363,4 +1384,5 @@ void inter_defaults(void)
 	inter->check_length = inter_check_length;
 	inter->parse_frommap = inter_parse_frommap;
 	inter->final = inter_final;
+	inter->config_read_connection = inter_config_read_connection;
 }
