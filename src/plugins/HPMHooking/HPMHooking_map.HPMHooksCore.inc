@@ -3149,6 +3149,10 @@ struct {
 	struct HPMHookPoint *HP_map_reloadnpc_sub_post;
 	struct HPMHookPoint *HP_map_inter_config_read_pre;
 	struct HPMHookPoint *HP_map_inter_config_read_post;
+	struct HPMHookPoint *HP_map_inter_config_read_database_names_pre;
+	struct HPMHookPoint *HP_map_inter_config_read_database_names_post;
+	struct HPMHookPoint *HP_map_inter_config_read_connection_pre;
+	struct HPMHookPoint *HP_map_inter_config_read_connection_post;
 	struct HPMHookPoint *HP_map_sql_init_pre;
 	struct HPMHookPoint *HP_map_sql_init_post;
 	struct HPMHookPoint *HP_map_sql_close_pre;
@@ -8882,6 +8886,10 @@ struct {
 	int HP_map_reloadnpc_sub_post;
 	int HP_map_inter_config_read_pre;
 	int HP_map_inter_config_read_post;
+	int HP_map_inter_config_read_database_names_pre;
+	int HP_map_inter_config_read_database_names_post;
+	int HP_map_inter_config_read_connection_pre;
+	int HP_map_inter_config_read_connection_post;
 	int HP_map_sql_init_pre;
 	int HP_map_sql_init_post;
 	int HP_map_sql_close_pre;

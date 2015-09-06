@@ -4224,31 +4224,113 @@ int HP_chr_online_data_cleanup(int tid, int64 tick, int id, intptr_t data) {
 	}
 	return retVal___;
 }
-void HP_chr_sql_config_read(const char *cfgName) {
+bool HP_chr_sql_config_read(const char *cfgName, bool imported) {
 	int hIndex = 0;
+	bool retVal___ = false;
 	if( HPMHooks.count.HP_chr_sql_config_read_pre ) {
-		void (*preHookFunc) (const char *cfgName);
+		bool (*preHookFunc) (const char *cfgName, bool *imported);
 		*HPMforce_return = false;
 		for(hIndex = 0; hIndex < HPMHooks.count.HP_chr_sql_config_read_pre; hIndex++ ) {
 			preHookFunc = HPMHooks.list.HP_chr_sql_config_read_pre[hIndex].func;
-			preHookFunc(cfgName);
+			retVal___ = preHookFunc(cfgName, &imported);
 		}
 		if( *HPMforce_return ) {
 			*HPMforce_return = false;
-			return;
+			return retVal___;
 		}
 	}
 	{
-		HPMHooks.source.chr.sql_config_read(cfgName);
+		retVal___ = HPMHooks.source.chr.sql_config_read(cfgName, imported);
 	}
 	if( HPMHooks.count.HP_chr_sql_config_read_post ) {
-		void (*postHookFunc) (const char *cfgName);
+		bool (*postHookFunc) (bool retVal___, const char *cfgName, bool *imported);
 		for(hIndex = 0; hIndex < HPMHooks.count.HP_chr_sql_config_read_post; hIndex++ ) {
 			postHookFunc = HPMHooks.list.HP_chr_sql_config_read_post[hIndex].func;
-			postHookFunc(cfgName);
+			retVal___ = postHookFunc(retVal___, cfgName, &imported);
 		}
 	}
-	return;
+	return retVal___;
+}
+bool HP_chr_sql_config_read_registry(const char *cfgName, config_t *config, bool imported) {
+	int hIndex = 0;
+	bool retVal___ = false;
+	if( HPMHooks.count.HP_chr_sql_config_read_registry_pre ) {
+		bool (*preHookFunc) (const char *cfgName, config_t *config, bool *imported);
+		*HPMforce_return = false;
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_chr_sql_config_read_registry_pre; hIndex++ ) {
+			preHookFunc = HPMHooks.list.HP_chr_sql_config_read_registry_pre[hIndex].func;
+			retVal___ = preHookFunc(cfgName, config, &imported);
+		}
+		if( *HPMforce_return ) {
+			*HPMforce_return = false;
+			return retVal___;
+		}
+	}
+	{
+		retVal___ = HPMHooks.source.chr.sql_config_read_registry(cfgName, config, imported);
+	}
+	if( HPMHooks.count.HP_chr_sql_config_read_registry_post ) {
+		bool (*postHookFunc) (bool retVal___, const char *cfgName, config_t *config, bool *imported);
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_chr_sql_config_read_registry_post; hIndex++ ) {
+			postHookFunc = HPMHooks.list.HP_chr_sql_config_read_registry_post[hIndex].func;
+			retVal___ = postHookFunc(retVal___, cfgName, config, &imported);
+		}
+	}
+	return retVal___;
+}
+bool HP_chr_sql_config_read_pc(const char *cfgName, config_t *config, bool imported) {
+	int hIndex = 0;
+	bool retVal___ = false;
+	if( HPMHooks.count.HP_chr_sql_config_read_pc_pre ) {
+		bool (*preHookFunc) (const char *cfgName, config_t *config, bool *imported);
+		*HPMforce_return = false;
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_chr_sql_config_read_pc_pre; hIndex++ ) {
+			preHookFunc = HPMHooks.list.HP_chr_sql_config_read_pc_pre[hIndex].func;
+			retVal___ = preHookFunc(cfgName, config, &imported);
+		}
+		if( *HPMforce_return ) {
+			*HPMforce_return = false;
+			return retVal___;
+		}
+	}
+	{
+		retVal___ = HPMHooks.source.chr.sql_config_read_pc(cfgName, config, imported);
+	}
+	if( HPMHooks.count.HP_chr_sql_config_read_pc_post ) {
+		bool (*postHookFunc) (bool retVal___, const char *cfgName, config_t *config, bool *imported);
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_chr_sql_config_read_pc_post; hIndex++ ) {
+			postHookFunc = HPMHooks.list.HP_chr_sql_config_read_pc_post[hIndex].func;
+			retVal___ = postHookFunc(retVal___, cfgName, config, &imported);
+		}
+	}
+	return retVal___;
+}
+bool HP_chr_sql_config_read_guild(const char *cfgName, config_t *config, bool imported) {
+	int hIndex = 0;
+	bool retVal___ = false;
+	if( HPMHooks.count.HP_chr_sql_config_read_guild_pre ) {
+		bool (*preHookFunc) (const char *cfgName, config_t *config, bool *imported);
+		*HPMforce_return = false;
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_chr_sql_config_read_guild_pre; hIndex++ ) {
+			preHookFunc = HPMHooks.list.HP_chr_sql_config_read_guild_pre[hIndex].func;
+			retVal___ = preHookFunc(cfgName, config, &imported);
+		}
+		if( *HPMforce_return ) {
+			*HPMforce_return = false;
+			return retVal___;
+		}
+	}
+	{
+		retVal___ = HPMHooks.source.chr.sql_config_read_guild(cfgName, config, imported);
+	}
+	if( HPMHooks.count.HP_chr_sql_config_read_guild_post ) {
+		bool (*postHookFunc) (bool retVal___, const char *cfgName, config_t *config, bool *imported);
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_chr_sql_config_read_guild_post; hIndex++ ) {
+			postHookFunc = HPMHooks.list.HP_chr_sql_config_read_guild_post[hIndex].func;
+			retVal___ = postHookFunc(retVal___, cfgName, config, &imported);
+		}
+	}
+	return retVal___;
 }
 bool HP_chr_config_read(const char *cfgName, bool imported) {
 	int hIndex = 0;
@@ -6661,33 +6743,6 @@ int HP_inter_accreg_fromsql(int account_id, int char_id, int fd, int type) {
 	}
 	return retVal___;
 }
-int HP_inter_config_read(const char *cfgName) {
-	int hIndex = 0;
-	int retVal___ = 0;
-	if( HPMHooks.count.HP_inter_config_read_pre ) {
-		int (*preHookFunc) (const char *cfgName);
-		*HPMforce_return = false;
-		for(hIndex = 0; hIndex < HPMHooks.count.HP_inter_config_read_pre; hIndex++ ) {
-			preHookFunc = HPMHooks.list.HP_inter_config_read_pre[hIndex].func;
-			retVal___ = preHookFunc(cfgName);
-		}
-		if( *HPMforce_return ) {
-			*HPMforce_return = false;
-			return retVal___;
-		}
-	}
-	{
-		retVal___ = HPMHooks.source.inter.config_read(cfgName);
-	}
-	if( HPMHooks.count.HP_inter_config_read_post ) {
-		int (*postHookFunc) (int retVal___, const char *cfgName);
-		for(hIndex = 0; hIndex < HPMHooks.count.HP_inter_config_read_post; hIndex++ ) {
-			postHookFunc = HPMHooks.list.HP_inter_config_read_post[hIndex].func;
-			retVal___ = postHookFunc(retVal___, cfgName);
-		}
-	}
-	return retVal___;
-}
 int HP_inter_vlog(char *fmt, va_list ap) {
 	int hIndex = 0;
 	int retVal___ = 0;
@@ -6914,6 +6969,60 @@ void HP_inter_final(void) {
 		}
 	}
 	return;
+}
+bool HP_inter_config_read(const char *cfgName, bool imported) {
+	int hIndex = 0;
+	bool retVal___ = false;
+	if( HPMHooks.count.HP_inter_config_read_pre ) {
+		bool (*preHookFunc) (const char *cfgName, bool *imported);
+		*HPMforce_return = false;
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_inter_config_read_pre; hIndex++ ) {
+			preHookFunc = HPMHooks.list.HP_inter_config_read_pre[hIndex].func;
+			retVal___ = preHookFunc(cfgName, &imported);
+		}
+		if( *HPMforce_return ) {
+			*HPMforce_return = false;
+			return retVal___;
+		}
+	}
+	{
+		retVal___ = HPMHooks.source.inter.config_read(cfgName, imported);
+	}
+	if( HPMHooks.count.HP_inter_config_read_post ) {
+		bool (*postHookFunc) (bool retVal___, const char *cfgName, bool *imported);
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_inter_config_read_post; hIndex++ ) {
+			postHookFunc = HPMHooks.list.HP_inter_config_read_post[hIndex].func;
+			retVal___ = postHookFunc(retVal___, cfgName, &imported);
+		}
+	}
+	return retVal___;
+}
+bool HP_inter_config_read_connection(const char *cfgName, config_t *config, bool imported) {
+	int hIndex = 0;
+	bool retVal___ = false;
+	if( HPMHooks.count.HP_inter_config_read_connection_pre ) {
+		bool (*preHookFunc) (const char *cfgName, config_t *config, bool *imported);
+		*HPMforce_return = false;
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_inter_config_read_connection_pre; hIndex++ ) {
+			preHookFunc = HPMHooks.list.HP_inter_config_read_connection_pre[hIndex].func;
+			retVal___ = preHookFunc(cfgName, config, &imported);
+		}
+		if( *HPMforce_return ) {
+			*HPMforce_return = false;
+			return retVal___;
+		}
+	}
+	{
+		retVal___ = HPMHooks.source.inter.config_read_connection(cfgName, config, imported);
+	}
+	if( HPMHooks.count.HP_inter_config_read_connection_post ) {
+		bool (*postHookFunc) (bool retVal___, const char *cfgName, config_t *config, bool *imported);
+		for(hIndex = 0; hIndex < HPMHooks.count.HP_inter_config_read_connection_post; hIndex++ ) {
+			postHookFunc = HPMHooks.list.HP_inter_config_read_connection_post[hIndex].func;
+			retVal___ = postHookFunc(retVal___, cfgName, config, &imported);
+		}
+	}
+	return retVal___;
 }
 /* inter_mail */
 int HP_inter_mail_sql_init(void) {
