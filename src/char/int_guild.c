@@ -68,7 +68,7 @@ int inter_guild_save_timer(int tid, int64 tick, int id, intptr_t data) {
 
 		if( g->save_flag == GS_REMOVE )
 		{// Nothing to save, guild is ready for removal.
-			if (save_log)
+			if (chr->save_log)
 				ShowInfo("Guild Unloaded (%d - %s)\n", g->guild_id, g->name);
 			db_remove(inter_guild->guild_db, key);
 		}
@@ -325,7 +325,7 @@ int inter_guild_tosql(struct guild *g,int flag)
 		}
 	}
 
-	if (save_log)
+	if (chr->save_log)
 		ShowInfo("Saved guild (%d - %s):%s\n",g->guild_id,g->name,t_info);
 	return 1;
 }
@@ -513,7 +513,7 @@ struct guild * inter_guild_fromsql(int guild_id)
 	idb_put(inter_guild->guild_db, guild_id, g); //Add to cache
 	g->save_flag |= GS_REMOVE; //But set it to be removed, in case it is not needed for long.
 
-	if (save_log)
+	if (chr->save_log)
 		ShowInfo("Guild loaded (%d - %s)\n", guild_id, g->name);
 
 	return g;
@@ -536,7 +536,7 @@ int inter_guild_castle_tosql(struct guild_castle *gc)
 
 	if (SQL_ERROR == SQL->QueryStr(inter->sql_handle, StrBuf->Value(&buf)))
 		Sql_ShowDebug(inter->sql_handle);
-	else if(save_log)
+	else if(chr->save_log)
 		ShowInfo("Saved guild castle (%d)\n", gc->castle_id);
 
 	StrBuf->Destroy(&buf);
@@ -588,7 +588,7 @@ struct guild_castle* inter_guild_castle_fromsql(int castle_id)
 
 	idb_put(inter_guild->castle_db, castle_id, gc);
 
-	if (save_log)
+	if (chr->save_log)
 		ShowInfo("Loaded guild castle (%d - guild %d)\n", castle_id, gc->guild_id);
 
 	return gc;

@@ -6,6 +6,7 @@
 #define CHAR_CHAR_H
 
 #include "common/hercules.h"
+#include "common/conf.h" // config_t
 #include "common/core.h" // CORE_ST_LAST
 #include "common/db.h"
 #include "common/mmo.h"
@@ -97,6 +98,8 @@ struct char_interface {
 	char *NET_CONF_NAME; ///< Network config filename
 	char *SQL_CONF_NAME;
 	char *INTER_CONF_NAME;
+
+	bool save_log; ///< show loading/saving messages
 
 	int (*waiting_disconnect) (int tid, int64 tick, int id, intptr_t data);
 	int (*delete_char_sql) (int char_id);
@@ -255,8 +258,20 @@ struct char_interface {
 	int (*online_data_cleanup_sub) (DBKey key, DBData *data, va_list ap);
 	int (*online_data_cleanup) (int tid, int64 tick, int id, intptr_t data);
 	void (*sql_config_read) (const char* cfgName);
-	void (*config_dispatch) (char *w1, char *w2);
-	int (*config_read) (const char* cfgName);
+
+	bool (*config_read) (const char *cfgName, bool imported);
+	bool (*config_read_database) (const char *cfgName, config_t *config, bool imported);
+	bool (*config_read_console) (const char *cfgName, config_t *config, bool imported);
+	bool (*config_read_player_fame) (const char *cfgName, config_t *config, bool imported);
+	bool (*config_read_player_deletion) (const char *cfgName, config_t *config, bool imported);
+	bool (*config_read_player_name) (const char *cfgName, config_t *config, bool imported);
+	void (*config_set_start_item) (config_setting_t *setting);
+	bool (*config_read_player_new) (const char *cfgName, config_t *config, bool imported);
+	bool (*config_read_player) (const char *cfgName, config_t *config, bool imported);
+	bool (*config_read_permission) (const char *cfgName, config_t *config, bool imported);
+	bool (*config_set_ip) (const char *type, const char *value, uint32 *out_ip, char *out_ip_str);
+	bool (*config_read_inter) (const char *cfgName, config_t *config, bool imported);
+	bool (*config_read_top) (const char *cfgName, config_t *config, bool imported);
 };
 
 #ifdef HERCULES_CORE
@@ -264,7 +279,6 @@ extern int char_name_option;
 extern char char_name_letters[];
 extern bool char_gm_read;
 extern int autosave_interval;
-extern int save_log;
 extern char db_path[];
 extern char char_db[256];
 extern char scdata_db[256];
@@ -304,7 +318,7 @@ extern int db_use_sql_mob_db;
 extern int db_use_sql_mob_skill_db;
 
 extern int guild_exp_rate;
-extern int log_inter;
+extern bool log_inter;
 
 void char_load_defaults();
 void char_defaults();

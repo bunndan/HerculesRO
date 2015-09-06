@@ -6,6 +6,7 @@
 #define CHAR_PINCODE_H
 
 #include "common/hercules.h"
+#include "common/conf.h"
 
 struct char_session_data;
 
@@ -39,7 +40,7 @@ struct pincode_interface {
 	void (*change) (int fd, struct char_session_data* sd);
 	int  (*compare) (int fd, struct char_session_data* sd, char* pin);
 	void (*check) (int fd, struct char_session_data* sd);
-	bool (*config_read) (char *w1, char *w2);
+	bool (*config_read) (const char *cfgName, config_t *config, bool imported);
 };
 
 #ifdef HERCULES_CORE
