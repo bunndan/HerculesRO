@@ -11,10 +11,10 @@
 //= 1.2 Optimized. [Euphy]
 //============================================================
 
-prontera,165,178,8	script	Old Woman	8_F_GRANDMOTHER,{
+prontera,162,165,4	script	Cursed Fairy	4_F_FAIRY1,{
 
 	setarray .@items[0],714,25,1061,100,1095,200,618,10,1551,2,1614,1,727,20;
-	set .@n$,"[Old Woman]";
+	set .@n$,"[Cursed Fairy]";
 
 	mes .@n$;
 	if(BerzQuest == 1) {

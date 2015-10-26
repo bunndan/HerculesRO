@@ -468,51 +468,52 @@ S8: Go("turbo_room",99,114);
 // --------------------------------------------------
 //	Duplicates:
 // --------------------------------------------------
-alb2trea,57,70,6	duplicate(Warper)	Warper#tre	4_F_VALKYRIE
-alberta,28,240,4	duplicate(Warper)	Warper#alb	4_F_VALKYRIE
-aldebaran,145,118,4	duplicate(Warper)	Warper#alde	4_F_VALKYRIE
-amatsu,203,87,4	duplicate(Warper)	Warper#ama	4_F_VALKYRIE
-ayothaya,209,169,6	duplicate(Warper)	Warper#ayo	4_F_VALKYRIE
-comodo,194,158,4	duplicate(Warper)	Warper#com	4_F_VALKYRIE
-einbech,59,38,6	duplicate(Warper)	Warper#einbe	4_F_VALKYRIE
-einbroch,69,202,4	duplicate(Warper)	Warper#einbr	4_F_VALKYRIE
-gef_fild10,71,339,4	duplicate(Warper)	Warper#orc	4_F_VALKYRIE
-geffen,124,72,4	duplicate(Warper)	Warper#gef	4_F_VALKYRIE
-glast_01,372,308,4	duplicate(Warper)	Warper#glh	4_F_VALKYRIE
-gonryun,162,122,4	duplicate(Warper)	Warper#gon	4_F_VALKYRIE
-hugel,101,151,4	duplicate(Warper)	Warper#hug	4_F_VALKYRIE
-izlu2dun,110,92,4	duplicate(Warper)	Warper#izd	4_F_VALKYRIE
-izlude,134,150,4	duplicate(Warper)	Warper#izl	4_F_VALKYRIE	//Pre-RE: (132,120)
-jawaii,253,138,4	duplicate(Warper)	Warper#jaw	4_F_VALKYRIE
-lighthalzen,162,102,4	duplicate(Warper)	Warper#lhz	4_F_VALKYRIE
-louyang,208,103,6	duplicate(Warper)	Warper#lou	4_F_VALKYRIE
-manuk,274,146,6	duplicate(Warper)	Warper#man	4_F_VALKYRIE
-mid_camp,216,288,4	duplicate(Warper)	Warper#mid	4_F_VALKYRIE
-mjolnir_02,85,364,4	duplicate(Warper)	Warper#mjo	4_F_VALKYRIE
-moc_ruins,64,164,4	duplicate(Warper)	Warper#moc	4_F_VALKYRIE
-morocc,159,97,4	duplicate(Warper)	Warper#mor	4_F_VALKYRIE
-moscovia,229,191,4	duplicate(Warper)	Warper#mos	4_F_VALKYRIE
-nameless_n,259,213,4	duplicate(Warper)	Warper#nam	4_F_VALKYRIE
-niflheim,205,179,4	duplicate(Warper)	Warper#nif	4_F_VALKYRIE
-pay_arche,42,134,4	duplicate(Warper)	Warper#arc	4_F_VALKYRIE
-payon,182,108,4	duplicate(Warper)	Warper#pay	4_F_VALKYRIE
-prontera,159,192,4	duplicate(Warper)	Warper#prt	4_F_VALKYRIE
-prt_fild05,279,223,6	duplicate(Warper)	Warper#cul	4_F_VALKYRIE
-rachel,135,116,4	duplicate(Warper)	Warper#rac	4_F_VALKYRIE
-splendide,205,153,4	duplicate(Warper)	Warper#spl	4_F_VALKYRIE
-thor_camp,249,76,4	duplicate(Warper)	Warper#thor	4_F_VALKYRIE
-umbala,106,150,3	duplicate(Warper)	Warper#umb	4_F_VALKYRIE
-veins,214,123,4	duplicate(Warper)	Warper#ve	4_F_VALKYRIE
-xmas,150,136,6	duplicate(Warper)	Warper#xmas	4_F_VALKYRIE
-yuno,162,47,4	duplicate(Warper)	Warper#yuno	4_F_VALKYRIE
+alb2trea,57,70,6	duplicate(Warper)	Warper#tre	4_LOLI_RURI
+alberta,28,240,4	duplicate(Warper)	Warper#alb	4_LOLI_RURI
+aldebaran,145,118,4	duplicate(Warper)	Warper#alde	4_LOLI_RURI
+amatsu,203,87,4	duplicate(Warper)	Warper#ama	4_LOLI_RURI
+ayothaya,209,169,6	duplicate(Warper)	Warper#ayo	4_LOLI_RURI
+comodo,194,158,4	duplicate(Warper)	Warper#com	4_LOLI_RURI
+einbech,59,38,6	duplicate(Warper)	Warper#einbe	4_LOLI_RURI
+einbroch,69,202,4	duplicate(Warper)	Warper#einbr	4_LOLI_RURI
+gef_fild10,71,339,4	duplicate(Warper)	Warper#orc	4_LOLI_RURI
+geffen,124,72,4	duplicate(Warper)	Warper#gef	4_LOLI_RURI
+glast_01,372,308,4	duplicate(Warper)	Warper#glh	4_LOLI_RURI
+gonryun,165,122,4	duplicate(Warper)	Warper#gon	4_LOLI_RURI
+hugel,101,151,4	duplicate(Warper)	Warper#hug	4_LOLI_RURI
+izlu2dun,110,92,4	duplicate(Warper)	Warper#izd	4_LOLI_RURI
+izlude,134,150,4	duplicate(Warper)	Warper#izl	4_LOLI_RURI	//Pre-RE: (132,120)
+jawaii,253,138,4	duplicate(Warper)	Warper#jaw	4_LOLI_RURI
+lighthalzen,162,102,4	duplicate(Warper)	Warper#lhz	4_LOLI_RURI
+louyang,208,103,6	duplicate(Warper)	Warper#lou	4_LOLI_RURI
+manuk,274,146,6	duplicate(Warper)	Warper#man	4_LOLI_RURI
+mid_camp,216,288,4	duplicate(Warper)	Warper#mid	4_LOLI_RURI
+mjolnir_02,85,364,4	duplicate(Warper)	Warper#mjo	4_LOLI_RURI
+moc_ruins,64,164,4	duplicate(Warper)	Warper#moc	4_LOLI_RURI
+morocc,159,97,4	duplicate(Warper)	Warper#mor	4_LOLI_RURI
+moscovia,229,191,4	duplicate(Warper)	Warper#mos	4_LOLI_RURI
+nameless_n,259,213,4	duplicate(Warper)	Warper#nam	4_LOLI_RURI
+niflheim,206,179,4	duplicate(Warper)	Warper#nif	4_LOLI_RURI
+pay_arche,42,134,4	duplicate(Warper)	Warper#arc	4_LOLI_RURI
+payon,182,108,4	duplicate(Warper)	Warper#pay	4_LOLI_RURI
+prontera,158,192,4	duplicate(Warper)	Warper#prt	4_LOLI_RURI
+prt_fild05,279,223,6	duplicate(Warper)	Warper#cul	4_LOLI_RURI
+rachel,135,116,4	duplicate(Warper)	Warper#rac	4_LOLI_RURI
+splendide,205,153,4	duplicate(Warper)	Warper#spl	4_LOLI_RURI
+thor_camp,249,76,4	duplicate(Warper)	Warper#thor	4_LOLI_RURI
+umbala,106,150,3	duplicate(Warper)	Warper#umb	4_LOLI_RURI
+veins,214,123,4	duplicate(Warper)	Warper#ve	4_LOLI_RURI
+xmas,150,136,6	duplicate(Warper)	Warper#xmas	4_LOLI_RURI
+yuno,162,47,4	duplicate(Warper)	Warper#yuno	4_LOLI_RURI
+new_1-1,56,114,4	duplicate(Warper)	Warper#yuno	4_LOLI_RURI
 
 // --------------------------------------------------
 //	Duplicates (Renewal):
 // --------------------------------------------------
-brasilis,201,222,4	duplicate(Warper)	Warper#bra	4_F_VALKYRIE
-dewata,204,186,6	duplicate(Warper)	Warper#dew	4_F_VALKYRIE
-dicastes01,194,194,6	duplicate(Warper)	Warper#dic	4_F_VALKYRIE
-ecl_in01,51,60,4	duplicate(Warper)	Warper#ecl	4_F_VALKYRIE
-malangdo,134,117,6	duplicate(Warper)	Warper#mal	4_F_VALKYRIE
-malaya,231,204,4	duplicate(Warper)	Warper#ma	4_F_VALKYRIE
-mora,57,152,4	duplicate(Warper)	Warper#mora	4_F_VALKYRIE
+brasilis,201,222,4	duplicate(Warper)	Warper#bra	4_LOLI_RURI
+dewata,204,186,6	duplicate(Warper)	Warper#dew	4_LOLI_RURI
+dicastes01,194,194,6	duplicate(Warper)	Warper#dic	4_LOLI_RURI
+ecl_in01,51,60,4	duplicate(Warper)	Warper#ecl	4_LOLI_RURI
+malangdo,134,117,6	duplicate(Warper)	Warper#mal	4_LOLI_RURI
+malaya,231,204,4	duplicate(Warper)	Warper#ma	4_LOLI_RURI
+mora,57,152,4	duplicate(Warper)	Warper#mora	4_LOLI_RURI

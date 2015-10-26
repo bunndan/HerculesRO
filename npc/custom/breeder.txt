@@ -10,7 +10,7 @@
 //= Fixed 'close' issues. [Joseph]
 //============================================================
 
-prontera,124,201,1	script	Universal Rental NPC	4_F_JOB_BLACKSMITH,{
+prontera,148,195,5	script	Universal Rental NPC	4_F_JOB_BLACKSMITH,{
 	/* TODO: This can be optimized with just setmount(), as it can
 		 auto-detect the proper mount for the class/skills. */
 	if (hascashmount()) {

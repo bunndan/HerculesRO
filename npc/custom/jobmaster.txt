@@ -16,7 +16,7 @@
 //      Baby Novice job change. [Haru]
 //============================================================
 
-prontera,153,193,6	script	Job Master	2_F_MAGICMASTER,{
+prontera,157,187,4	script	Job Master	4_F_OPERATION,{
 	function Job_Menu; function A_An;
 
 	mes "[Job Master]";

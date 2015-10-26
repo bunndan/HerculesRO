@@ -11,12 +11,18 @@
 //= Account, Character, or Guild
 //============================================================
 
-prontera,144,174,4	script	Bound Items	4_M_JP_MID,{
+prontera,162,153,4	script	Bound Items	4_F_SARAH,{
+	set .@n$, "[Bound Items]";
 
+	mes .@n$;
 	mes "I can bind your items to your account, guild, or character"+((.bindprice)?" for a ^0000FF"+.bindprice+"^000000 zeny fee":"")+".";
 	next;
+	
+	mes .@n$;
 	mes "With this, you can rest assured your items are safe.";
 	next;
+	
+	mes .@n$;
 	mes "What would you like to do?";
 	if(select("Bind:Unbind") == 1) {
 		if(Zeny < .bindprice) {
@@ -46,6 +52,7 @@ prontera,144,174,4	script	Bound Items	4_M_JP_MID,{
 		}
 		.@item = .@bindlist[select(.@bindlist$)-2];
 		next;
+		mes .@n$;
 		mes "Before I continue, I want you to know I can't tell the difference between multiple items.  If you have a specific item you want bounded, please remove any duplicates from inventory.";
 		if(select("I understand, continue:Wait a minute") == 2) {
 			next;
@@ -53,6 +60,7 @@ prontera,144,174,4	script	Bound Items	4_M_JP_MID,{
 			close;
 		}
 		next;
+		mes .@n$;
 		mes "Are you sure you'd like to bind your "+ getitemname(@inventorylist_id[.@item]) +" to your "+.boundtypes$[.@boundtype]+"?";
 		if(select("Yes:No") == 1) {
 			Zeny -= .bindprice;
@@ -85,6 +93,7 @@ prontera,144,174,4	script	Bound Items	4_M_JP_MID,{
 		}
 		.@item = .@bindlist[select(.@bindlist$)-2];
 		next;
+		mes .@n$;
 		for(.@i = 0; .@i < getarraysize(@bound_items); .@i++) {
 			if(@inventorylist_id[.@item] == @bound_items[.@i] &&
 				(!getcharid(2) || getguildmaster(getcharid(2)) != strcharinfo(0))
@@ -96,10 +105,12 @@ prontera,144,174,4	script	Bound Items	4_M_JP_MID,{
 		mes "Before I continue, I want you to know I can't tell the difference between multiple items.  If you have a specific item you want unbounded, please remove any duplicates from inventory.";
 		if(select("I understand, continue:Wait a minute") == 2) {
 			next;
+		mes .@n$;
 			mes "I'll be here when you're ready.";
 			close;
 		}
 		next;
+		mes .@n$;
 		mes "Are you sure you'd like to unbind your "+ getitemname(@inventorylist_id[.@item]) +"?";
 		if(select("Yes:No") == 1) {
 			Zeny -= .unbindprice;

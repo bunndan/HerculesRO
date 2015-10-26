@@ -13,48 +13,48 @@
 //= 1.1 Removed Duplicates [Silent]
 //============================================================
 
-// Tine - Valentine Event Chocolate Even Guide ------------------
-prontera,156,172,4	script	Tine	1_M_MERCHANT,{
+// Anna - Valentine Event Chocolate Even Guide ------------------
+prontera,149,162,5	script	Anna	4_F_ANNIVERSARY,{
 //  Debug info for item effects and tricky conditions 8)
 //	mes "@dsv: "+@dsv;
 //	mes "ispartneron()=="+ispartneron();
 //	mes "sex == "+Sex;
 //	if(@dsv == gettime(3)+1) mes "@dsv == gettime(3)+1";
 
-	mes "[Tine]";
+	mes "[Anna]";
 	mes "The legend says that on 14th February... on the Day of Saint Valentine...";
 	mes "Only in Run-Midgard kingdom...";
 	next;
 	specialeffect 417;
-	mes "[Tine]";
+	mes "[Anna]";
 	mes "Some married chocolate lovers almost double their experience at trainings!";
 	mes "But everything isn't so simply...";
 	next;
 	menu "Wow! Tell me more!",M_INFO,"Marri... what?",-;
 
-	mes "[Tine]";
+	mes "[Anna]";
 	mes "Are you a single?";
 	mes "Today is a great date to ask your beloved half for marriage!";
 	next;
-	mes "[Tine]";
+	mes "[Anna]";
 	mes "The Marriage fee is ridiculous low these days!";
 	close;
 
 M_INFO:
-	mes "[Tine]";
+	mes "[Anna]";
 	mes "The magic effect posesses only handmade chocolate from grand-grand-grand-whoever recipes!";
 	next;
-	mes "[Tine]";
+	mes "[Anna]";
 	mes "It being known that Black Handmade Chocolate works on married guys... And the White one on the married girls!";
 	mes "If you lose your wedding ring... then alas, it won't work on you.";
 	next;
-	mes "[Tine]";
+	mes "[Anna]";
 	mes "On having a Chocolate, you should put off your ring then... put it back... And if your partner is online, then magc would last till the next hour!";
 	next;
-	mes "[Tine]";
+	mes "[Anna]";
 	mes "Rumors bark that guys and gals have +50% EXP bonuses on FIVE different races of the monsters... Exluding bloody bosses, of course.";
 	next;
-	mes "[Tine]";
+	mes "[Anna]";
 	mes "There's a fameous confectioner in the Castle of Prontera! He's the one you need.";
 	close;
 
@@ -72,7 +72,7 @@ OnInit:
 }
 
 // Stephen - Valentine Event Chocolate seller ------------------
-alberta,26,243,4	script	Stephen#val1	1_M_MERCHANT,{
+prontera,149,159,5	script	Stephen#val1	4_M_TAMARIN,{
 	mes "[Stephen]";
 	mes "Guess what I've got?";
 	mes "A tasty treat not easily found in Rune-Midgard....";
@@ -127,7 +127,7 @@ L_NOTENO:
 }
 
 // Jainie -- Gives information about Valentine Event ------------------------
-alberta,29,243,4	script	Jainie#val1	1_M_INNKEEPER,{
+prontera,149,156,5	script	Jainie#val1	4_F_BERRYTEA,{
 	mes "[Jainie]";
 	mes "You know what? The chocolate that my boyfriend sells are from me!";
 	mes "I made them by myself. Now I need some Milk for my special White Chocolate.";
@@ -195,7 +195,7 @@ L_NOMILK:
 }
 
 // Carl Orleans -- Valentine Event Chocolate maker ------------------
-prt_castle,54,34,4	script	Carl Orleans#val1	1_M_01,{
+prontera,149,153,5	script	Carl Orleans#val1	4_COOK,{
 	mes "[Carl Orleans]";
 	mes "Yes? What can I cook for you?";
 	next;

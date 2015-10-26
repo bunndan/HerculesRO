@@ -1777,11 +1777,11 @@ ACMD(go) {
 		int x, y;
 		int min_match; ///< Minimum string length to match
 	} data[] = {
-		{ MAP_PRONTERA,    156, 191, 3 }, //  0 = Prontera
+		{ MAP_PRONTERA,    155, 183, 3 }, //  0 = Prontera
 		{ MAP_MORROC,      156,  93, 4 }, //  1 = Morroc
 		{ MAP_GEFFEN,      119,  59, 3 }, //  2 = Geffen
-		{ MAP_PAYON,       162, 233, 3 }, //  3 = Payon
-		{ MAP_ALBERTA,     192, 147, 3 }, //  4 = Alberta
+		{ MAP_PAYON,       179, 100, 3 }, //  3 = Payon
+		{ MAP_ALBERTA,      28, 234, 3 }, //  4 = Alberta
 #ifdef RENEWAL
 		{ MAP_IZLUDE,      128, 146, 3 }, //  5 = Izlude (Renewal)
 #else
@@ -1793,30 +1793,30 @@ ACMD(go) {
 		{ MAP_YUNO,        157,  51, 3 }, //  9 = Juno
 		{ MAP_AMATSU,      198,  84, 3 }, // 10 = Amatsu
 		{ MAP_GONRYUN,     160, 120, 3 }, // 11 = Kunlun
-		{ MAP_UMBALA,       89, 157, 3 }, // 12 = Umbala
-		{ MAP_NIFLHEIM,     21, 153, 3 }, // 13 = Niflheim
-		{ MAP_LOUYANG,     217,  40, 3 }, // 14 = Luoyang
+		{ MAP_UMBALA,       97, 153, 3 }, // 12 = Umbala
+		{ MAP_NIFLHEIM,    202, 174, 3 }, // 13 = Niflheim
+		{ MAP_LOUYANG,     217, 100, 3 }, // 14 = Luoyang
 		{ MAP_NOVICE,       53, 111, 3 }, // 15 = Training Grounds
 		{ MAP_JAIL,         23,  61, 3 }, // 16 = Prison
-		{ MAP_JAWAII,      249, 127, 3 }, // 17 = Jawaii
-		{ MAP_AYOTHAYA,    151, 117, 3 }, // 18 = Ayothaya
+		{ MAP_JAWAII,      251, 132, 3 }, // 17 = Jawaii
+		{ MAP_AYOTHAYA,    208, 166, 3 }, // 18 = Ayothaya
 		{ MAP_EINBROCH,     64, 200, 5 }, // 19 = Einbroch
 		{ MAP_LIGHTHALZEN, 158,  92, 3 }, // 20 = Lighthalzen
-		{ MAP_EINBECH,      70,  95, 5 }, // 21 = Einbech
+		{ MAP_EINBECH,      63,  35, 5 }, // 21 = Einbech
 		{ MAP_HUGEL,        96, 145, 3 }, // 22 = Hugel
 		{ MAP_RACHEL,      130, 110, 3 }, // 23 = Rachel
 		{ MAP_VEINS,       216, 123, 3 }, // 24 = Veins
 		{ MAP_MOSCOVIA,    223, 184, 3 }, // 25 = Moscovia
-		{ MAP_MIDCAMP,     180, 240, 3 }, // 26 = Midgard Camp
+		{ MAP_MIDCAMP,     210, 288, 3 }, // 26 = Midgard Camp
 		{ MAP_MANUK,       282, 138, 3 }, // 27 = Manuk
-		{ MAP_SPLENDIDE,   197, 176, 3 }, // 28 = Splendide
-		{ MAP_BRASILIS,    182, 239, 3 }, // 29 = Brasilis
+		{ MAP_SPLENDIDE,   201, 147, 3 }, // 28 = Splendide
+		{ MAP_BRASILIS,    196, 217, 3 }, // 29 = Brasilis
 		{ MAP_DICASTES,    198, 187, 3 }, // 30 = El Dicastes
-		{ MAP_MORA,         44, 151, 4 }, // 31 = Mora
+		{ MAP_MORA,         55, 146, 4 }, // 31 = Mora
 		{ MAP_DEWATA,      200, 180, 3 }, // 32 = Dewata
 		{ MAP_MALANGDO,    140, 114, 5 }, // 33 = Malangdo Island
-		{ MAP_MALAYA,      242, 211, 5 }, // 34 = Malaya Port
-		{ MAP_ECLAGE,      110,  39, 3 }, // 35 = Eclage
+		{ MAP_MALAYA,      231, 200, 5 }, // 34 = Malaya Port
+		{ MAP_ECLAGE,      297, 307, 3 }, // 35 = Eclage
 	};
 
 	memset(map_name, '\0', sizeof(map_name));

@@ -14,7 +14,7 @@
 
 // Dragon Breeder
 //============================================================
-job3_rune01,88,62,5	script	Dragon Breeder	8W_SOLDIER,{
+job3_rune01,88,62,5	script	Dragon Breeder	4_F_EDEN_OFFICER,{
 	mes "[Dragon Breeder]";
 	if (Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == Job_Baby_Rune) {
 		mes "Welcome. Would you like to rent a Dragon?";
@@ -50,7 +50,7 @@ job3_rune01,88,62,5	script	Dragon Breeder	8W_SOLDIER,{
 
 // Dragon/Gryphon Master
 //============================================================
-prontera,130,213,5	script	Riding Creature Master	8W_SOLDIER,{
+prontera,130,213,5	script	Riding Creature Master	4_F_EDEN_OFFICER,{
 	mes "[Riding Creature Master]";
 	if (Class == Job_Rune_Knight || Class == Job_Rune_Knight_T || Class == Job_Baby_Rune) {
 		mes "Welcome. Would you like to rent a Dragon?";
@@ -109,11 +109,11 @@ prontera,130,213,5	script	Riding Creature Master	8W_SOLDIER,{
 	close;
 }
 
-geffen,100,55,3	duplicate(Riding Creature Master)	Riding Creature Master#2	8W_SOLDIER
-payon,166,102,5	duplicate(Riding Creature Master)	Riding Creature Master#3	8W_SOLDIER
-aldebaran,133,109,5	duplicate(Riding Creature Master)	Riding Creature Master#4	8W_SOLDIER
-yuno,171,187,3	duplicate(Riding Creature Master)	Riding Creature Master#5	8W_SOLDIER
-rachel,106,130,5	duplicate(Riding Creature Master)	Riding Creature Master#6	8W_SOLDIER
+geffen,100,55,3	duplicate(Riding Creature Master)	Riding Creature Master#2	4_F_EDEN_OFFICER
+payon,166,102,5	duplicate(Riding Creature Master)	Riding Creature Master#3	4_F_EDEN_OFFICER
+aldebaran,133,109,5	duplicate(Riding Creature Master)	Riding Creature Master#4	4_F_EDEN_OFFICER
+yuno,171,187,3	duplicate(Riding Creature Master)	Riding Creature Master#5	4_F_EDEN_OFFICER
+rachel,106,130,5	duplicate(Riding Creature Master)	Riding Creature Master#6	4_F_EDEN_OFFICER
 
 // Peco removing NPC
 //============================================================
@@ -194,13 +194,13 @@ prontera,125,208,5	script	Peco Peco Remover	8W_SOLDIER,{
 	mes "Magic Gears are only available for Mechanics.";
 	close;
 }
-prontera,163,178,3	duplicate(mgm)	Magic Gear Master#prt	8W_SOLDIER
-geffen,103,55,5	duplicate(mgm)	Magic Gear Master#gef	8W_SOLDIER
-payon,166,106,5	duplicate(mgm)	Magic Gear Master#pay	8W_SOLDIER
-aldebaran,133,112,5	duplicate(mgm)	Magic Gear Master#alde	8W_SOLDIER
-yuno,167,187,3	duplicate(mgm)	Magic Gear Master#yuno	8W_SOLDIER
-rachel,106,134,5	duplicate(mgm)	Magic Gear Master#ra	8W_SOLDIER
-dicastes01,187,207,3	duplicate(mgm)	Magic Gear Master#dic	8W_SOLDIER
-manuk,273,212,5	duplicate(mgm)	Magic Gear Master#man	8W_SOLDIER
-splendide,180,174,5	duplicate(mgm)	Magic Gear Master#spl	8W_SOLDIER
-mid_camp,242,243,3	duplicate(mgm)	Magic Gear Master#mid	8W_SOLDIER
+prontera,162,150,4	duplicate(mgm)	Magic Gear Master#prt	4_F_SCIENCE
+geffen,103,55,5	duplicate(mgm)	Magic Gear Master#gef	4_F_SCIENCE
+payon,166,106,5	duplicate(mgm)	Magic Gear Master#pay	4_F_SCIENCE
+aldebaran,133,112,5	duplicate(mgm)	Magic Gear Master#alde	4_F_SCIENCE
+yuno,167,187,3	duplicate(mgm)	Magic Gear Master#yuno	4_F_SCIENCE
+rachel,106,134,5	duplicate(mgm)	Magic Gear Master#ra	4_F_SCIENCE
+dicastes01,187,207,3	duplicate(mgm)	Magic Gear Master#dic	4_F_SCIENCE
+manuk,273,212,5	duplicate(mgm)	Magic Gear Master#man	4_F_SCIENCE
+splendide,180,174,5	duplicate(mgm)	Magic Gear Master#spl	4_F_SCIENCE
+mid_camp,242,243,3	duplicate(mgm)	Magic Gear Master#mid	4_F_SCIENCE

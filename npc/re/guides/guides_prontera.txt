@@ -13,7 +13,7 @@
 //=     Optimized.
 //============================================================
 
-prontera,154,187,4	script	Guide#01prontera::GuideProntera	8W_SOLDIER,{
+prontera,146,198,4	script	Guide#01prontera::GuideProntera	8W_SOLDIER,{
 	cutin "prt_soldier",2;
 	mes "[Prontera Guide]";
 	mes "Welcome to ^8B4513Prontera^000000,";
@@ -155,7 +155,7 @@ prontera,154,187,4	script	Guide#01prontera::GuideProntera	8W_SOLDIER,{
 					break;
 				case 4:
 					mes "[Prontera Guide]";
-					mes "The "+F_Navi("Magic Gear Master","prontera,163,178","^006400");
+					mes "The "+F_Navi("Magic Gear Master","prontera,162,150","^006400");
 					mes "provides services for";
 					mes "^006400Mechanics^000000.";
 					mes "Let me mark his location";
@@ -296,5 +296,5 @@ L_Mark:
 }
 prontera,282,208,2	duplicate(GuideProntera)	Guide#02prontera	8W_SOLDIER
 prontera,29,200,6	duplicate(GuideProntera)	Guide#03prontera	8W_SOLDIER
-prontera,160,29,0	duplicate(GuideProntera)	Guide#04prontera	8W_SOLDIER
-prontera,151,330,4	duplicate(GuideProntera)	Guide#05prontera	8W_SOLDIER
+prontera,159,29,0	duplicate(GuideProntera)	Guide#04prontera	8W_SOLDIER
+prontera,152,333,4	duplicate(GuideProntera)	Guide#05prontera	8W_SOLDIER

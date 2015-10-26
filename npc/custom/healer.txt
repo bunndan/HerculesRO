@@ -34,45 +34,104 @@
 	end;
 }
 
+-	script	Buffer	-1,{
+
+	.@Buffs = 1;	// Also buff players? (1: yes / 0: no)
+	.@Delay = 0;	// Heal delay, in seconds
+
+	if (@HD > gettimetick(2)) end;
+	if (.@Buffs) {
+		specialeffect2 EF_INCAGILITY; sc_start SC_INC_AGI,240000,10;
+		specialeffect2 EF_BLESSING; sc_start SC_BLESSING,240000,10;
+		specialeffect2 EF_KYRIE; sc_start SC_KYRIE,240000,10;
+	}
+	if (.@Delay) @HD = gettimetick(2)+.@Delay;
+	end;
+}
+
 
 // Duplicates
 //============================================================
-alberta,25,240,6	duplicate(Healer)	Healer#alb	4_PORING
-aldebaran,135,118,6	duplicate(Healer)	Healer#alde	4_PORING
-amatsu,200,79,4	duplicate(Healer)	Healer#ama	4_PORING
-ayothaya,207,169,6	duplicate(Healer)	Healer#ayo	4_PORING
-comodo,184,158,6	duplicate(Healer)	Healer#com	4_PORING
-einbech,57,36,6	duplicate(Healer)	Healer#einbe	4_PORING
-einbroch,57,202,6	duplicate(Healer)	Healer#einbr	4_PORING
-geffen,115,72,6	duplicate(Healer)	Healer#gef	4_PORING
-gonryun,156,122,6	duplicate(Healer)	Healer#gon	4_PORING
-hugel,89,150,6	duplicate(Healer)	Healer#hug	4_PORING
-izlude,125,118,5	duplicate(Healer)	Healer#izl	4_PORING
-jawaii,250,139,4	duplicate(Healer)	Healer#jaw	4_PORING
-lighthalzen,152,100,6	duplicate(Healer)	Healer#lhz	4_PORING
-louyang,226,103,4	duplicate(Healer)	Healer#lou	4_PORING
-manuk,272,144,6	duplicate(Healer)	Healer#man	4_PORING
-mid_camp,203,289,6	duplicate(Healer)	Healer#mid	4_PORING
-moc_ruins,72,164,4	duplicate(Healer)	Healer#moc	4_PORING
-morocc,153,97,6	duplicate(Healer)	Healer#mor	4_PORING
-moscovia,220,191,4	duplicate(Healer)	Healer#mos	4_PORING
-niflheim,212,182,5	duplicate(Healer)	Healer#nif	4_PORING
-payon,179,106,4	duplicate(Healer)	Healer#pay	4_PORING
-prontera,162,193,4	duplicate(Healer)	Healer#prt	4_PORING
-rachel,125,116,6	duplicate(Healer)	Healer#rac	4_PORING
-splendide,201,153,4	duplicate(Healer)	Healer#spl	4_PORING
-thor_camp,249,74,4	duplicate(Healer)	Healer#thor	4_PORING
-umbala,105,148,3	duplicate(Healer)	Healer#umb	4_PORING
-veins,217,121,4	duplicate(Healer)	Healer#ve	4_PORING
-xmas,143,136,4	duplicate(Healer)	Healer#xmas	4_PORING
-yuno,164,45,4	duplicate(Healer)	Healer#yuno	4_PORING
+alberta,25,240,6	duplicate(Healer)	Healer#alb	4_F_MAYSEL
+aldebaran,135,118,6	duplicate(Healer)	Healer#alde	4_F_MAYSEL
+amatsu,200,79,4	duplicate(Healer)	Healer#ama	4_F_MAYSEL
+ayothaya,207,169,6	duplicate(Healer)	Healer#ayo	4_F_MAYSEL
+comodo,184,158,6	duplicate(Healer)	Healer#com	4_F_MAYSEL
+einbech,57,36,6	duplicate(Healer)	Healer#einbe	4_F_MAYSEL
+einbroch,57,202,6	duplicate(Healer)	Healer#einbr	4_F_MAYSEL
+geffen,115,72,6	duplicate(Healer)	Healer#gef	4_F_MAYSEL
+gonryun,156,122,6	duplicate(Healer)	Healer#gon	4_F_MAYSEL
+hugel,89,150,6	duplicate(Healer)	Healer#hug	4_F_MAYSEL
+izlude,124,148,5	duplicate(Healer)	Healer#izl	4_F_MAYSEL
+jawaii,250,139,4	duplicate(Healer)	Healer#jaw	4_F_MAYSEL
+lighthalzen,152,100,6	duplicate(Healer)	Healer#lhz	4_F_MAYSEL
+louyang,226,103,4	duplicate(Healer)	Healer#lou	4_F_MAYSEL
+manuk,272,144,6	duplicate(Healer)	Healer#man	4_F_MAYSEL
+mid_camp,203,289,6	duplicate(Healer)	Healer#mid	4_F_MAYSEL
+moc_ruins,72,164,4	duplicate(Healer)	Healer#moc	4_F_MAYSEL
+morocc,153,97,6	duplicate(Healer)	Healer#mor	4_F_MAYSEL
+moscovia,220,191,4	duplicate(Healer)	Healer#mos	4_F_MAYSEL
+niflheim,212,182,5	duplicate(Healer)	Healer#nif	4_F_MAYSEL
+payon,179,106,4	duplicate(Healer)	Healer#pay	4_F_MAYSEL
+prontera,161,193,4	duplicate(Healer)	Healer#prt	4_F_MAYSEL
+rachel,125,116,6	duplicate(Healer)	Healer#rac	4_F_MAYSEL
+splendide,201,153,4	duplicate(Healer)	Healer#spl	4_F_MAYSEL
+thor_camp,249,74,4	duplicate(Healer)	Healer#thor	4_F_MAYSEL
+umbala,105,148,3	duplicate(Healer)	Healer#umb	4_F_MAYSEL
+veins,217,121,4	duplicate(Healer)	Healer#ve	4_F_MAYSEL
+xmas,148,136,4	duplicate(Healer)	Healer#xmas	4_F_MAYSEL
+yuno,164,45,4	duplicate(Healer)	Healer#yuno	4_F_MAYSEL
 
 // Duplicates (Renewal)
 //============================================================
-brasilis,194,221,6	duplicate(Healer)	Healer#bra	4_PORING
-dewata,195,187,4	duplicate(Healer)	Healer#dew	4_PORING
-dicastes01,201,194,4	duplicate(Healer)	Healer#dic	4_PORING
-ecl_in01,45,60,4	duplicate(Healer)	Healer#ecl	4_PORING
-malangdo,132,114,6	duplicate(Healer)	Healer#mal	4_PORING
-malaya,205,205,6	duplicate(Healer)	Healer#ma	4_PORING
-mora,55,152,4	duplicate(Healer)	Healer#mora	4_PORING
+brasilis,194,221,6	duplicate(Healer)	Healer#bra	4_F_MAYSEL
+dewata,195,187,4	duplicate(Healer)	Healer#dew	4_F_MAYSEL
+dicastes01,201,194,4	duplicate(Healer)	Healer#dic	4_F_MAYSEL
+ecl_in01,45,60,4	duplicate(Healer)	Healer#ecl	4_F_MAYSEL
+malangdo,132,114,6	duplicate(Healer)	Healer#mal	4_F_MAYSEL
+malaya,228,204,6	duplicate(Healer)	Healer#ma	4_F_MAYSEL
+mora,55,152,4	duplicate(Healer)	Healer#mora	4_F_MAYSEL
+
+
+// ---------------- BUFFER ---------------- //
+// Duplicates
+//============================================================
+alberta,23,243,6	duplicate(Buffer)	Buffer#alb	4_F_LGTGIRL
+aldebaran,135,114,6	duplicate(Buffer)	Buffer#alde	4_F_LGTGIRL
+amatsu,200,82,4	duplicate(Buffer)	Buffer#ama	4_F_LGTGIRL
+ayothaya,203,171,6	duplicate(Buffer)	Buffer#ayo	4_F_LGTGIRL
+comodo,184,155,6	duplicate(Buffer)	Buffer#com	4_F_LGTGIRL
+einbech,57,33,6	duplicate(Buffer)	Buffer#einbe	4_F_LGTGIRL
+einbroch,55,201,6	duplicate(Buffer)	Buffer#einbr	4_F_LGTGIRL
+geffen,124,67,6	duplicate(Buffer)	Buffer#gef	4_F_LGTGIRL
+gonryun,153,122,6	duplicate(Buffer)	Buffer#gon	4_F_LGTGIRL
+hugel,87,149,6	duplicate(Buffer)	Buffer#hug	4_F_LGTGIRL
+izlude,121,150,5	duplicate(Buffer)	Buffer#izl	4_F_LGTGIRL
+jawaii,247,140,4	duplicate(Buffer)	Buffer#jaw	4_F_LGTGIRL
+lighthalzen,150,102,6	duplicate(Buffer)	Buffer#lhz	4_F_LGTGIRL
+louyang,228,102,4	duplicate(Buffer)	Buffer#lou	4_F_LGTGIRL
+manuk,270,141,6	duplicate(Buffer)	Buffer#man	4_F_LGTGIRL
+mid_camp,200,289,6	duplicate(Buffer)	Buffer#mid	4_F_LGTGIRL
+moc_ruins,74,164,4	duplicate(Buffer)	Buffer#moc	4_F_LGTGIRL
+morocc,150,97,6	duplicate(Buffer)	Buffer#mor	4_F_LGTGIRL
+moscovia,217,191,4	duplicate(Buffer)	Buffer#mos	4_F_LGTGIRL
+niflheim,212,186,5	duplicate(Buffer)	Buffer#nif	4_F_LGTGIRL
+payon,183,104,4	duplicate(Buffer)	Buffer#pay	4_F_LGTGIRL
+prontera,163,195,4	duplicate(Buffer)	Buffer#prt	4_F_LGTGIRL
+rachel,123,115,6	duplicate(Buffer)	Buffer#rac	4_F_LGTGIRL
+splendide,199,153,4	duplicate(Buffer)	Buffer#spl	4_F_LGTGIRL
+thor_camp,249,72,4	duplicate(Buffer)	Buffer#thor	4_F_LGTGIRL
+umbala,104,153,3	duplicate(Buffer)	Buffer#umb	4_F_LGTGIRL
+veins,214,121,4	duplicate(Buffer)	Buffer#ve	4_F_LGTGIRL
+xmas,142,136,4	duplicate(Buffer)	Buffer#xmas	4_F_LGTGIRL
+yuno,151,45,4	duplicate(Buffer)	Buffer#yuno	4_F_LGTGIRL
+
+// Duplicates (Renewal)
+//============================================================
+brasilis,191,221,6	duplicate(Buffer)	Buffer#bra	4_F_LGTGIRL
+dewata,197,191,4	duplicate(Buffer)	Buffer#dew	4_F_LGTGIRL
+dicastes01,204,201,4	duplicate(Buffer)	Buffer#dic	4_F_LGTGIRL
+ecl_in01,42,60,4	duplicate(Buffer)	Buffer#ecl	4_F_LGTGIRL
+malangdo,131,111,6	duplicate(Buffer)	Buffer#mal	4_F_LGTGIRL
+malaya,226,204,6	duplicate(Buffer)	Buffer#ma	4_F_LGTGIRL
+mora,60,148,4	duplicate(Buffer)	Buffer#mora	4_F_LGTGIRL

@@ -6387,7 +6387,7 @@ OnInit:
 
 // Z-Gang Quest
 //============================================================
-prontera,150,326,0	script	Wanted Notice#edq	HIDDEN_NPC,{
+prontera,150,326,4	script	Wanted Notice#edq	4_BOARD3,{
 	if (zdan_edq == 0) {
 		mes "====National Wanted Notice====";
 		mes "Please report any information";
@@ -11684,7 +11684,7 @@ OnTouch:
 
 // Rogue Guild Investigation
 //============================================================
-prontera,163,204,3	script	Man from Morroc	4W_M_03,{
+prontera,163,203,5	script	Man from Morroc	4W_M_03,{
 	if (rumour_nd == 0) {
 		mes "[Morroc Traveler]";
 		mes "Ah, it's very nice and";

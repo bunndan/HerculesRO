@@ -17,13 +17,13 @@
 
 // Information NPC
 //============================================================
-prontera,149,193,4	script	WOE Information	2_BOARD1,{
+prontera,165,198,4	script	WOE Information	2_BOARD1,{
 	doevent "WOE_CONTROL::OnMenu";
 	end;
 OnAgitStart:
 	while(agitcheck()) {
-		misceffect EF_BEGINSPELL6;
-		sleep 425;
+		// misceffect EF_BEGINSPELL6;
+		// sleep 425;
 	}
 	end;
 }
