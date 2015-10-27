@@ -138,7 +138,7 @@ xmas,117,295,4	script	Vending Machine Man	4_M_BIBI,{
 	}
 }
 
-xmas,115,297,4	script	Vending Machine	HIDDEN_NPC,{
+xmas,115,297,4	script	Vending Machine B	HIDDEN_NPC,{
 	mes "[Audi]";
 	mes "^555555Exciting item vending machine. Invented by great Titicupe. Select the desired item and place required items into snowmouth receptacle.^000000";
 	next;

@@ -122,7 +122,7 @@ ra_in01,257,266,4	shop	Black Marketeer#ra	1_M_03,2139:-1,2800:-1,2801:-1,2802:-1
 s_atelier,137,60,3	shop	Part-Timer#sc_ra	1_F_GYPSY,6123:-1,6120:-1
 
 // Ninja Shops
-prontera,178,244,3	trader	Amatsu Trader#nin	4_M_01,{
+prontera,195,241,3	trader	Amatsu Trader#nin	4_M_NINJA_RED,{
 OnInit:
 	sellitem Shuriken;
 	sellitem Nimbus_Shuriken;
