@@ -44,7 +44,22 @@
 		specialeffect2 EF_INCAGILITY; sc_start SC_INC_AGI,240000,10;
 		specialeffect2 EF_BLESSING; sc_start SC_BLESSING,240000,10;
 		specialeffect2 EF_KYRIE; sc_start SC_KYRIE,240000,10;
+		//specialeffect2 EF_SOULLINK; sc_start SC_SOULLINK,240000,5; // Soul Link for 4 minutes
 	}
+	if (.@Delay) @HD = gettimetick(2)+.@Delay;
+	end;
+}
+
+-	script	HealBuffer	-1,{
+
+	.@Delay = 0;	// Heal delay, in seconds
+
+	if (@HD > gettimetick(2)) end;
+	specialeffect2 EF_HEAL2; percentheal 100,100;
+	specialeffect2 EF_INCAGILITY; sc_start SC_INC_AGI,240000,10;
+	specialeffect2 EF_BLESSING; sc_start SC_BLESSING,240000,10;
+	specialeffect2 EF_KYRIE; sc_start SC_KYRIE,240000,10;
+	
 	if (.@Delay) @HD = gettimetick(2)+.@Delay;
 	end;
 }
@@ -135,3 +150,7 @@ ecl_in01,42,60,4	duplicate(Buffer)	Buffer#ecl	4_F_LGTGIRL
 malangdo,131,111,6	duplicate(Buffer)	Buffer#mal	4_F_LGTGIRL
 malaya,226,204,6	duplicate(Buffer)	Buffer#ma	4_F_LGTGIRL
 mora,60,148,4	duplicate(Buffer)	Buffer#mora	4_F_LGTGIRL
+
+
+// ---------------- ALL IN ONE ---------------- //
+guild_vs1,48,55,5	duplicate(HealBuffer)	Healer#guild	4_F_NURSE
