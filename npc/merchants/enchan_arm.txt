@@ -15,19 +15,17 @@
 //= 1.3a Added 'disable_items' command. [Euphy]
 //============================================================
 
-prontera,165,60,2	script	Apprentice Craftsman	1_F_MERCHANT_01,{
+prontera,143,175,5	script	Apprentice Craftsman	1_F_MERCHANT_01,{
 	disable_items;
 	mes "[Apprentice Craftsman]";
 	if (Zeny >= 400000) {
 		mes "I've been studying ways to enhance an armor to maximize its capability.";
-		next;
-		mes "[Apprentice Craftsman]";
+		mes " ";
 		mes "Enchanting is an awesome skill that infuses a mysterious status powers into the armor's hidden socket.";
 		next;
 		mes "[Apprentice Craftsman]";
 		mes "However, you have to keep in mind that if there are two armors of the same kind in your possession, the Enchantment will be applied in the order they are placed in your inventory.";
-		next;
-		mes "[Apprentice Craftsman]";
+		mes " ";
 		mes "In that case, the Enchantment may be applied to an item which you didn't mean to Enchant. So just bring ^5555ffONE Armor^000000 you want enchanted to be safe...";
 		next;
 		mes "[Apprentice Craftsman]";
@@ -92,10 +90,11 @@ S_EnchantArmor:
 			mes "Sorry, but you don't have enough zeny.";
 			close;
 		}
-		progressbar "ffff00",7;
+		progressbar "ffff00",1;
 		Zeny -= 400000;
 		delitem .@itemid,1;
-		switch (rand(1,.@failrate)) {
+		//switch (rand(1,.@failrate)) {
+		switch (rand(1,36)) {
 			case 1: .@addpart = 4702;break;
 			case 2: .@addpart = 4712;break;
 			case 3: .@addpart = 4722;break;
