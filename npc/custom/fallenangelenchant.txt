@@ -1,0 +1,240 @@
+//============================================================
+//= Fallen Angel Wing Enchantment
+//===== By: ==================================================
+//= n0tme
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= An npc that will let you enchat your fallen angel wings with stats
+//===== Additional Comments: =================================
+//= Fully working.
+//= 1.0 First release
+//============================================================
+prontera,147,173,5	script	Fallen Angel Wing	4_F_VALKYRIE2,{
+	disable_items;
+	if (checkweight(1201,1) == 0) {
+		mes "You are carrying too many items, please reduce them and come back!";
+		close;
+	}
+	if (MaxWeight - Weight < 10000) {
+		mes "You have overweight, please reduce it and come back!";
+		close;
+	}
+	if (getequipid(EQI_GARMENT) == 2589) {
+		if(getequipcardid(EQI_GARMENT,1)){
+			if (getequiprefinerycnt(EQI_GARMENT)>=7)  {
+				if(getequipcardid(EQI_GARMENT,2)) {
+					if (getequiprefinerycnt(EQI_GARMENT)>=9) {
+						if(getequipcardid(EQI_GARMENT,3)) {
+							goto jExit;
+						}
+						else { // third slot array
+							set .@menu$, "Enchant Fallen Angel Wing";
+						}
+					} else
+						goto jExit;
+				}
+				else { //second slot array
+					set .@menu$, "Enchant Fallen Angel Wing";
+				}
+			}
+			else {
+jExit:			set .@menu$, "";
+			}
+		}
+		else { // first slot array
+		set .@menu$, "Enchant Fallen Angel Wing";
+		}
+	} else
+		set .@menu$, "";
+
+	mes "[Fallen Angel]";
+	mes "If you have a Fallen Angel Wing, I can enchant its useless slots for 1 million zeny.";
+	mes "*Note: Equip your Fallen Angel Wing to see the Enchant Menu!";
+	next;
+	
+	switch(select("What is that?:"+.@menu$+":Clear Enchantment")) {
+		case 1:
+			switch(select("Stop speaking:What are you going to do?")) {
+				case 1:
+					mes "[Fallen Angel]";
+					mes "What did you say?";
+					close;
+				case 2:
+					mes "[Fallen Angel]";
+					mes "I can enchant special stats into your Fallen Angel Wing if you pay 1,000,000 zeny.";	
+					next;
+					mes "I can enchant it once if upgraded +6 or lower.";	
+					mes "twice if upgraded +7 or +8.";	
+					mes "and 3 times if upgraded +9 or higher.";	
+					mes "[Fallen Angel]";
+					close;
+			}
+		case 2:
+			if (Zeny < 100) { //zeny amount
+				mes "[Fallen Angel]";
+				mes "I can't do it if you can't pay!";
+				close;
+			}
+			mes "[Fallen Angel]";
+			mes "Select enchant category";
+			next;
+			switch(select("Fighting:Magic:Archer:Max HP:Max SP:Str:Agi:Dex:Vit:Int:Luk:ASPD:Crit")) {//dito tayo sir
+				set .@i, rand(1,9);
+				case 1: //Fighting
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4821;
+					else if (.@i < 10)   set .@enchant,4820;
+					else if (.@i < 12)   set .@enchant,4808;
+					else set .@enchant,4809;
+				goto eStart;
+				case 2: //Magic
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4828;
+					else if (.@i < 10)   set .@enchant,4827;
+					else if (.@i < 12)   set .@enchant,4826;
+					else set .@enchant,4812;
+				goto eStart;
+				case 3:// Archer
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4835;
+					else if (.@i < 10)   set .@enchant,4834;
+					else if (.@i < 12)   set .@enchant,4833;
+					else set .@enchant,4832;
+				goto eStart;
+				case 4:// MHP
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4868;
+					else if (.@i < 10)   set .@enchant,4867;
+					else if (.@i < 12)   set .@enchant,4862;
+					else set .@enchant,4861;
+				goto eStart;
+				case 5://MSP
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4801;
+					else if (.@i < 10)   set .@enchant,4871;
+					else if (.@i < 12)   set .@enchant,4800;
+					else set .@enchant,4870;
+				goto eStart;
+				case 6://STR
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4853;
+					else if (.@i < 10)   set .@enchant,4704;
+					else if (.@i < 12)   set .@enchant,4703;
+					else set .@enchant,4702;
+				goto eStart;
+				case 7://AGI
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4854;
+					else if (.@i < 10)   set .@enchant,4733;
+					else if (.@i < 12)   set .@enchant,4732;
+					else set .@enchant,4731;
+				goto eStart;
+				case 8://DEX
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4857;
+					else if (.@i < 10)   set .@enchant,4724;
+					else if (.@i < 12)   set .@enchant,4723;
+					else set .@enchant,4722;
+				goto eStart;
+				case 9:// VIT
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4855;
+					else if (.@i < 10)   set .@enchant,4744;
+					else if (.@i < 12)   set .@enchant,4743;
+					else set .@enchant,4742;
+				goto eStart;
+				case 10://INT
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4856;
+					else if (.@i < 10)   set .@enchant,4714;
+					else if (.@i < 12)   set .@enchant,4713;
+					else set .@enchant,4712;
+				goto eStart;
+				case 11://LUK
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4858;
+					else if (.@i < 10)   set .@enchant,4754;
+					else if (.@i < 12)   set .@enchant,4753;
+					else set .@enchant,4752;
+				goto eStart;
+				case 12://ASPD
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4842;
+					else if (.@i < 10)   set .@enchant,4881;
+					else if (.@i < 12)   set .@enchant,4873;
+					else set .@enchant,4872;
+				goto eStart;
+				case 13://Crit
+					if(getequipcardid(EQI_GARMENT,2)) set .@enchant,4866;
+					else if (.@i < 10)   set .@enchant,4865;
+					else if (.@i < 12)   set .@enchant,4864;
+					else set .@enchant,4863;
+				goto eStart;
+				
+eStart:			specialeffect2 EF_REPAIRWEAPON;
+				progressbar "ffff00",1;
+				if (getequipisequiped(EQI_GARMENT) == 0) {
+					mes "[Fallen Angel]";
+					mes "The Archangel Wing has been taken out!";
+					close;
+				}
+				if (getequipid(EQI_GARMENT) != 2589) {
+					mes "[Fallen Angel]";
+					mes "Don't take off the item!";
+					close;
+				}
+			Zeny -= 100;	
+			// find slot to enchant
+				if(getequipcardid(EQI_GARMENT,1)){
+						if(getequipcardid(EQI_GARMENT,2)) {
+									set .@equip_refine, getequiprefinerycnt(EQI_GARMENT);
+									setarray .@equip_card[0], getequipcardid(EQI_GARMENT,0),getequipcardid(EQI_GARMENT,1),getequipcardid(EQI_GARMENT,2);
+									getitem2 2589,1,1,.@equip_refine,0,.@equip_card[0],.@equip_card[1],.@equip_card[2],.@enchant; //Archangel_Wing
+							}
+						else { //second slot array
+							set .@equip_refine, getequiprefinerycnt(EQI_GARMENT);
+							setarray .@equip_card[0], getequipcardid(EQI_GARMENT,0),getequipcardid(EQI_GARMENT,1),getequipcardid(EQI_GARMENT,3);
+							getitem2 2589,1,1,.@equip_refine,0,.@equip_card[0],.@equip_card[1],.@enchant,.@equip_card[3]; //Archangel_Wing
+						}
+				}
+				else { // first slot array
+					set .@equip_refine, getequiprefinerycnt(EQI_GARMENT);
+					setarray .@equip_card[0], getequipcardid(EQI_GARMENT,0),getequipcardid(EQI_GARMENT,2),getequipcardid(EQI_GARMENT,3);
+					getitem2 2589,1,1,.@equip_refine,0,.@equip_card[0],.@enchant,.@equip_card[2],.@equip_card[3]; //Archangel_Wing
+				}
+			delequip EQI_GARMENT;
+			mes "[Fallen Angel]";
+			mes "Take it!";
+			mes "I believe that you will become the dominator of the new world!";
+			close;
+			}
+		case 3:
+				mes "[Fallen Angel]";
+				mes "Reset enchantment requires ^0000ff3 units of Silvervine Fruit^000000. The wing will not be damaged except for the enchanted capability.";
+				next;
+				if(select("Let me consider...:Ok, I want reset its enchanment.") == 1) {
+					mes "[Fallen Angel]";
+					mes "Ok! Take your time to consider!";
+					close;
+				}
+				specialeffect2 EF_REPAIRWEAPON;
+				progressbar "ffff00",1;
+				if (getequipisequiped(EQI_GARMENT) == 0) {
+					mes "[Fallen Angel]";
+					mes "The Fallen Angel Wing has been taken out!";
+					close;
+				}
+				if (getequipid(EQI_GARMENT) != 2589) {
+					mes "[Fallen Angel]";
+					mes "Oh... you have unequipped the Fallen Angel Wing!";
+					close;
+				}
+				if (countitem(6417) < 3) {
+					mes "[Fallen Angel]";
+					mes "I can't do it if you can't pay!";
+					close;
+				}
+				if ((getequipcardid(EQI_GARMENT,3) < 4700) && (getequipcardid(EQI_GARMENT,2) < 4700) && (getequipcardid(EQI_GARMENT,1) < 4700)) { // Armor Enchant System
+					mes "[Fallen Angel]";
+					mes "This equipment has not been enchanted, please check it again!";
+					close;
+				}
+				set .@equip_refine, getequiprefinerycnt(EQI_GARMENT);
+				setarray .@equip_card[0], getequipcardid(EQI_GARMENT,0);//,getequipcardid(EQI_GARMENT,1),getequipcardid(EQI_GARMENT,2);
+				delitem 6417,3; //Silvervine
+				delequip EQI_GARMENT;
+				getitem2 2589,1,1,.@equip_refine,0,.@equip_card[0],.@equip_card[1],.@equip_card[2],0; //Archangel_Wing
+				mes "[Fallen Angel]";
+				mes "Take it!";
+				close;
+	}
+}
