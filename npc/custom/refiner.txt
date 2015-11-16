@@ -1,0 +1,238 @@
+//===== rAthena Script =======================================
+//= All-in-One NPC
+//===== By: ==================================================
+//= Euphy, modification by Shakto
+//===== Current Version: =====================================
+//= 1.6
+//===== Description: =========================================
+//= A compilation of commonly-used NPC scripts.
+//== Includes job changer, stylist, refiner, card remover,
+//== coin exchanger, rentals, resetter, platinum skills,
+//== sex changer, identifier, healer, buffer, and repairman.
+//============================================================
+
+prontera,146,192,5	script	Fairy Refiner NPC	4_M_FAIRYFREAK,{
+function Equip_Menu; function Refine_Item;
+
+	set .@menu$,"";
+	for (set .@i,0; .@i < getarraysize(.MainMenu$); set .@i,.@i+1) {
+		if (.MenuOption & pow(2,.@i))
+			set .@menu$, .@menu$+" ~ "+.MainMenu$[.@i];
+		set .@menu$, .@menu$+":"; }
+	switch(select(.@menu$)) {
+		case 1:
+		Equip_Menu(1);
+		setarray .@Materials[0],985,1010,1011,984,984;
+		setarray .@Safe[0],4,7,6,5,4;
+		set .@WLv, getequipweaponlv(@i);
+		set .@SafeCount, .@Safe[.@WLv]-getequiprefinerycnt(@i);
+		message strcharinfo(0),"Item: +"+getequiprefinerycnt(@i)+" "+getequipname(@i);
+		switch(select(" ~ Refine once (^0055FF"+getequippercentrefinery(@i)+"^000000% success): ~ Refine multiple times (up to "+(10-getequiprefinerycnt(@i))+"): ~ Refine to safe limit ("+((.@SafeCount>0)?.@SafeCount+" refines":"^777777disabled^000000")+"): ~ ^777777Cancel^000000")) {
+			case 1: Refine_Item(1, .@Materials[.@WLv], .RP[.@WLv], .@Safe[.@WLv]); close;
+			case 2:
+				input .@Refines;
+				if (.@Refines+getequiprefinerycnt(@i) > 10 || .@Refines < 1) message strcharinfo(0),"Invalid number ("+.@Refines+").";
+				else Refine_Item(.@Refines, .@Materials[.@WLv], .RP[.@WLv], .@Safe[.@WLv]);
+				close;
+			case 3:
+				if (.@SafeCount < 1) message strcharinfo(0),"The item has already reached the safe limit.";
+				else Refine_Item(.@SafeCount, .@Materials[.@WLv], .RP[.@WLv], .@Safe[.@WLv]);
+				close;  
+			case 4: close; 
+		}
+		case 2:
+			Equip_Menu(1);
+			setarray .@Materials[0],7619,7620,7620,7620,7620;
+			setarray .@Safe[0],4,7,6,5,4;
+			set .@WLv, getequipweaponlv(@i);
+			message strcharinfo(0),"Item: +"+getequiprefinerycnt(@i)+" "+getequipname(@i);
+			if(select(" ~ Refine item (2 * ^0055FF"+getequippercentrefinery(@i)+"^000000% success): ~ ^777777Cancel^000000")==2) close;
+			Refine_Item(1, .@Materials[.@WLv], .RP[.@WLv], .@Safe[.@WLv], 1);
+			close;
+		case 3:
+			setarray .@position$[1], "Head","Body","Left hand","Right hand","Robe","Shoes","Accessory 1","Accessory 2","Head 2","Head 3";
+			set .@menu$,"";
+			for( set .@i,1; .@i <= 10; set .@i,.@i+1 )
+			{
+				if( getequipisequiped(.@i) )
+				set .@menu$, .@menu$ + .@position$[.@i] + "-" + "[" + getequipname(.@i) + "]";
+				set .@menu$, .@menu$ + ":";
+			}
+			set .@part,select(.@menu$);	
+			if( !getequipisequiped(.@part) )
+				close;
+			if( !getequipisenableref(.@part) )
+			{
+				message strcharinfo(0),"You can't refine this item at all";
+			}
+			if( !getequipisidentify(.@part) )
+			{
+				message strcharinfo(0),"This item has not been identified";
+				close;
+			}
+			if( getequiprefinerycnt(.@part) >= 10 || getequiprefinerycnt(.@part) < 7 )
+			{
+				message strcharinfo(0),"This item cannot be refined because it's refine level is more than 10 or less than 7...";
+				close;
+			}
+			switch( getequipweaponlv(.@part) )
+			{
+				case 1: callsub S_RefineValidate,1,6240,50,.@part; break;
+				case 2: callsub S_RefineValidate,2,6240,200,.@part; break;
+				case 3: callsub S_RefineValidate,3,6240,5000,.@part; break;
+				case 4: callsub S_RefineValidate,4,6240,20000,.@part; break;
+				default: callsub S_RefineValidate,0,6241,2000,.@part; break;
+			}
+			if( getequippercentrefinery(.@part) > rand(100) || getequippercentrefinery(.@part) > rand(100) )
+			{
+				successrefitem .@part;
+				message strcharinfo(0),"All done";
+				close;
+			}
+			if( getequiprefinerycnt(.@part) > 7 )
+			{
+				downrefitem .@part;
+			}
+			message strcharinfo(0),"Your item "+getequipname(.@part)+" has not been refine";
+			close;
+			S_RefineValidate:
+				if( select(" ~ Refine item (2*^0055FF"+getequippercentrefinery(getarg(3))+"^000000% success): ~ ^777777Cancel^000000") == 1 )
+				{
+					if( countitem(getarg(1)) > 0 && Zeny > getarg(2) )
+					{
+						delitem getarg(1), 1;
+						set Zeny, Zeny - getarg(2);
+						return;
+					}
+					message strcharinfo(0),"I'll need " + getarg(2) + " zeny and 1 " + getitemname(getarg(1)) + "...";
+					close;
+				}
+				close;
+		case 4:
+			setarray .@position$[1],"Head","Body","Left hand","Right hand","Robe","Shoes","Accessory 1","Accessory 2","Head 2","Head 3";
+			set .@menu$,"";
+			for(set .@i,1; .@i<=10; set .@i,.@i+1) {
+				if(getequipisequiped(.@i))
+					set .@menu$, .@menu$ + .@position$[.@i] + "-" + "[" + getequipname(.@i) + "]";
+				set .@menu$, .@menu$ + ":";
+			}
+			set .@part,select(.@menu$);
+			if(!getequipisequiped(.@part)) {
+				message strcharinfo(0),"You're not wearing anything that it can be refine";
+				close;
+			}
+			if(!getequipisenableref(.@part)) {
+				message strcharinfo(0),"This item can't be refine";
+				close;
+			}
+			if(!getequipisidentify(.@part)) {
+				message strcharinfo(0),"This item is not identified";
+				close;
+			}
+			if(getequiprefinerycnt(.@part) < 10) {
+				message strcharinfo(0),"Only item at least lv. 10 can be refine";
+				close;
+			}
+			if(getequiprefinerycnt(.@part) >= 20) {
+				message strcharinfo(0),"This item can't be refined anymore";
+				close;
+			}
+			set .@refineitemid, getequipid(.@part); // save id of the item
+			set .@refinerycnt, getequiprefinerycnt(.@part); //save refinery count
+			if ((getequipweaponlv(.@part) >= 1) && (getequipweaponlv(.@part) <= 4)) {
+				set .@material,6226;
+				set .@price,100000;
+				set .@safe,10;
+			} else {
+				set .@material,6225;
+				set .@price,100000;
+				set .@safe,10;
+			}
+			if(countitem(.@material) < 1 || Zeny < .@price) {
+				message strcharinfo(0),"I'll need " + .@price + " zeny and 1 " + getitemname(.@material) + "...";
+				close;
+			}
+			if( select(" ~ Refine item (^0055FF33^000000% success): ~ ^777777Cancel^000000") == 1 )
+				{
+					set Zeny,Zeny - .@price;
+					delitem .@material,1;
+					if(getequipisequiped(.@part) == 0) { // hacker has removed the item (not changed, why?)
+						message strcharinfo(0),"You don't have item on you";
+						close;
+					}
+					if(getequiprefinerycnt(.@part) != .@refinerycnt || getequipid(.@part) != .@refineitemid) { // hacker has changed the item
+						message strcharinfo(0),"You switched the item...";
+						close;
+					}
+					set .@rand,rand(1,3);
+					if (.@rand == 1) {
+						message strcharinfo(0),"All done";
+						successrefitem .@part;
+						close;
+					}
+					if (.@rand == 2 || .@rand == 3) {
+						if(getequiprefinerycnt(.@part) > 10){
+							downrefitem .@part;
+						}
+						message strcharinfo(0),"Your item "+getequipname(.@part)+" has not been refine";
+						close;
+					}
+				}
+			close;
+
+			function Equip_Menu {
+				setarray .@pos$[1],"Upper Headgear","Armor","Left hand","Right hand","Garment","Footgear","Left Accessory","Right Accessory","Mid Headgear","Lower Headgear";
+				set .@menu$,"";
+				for (set .@i,1; .@i <= 10; set .@i,.@i+1) {
+					if (getequipisequiped(.@i))
+						set .@menu$, .@menu$+.@pos$[.@i]+" [^0055FF"+getequipname(.@i)+"^000000]";
+					set .@menu$, .@menu$+":"; }
+				set @i, select(.@menu$);
+				if (!getequipisequiped(@i)) { message strcharinfo(0),"Nothing is equipped there!"; close; }
+				if (getarg(0)) {
+					if (!getequipisenableref(@i)) { message strcharinfo(0),getequipname(@i)+" cannot be refined."; close; }
+					if (getequiprefinerycnt(@i) >= 10 ) { message strcharinfo(0),"+"+getequiprefinerycnt(@i)+" "+getequipname(@i)+" cannot be refined any further."; close; } }
+				return; }
+			function Refine_Item {
+				message strcharinfo(0),"I'll need "+getarg(0)+"x "+getitemname(getarg(1))+" and "+getarg(0)*getarg(2)+" Zeny.";
+				if (countitem(getarg(1)) < getarg(0) || Zeny < getarg(0)*getarg(2)) {
+					sleep2 500; message strcharinfo(0),"Come back when you have the required materials."; close; }
+				if (getequiprefinerycnt(@i)+getarg(0) > getarg(3)) {
+					sleep2 500; message strcharinfo(0),"The item will be refined above the safe limit. It may break."; }
+				sleep2 500;
+				if(select(" ~ ^0055FFContinue^000000: ~ ^777777Cancel^000000")==2) close;
+				set .@j, getarg(0);
+				while(.@j) {
+					delitem getarg(1), 1;
+					set Zeny, Zeny-getarg(2);
+					if (getarg(4,0)) {
+						if (getequippercentrefinery(@i) <= rand(100) && getequippercentrefinery(@i) <= rand(100)) {
+							message strcharinfo(0),getequipname(@i)+" broke while refining."; downrefitem @i; close; } }
+					else {
+						if (getequippercentrefinery(@i) <= rand(100)) {
+							message strcharinfo(0),getequipname(@i)+" broke while refining."; downrefitem @i; close; } }
+					successrefitem @i;
+					set .@j, .@j-1; }
+				message strcharinfo(0),"All done!";
+				close; }
+		}
+OnInit:
+
+// --------------------- Config ---------------------
+
+	setarray .MainMenu$[0],	// Set menu options!
+		"Normal Refiner",		// [1]
+		"Enriched Refiner",		// [2]
+		"Purified Refiner",		// [4]
+		"Bradium / Carnium Refiner";	// [8]
+
+	set .MenuOption,1|2|4|8;
+
+	set .EnrichedRefine,1;			// Allow enriched refiner option? (1: yes / 0: no)
+	setarray .RP[0],2000,50,200,5000,20000;	// Zeny for armor, lv1, lv2, lv3, lv4 refines
+
+// --------------------------------------------------
+	end;
+}
+
+
