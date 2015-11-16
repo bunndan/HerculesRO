@@ -1,0 +1,41 @@
+prontera,148,190,5	script	Identifier	4_F_RUNAIN,{
+	
+	set .@n$,"^0000FF[ Identifier ]^000000";
+	set .@Price, 50;	// Zeny per identify
+	
+	mes .@n$;
+	mes "Hello "+strcharinfo(0)+", for " +.@Price+ " Zeny each, I'm going to identify all items in your inventory.";
+	mes " ";
+	mes "Do you want me to Identify them for you?";
+	next;
+	
+	switch(select("Yes:No")) {
+		case 1:
+			getinventorylist;
+			for(set .@i,0; .@i<@inventorylist_count; set .@i,.@i+1) {
+				if (@inventorylist_identify[.@i]) continue;
+				if (Zeny < .@Price) {
+					mes .@n$;
+					mes "Sorry,but you don't have enough Zeny!";
+					close;
+				}
+				set Zeny, Zeny-.@Price;
+				delitem2 @inventorylist_id[.@i],1,0,0,0,0,0,0,0;
+				getitem @inventorylist_id[.@i],1;
+				setarray .@Total[0], .@Total[0]+1, .@Total[1]+.@Price;
+			}
+			
+			if (!.@Total[0]) {
+				mes .@n$;
+				mes "You don't have any items to identify!";
+				close;
+			}
+			
+			specialeffect2 EF_DISPELL;
+			mes .@n$;
+			mes "Identified " +.@Total[0]+ " items for " +.@Total[1]+ " Zeny.";
+			
+		case 2:
+			close;
+	}
+}
