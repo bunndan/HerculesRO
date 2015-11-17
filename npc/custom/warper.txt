@@ -452,7 +452,8 @@ I12: Restrict("RE");
 	Special:
 // --------------------------------------------------
 menu	"Auction Hall",S1, "Battlegrounds",S2, "Casino",S3, "Eden Group Headquarters",S4,
-		"Gonryun Arena",S5, "Izlude Arena",S6, "Monster Race Arena",S7, "Turbo Track",S8;
+		"Gonryun Arena",S5, "Izlude Arena",S6, "Monster Race Arena",S7, "Turbo Track",S8,
+		"Dead Branch Room",S9;
 
 S1: Go("auction_01",22,68);
 S2: Go("bat_room",154,150);
@@ -463,6 +464,7 @@ S5: Go("gon_test",48,10);
 S6: Go("arena_room",100,88);
 S7: Go("p_track01",62,41);
 S8: Go("turbo_room",99,114);
+S9: Go("guild_vs1",50,50);
 }
 
 // --------------------------------------------------
