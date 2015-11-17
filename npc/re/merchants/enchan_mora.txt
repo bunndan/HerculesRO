@@ -138,7 +138,7 @@ mora,88,89,5	script	Keeper of Secrets#pa082	4_M_MERCAT1,{
 	}
 }
 
-mora,96,74,5	script	Master of Relics#pa0829	4_M_MERCAT1,{
+prontera,141,171,5	script	Arch Bishop#pa0829	4_M_MERCAT1,{
 	if (checkweight(1201,1) == 0) {
 		mes "You have too many kinds of things with you to do that. Throw out some of them and try again.";
 		close;
@@ -150,26 +150,21 @@ mora,96,74,5	script	Master of Relics#pa0829	4_M_MERCAT1,{
 	disable_items;
 	mes "[Relice]";
 	mes "I enhance Relics that holy Arch-Bishops use, it will take 2 Mora Coins and the relic to allow me to attempt to enhance it.";
-	next;
 	switch(select("More details please.:Please Enhance my Relic.")) {
 	case 1:
 		mes "[Relice]";
 		mes "Let me briefly explain, for 2 Mora Coins and the relic I can give you a single Enchantment on that relic.";
-		next;
-		mes "[Relice]";
+		mes " ";
 		mes "Even though this relic was already enchanted, we will re-enchant it without checking its status.";
-		next;
-		mes "[Relice]";
+		mes " ";
 		mes "So it you have already enchanted relic, please put it some place safe and come back.";
-		next;
-		mes "[Relice]";
+		mes " ";
 		mes "Ah, one more thing! It is possible I can fail though and if that happens the relic is lost forever.";
 		close;
 	case 2:
 		mes "[Relice]";
 		mes "Ok, you can get a new Relic from Artifice if it fails.";
-		next;
-		mes "[Relice]";
+		mes " ";
 		mes "If you have a ritual for luck, you should use it now!";
 		next;
 		.@select = select("Wait a minute!:Light of Cure:Seal of Cathedral:Ring of Archbishop:Shoes of Affection:Shoes of Judgement:Shawl of Affection:Shawl of Judgement:Robe of Affection:Robe of Judgement:Bible of Promise 1st Vol:Wand of Affection:Mace of Judgement");
@@ -217,11 +212,11 @@ mora,96,74,5	script	Master of Relics#pa0829	4_M_MERCAT1,{
 		delitem .@item,1;
 		switch(.@enchant_type) {
 		case 1:
-			.@i = rand(1,1487);
+			.@i = rand(1,1040);
 			if (.@i <= 1024) {
 				// Basic combinations
 				// (raw: .@i increments by 16, 4 repeats)
-				setarray .@enchant_slot2[0],4711,4720,4721,4740; //Inteligence2,Dexterity1,Dexterity2,Vitality1
+				setarray .@enchant_slot2[0],4711,4721,4721,4740; //Inteligence2,Dexterity1,Dexterity2,Vitality1
 				setarray .@enchant_slot3[0],.@sp,4799,4766,4788; //[sp],HP500,Atk2,Mdef6
 				setarray .@enchants[2],
 					.@enchant_slot2[rand(getarraysize(.@enchant_slot2))],
@@ -235,7 +230,7 @@ mora,96,74,5	script	Master of Relics#pa0829	4_M_MERCAT1,{
 			}
 			break;
 		case 2:
-			.@i = rand(1,1487);
+			.@i = rand(1025,1040);
 			if (.@i <= 1024) {
 				// Basic combinations
 				// (raw: .@i increments by 16)
@@ -262,7 +257,7 @@ mora,96,74,5	script	Master of Relics#pa0829	4_M_MERCAT1,{
 			}
 			break;
 		case 3:
-			.@i = rand(1,2852);
+			.@i = rand(0985,1996);
 			if (.@i <= 1984) {
 				// Basic combinations
 				// (raw: .@i increments by 31, 4 repeats)
@@ -285,7 +280,7 @@ mora,96,74,5	script	Master of Relics#pa0829	4_M_MERCAT1,{
 			}
 			break;
 		case 4:
-			.@i = rand(1,2852);
+			.@i = rand(1985,1996);
 			if (.@i <= 1984) {
 				// Basic combinations
 				// (raw: .@i increments by 31, 4 repeats)
@@ -390,7 +385,8 @@ mora,104,76,4	script	Guardian of Artifacts#p	4_M_MERCAT1,{
 	close;
 }
 
-mora,99,93,5	script	Artifact Crafter#pa0829	4_M_MERCAT1,{
+
+prontera,141,169,5	script	Warlock#pa0829	4_M_MERCAT1,{
 	if (checkweight(1201,1) == 0) {
 		mes "You have too many kinds of things with you to do that. Throw out some of them and try again.";
 		close;
@@ -402,7 +398,6 @@ mora,99,93,5	script	Artifact Crafter#pa0829	4_M_MERCAT1,{
 	disable_items;
 	mes "[Artifact Crafter]";
 	mes "My job is to imbue artifacts with new power. If you have enough Coins, you can have one of the following items reinforced.";
-	next;
 	if(select("Tell me more.:I want to have my item reinforced.") == 1) {
 		mes "[Artifact Crafter]";
 		mes "Let me explain. One reinforcement costs you two Coins.";
@@ -411,11 +406,9 @@ mora,99,93,5	script	Artifact Crafter#pa0829	4_M_MERCAT1,{
 	}
 	mes "[Artifact Crafter]";
 	mes "And, I'll work on the item whether it's been already reinforced or not.";
-	next;
-	mes "[Artifact Crafter]";
+	mes " ";
 	mes "So if you have an artifact reinforced to your liking, put it in a safe place and come back.";
-	next;
-	mes "[Artifact Crafter]";
+	mes " ";
 	mes "And another thing, the artifact will be destroyed if the reinforcement fails. Please keep that in mind.";
 	if (.@info_only)
 		close;
@@ -466,7 +459,7 @@ mora,99,93,5	script	Artifact Crafter#pa0829	4_M_MERCAT1,{
 	delitem .@item,1;
 	switch(.@enchant_type) {
 	case 1:
-		.@i = rand(1,2847);
+		.@i = rand(1985,1992);
 		if (.@i <= 1984) {
 			// Basic combinations
 			// (raw: .@i increments by 31, 4 repeats)
@@ -487,7 +480,7 @@ mora,99,93,5	script	Artifact Crafter#pa0829	4_M_MERCAT1,{
 		}
 		break;
 	case 2:
-		.@i = rand(1,2858);
+		.@i = rand(1985,2000);
 		if (.@i <= 1984) {
 			// Basic combinations
 			// (raw: .@i increments by 31)
@@ -593,7 +586,7 @@ mora,152,97,5	script	Guardian of Power#pa082	4_F_DOGTRAVELER,{
 	close;
 }
 
-mora,148,98,3	script	Artifact Researcher#new	4_F_MORAFINE2,{
+prontera,139,171,5	script	Ranger, GCross, RKnight	4_F_MORAFINE2,{
 	if (checkweight(1201,1) == 0) {
 		mes "Reduce the amount of items that you have in your inventory before continuing.";
 		close;
@@ -606,7 +599,6 @@ mora,148,98,3	script	Artifact Researcher#new	4_F_MORAFINE2,{
 	mes "[Artifact Researcher]";
 	mes "Nice to meet you.";
 	mes "I'm here in Mora studying ancient relics and artifacts. The new discoveries of Adventurers has made this village very exciting for me.";
-	next;
 	switch(select("Tell me more...:Give abilities to artifacts.:Reset Enhanced abilities.")) {
 	case 1:
 		mes "[Artifact Researcher]";
@@ -614,14 +606,11 @@ mora,148,98,3	script	Artifact Researcher#new	4_F_MORAFINE2,{
 		next;
 		mes "[Artifact Researcher]";
 		mes "If you come across any of these artifacts, there are hidden powers that can be extracted from them.";
-		next;
-		mes "[Artifact Researcher]";
+		mes " ";
 		mes "I'm going to continue my research for these artifacts. We researchers are taking Mora Coins as payment for our services...";
-		next;
-		mes "[Artifact Researcher]";
+		mes " ";
 		mes "I'm offering my services to give abilities to the artifacts for 100,000 zeny and 1 Mora Coin.";
-		next;
-		mes "[Artifact Researcher]";
+		mes " ";
 		mes "The best part of my service is that any enhancements that you have in these artifacts will not be harmed.";
 		close;
 	case 2:
@@ -638,7 +627,6 @@ mora,148,98,3	script	Artifact Researcher#new	4_F_MORAFINE2,{
 	}
 	mes "[Artifact Researcher]";
 	mes "Ok, so are you ready? Before I start working on this, what kind of equipment did you want me to enhance?";
-	next;
 	.@i = select("I'm not wearing the equipment:1. Weapon:2. Shoes:3. Garment:4. Armor:5. Accessory")-2;
 	if (.@i == -1) {
 		mes "[Artifact Researcher]";
@@ -738,7 +726,6 @@ L_Socket:
 			setarray .@enchant_type$[1],"ATK Type","Critical Type","Evasion Type","Healer Type","Spell Ability 1","Assist Ability 1","Assist Ability 2","Strength","Range Type","Physical Type","Spell Ability 2";
 			mes "[Artifact Researcher]";
 			mes "It's a considerable reinforcement to the equipment. In this case extended enhancements can be granted. Which stat do you want to enhance?";
-			next;
 			switch(select(.@enchant_type$[.@enchant_type],.@enchant_type$[getarg(1)])) {
 			case 1:
 				break;
@@ -755,8 +742,7 @@ L_Socket:
 			.@slot = 3;
 			mes "[Artifact Researcher]";
 			mes "Attempting second enhancement. The previous enforcement won't be affected.";
-			next;
-			mes "[Artifact Researcher]";
+			mes " ";
 			mes "I may have a chance to fail now with this attempt. Do you wish to continue?";
 		} else if (.@equip_card[1] == 0 && getarg(2) < 2) {
 			.@slot = 2;
@@ -767,7 +753,6 @@ L_Socket:
 			mes "This artifact has been strengthened to the limit. Further enhancement is impossible at its current state.";
 			close;
 		}
-		next;
 		if(select("I'll come back later.:Please continue!") == 1) {
 			mes "[Artifact Researcher]";
 			mes "If you change your mind, please come back.";
@@ -776,27 +761,27 @@ L_Socket:
 		switch(.@enchant_type) {
 		case 1: //Attack
 			     if (.@slot == 4) .@i = rand(1,525);
-			else if (.@slot == 3) .@i = rand(301,655);
-			else if (.@slot == 2) .@i = rand(451,750);
+			else if (.@slot == 3) .@i = rand(301,525);
+			else if (.@slot == 2) .@i = rand(451,669);
 			else {
 				mes "[Artifact Researcher]";
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 101) .@enchant = 4700; //Strength1
-			else if (.@i < 201) .@enchant = 4811; //Fighting_Spirit1
-			else if (.@i < 301) .@enchant = 4819; //Atk1
-			else if (.@i < 351) .@enchant = 4701; //Strength2
-			else if (.@i < 401) .@enchant = 4810; //Fighting_Spirit2
-			else if (.@i < 451) .@enchant = 4766; //Atk2
-			else if (.@i < 476) .@enchant = 4702; //Strength3
-			else if (.@i < 501) .@enchant = 4809; //Fighting_Spirit3
+			     if (.@i < 101) .@enchant = 4705; //Strength1
+			else if (.@i < 201) .@enchant = 4821; //Fighting_Spirit1
+			else if (.@i < 301) .@enchant = 4767; //Atk1
+			else if (.@i < 351) .@enchant = 4705; //Strength2
+			else if (.@i < 401) .@enchant = 4821; //Fighting_Spirit2
+			else if (.@i < 451) .@enchant = 4767; //Atk2
+			else if (.@i < 476) .@enchant = 4705; //Strength3
+			else if (.@i < 501) .@enchant = 4821; //Fighting_Spirit3
 			else if (.@i < 526) .@enchant = 4767; //Atk3
-			else if (.@i < 626) .@enchant = 0;
-			else if (.@i < 641) .@enchant = 4703; //Strength4
-			else if (.@i < 656) .@enchant = 4808; //Fighting_Spirit4
-			else if (.@i < 661) .@enchant = 4704; //Strength5
-			else if (.@i < 666) .@enchant = 4820; //Fighting_Spirit5
+			//else if (.@i < 626) .@enchant = 0;
+			else if (.@i < 641) .@enchant = 4705; //Strength4
+			else if (.@i < 656) .@enchant = 4821; //Fighting_Spirit4
+			else if (.@i < 661) .@enchant = 4705; //Strength5
+			else if (.@i < 666) .@enchant = 4821; //Fighting_Spirit5
 			else if (.@i < 668) .@enchant = 4705; //Strength6
 			else if (.@i < 670) .@enchant = 4821; //Fighting_Spirit6
 			else .@enchant = 9;
@@ -804,26 +789,26 @@ L_Socket:
 		case 2: //Critical
 			     if (.@slot == 4) .@i = rand(1,470);
 			else if (.@slot == 3) .@i = rand(201,610);
-			else if (.@slot == 2) .@i = rand(381,750);
+			else if (.@slot == 2) .@i = rand(381,617);
 			else {
 				mes "[Artifact Researcher]";
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 101) .@enchant = 4750; //Luck1
-			else if (.@i < 201) .@enchant = 4700; //Strength1
-			else if (.@i < 261) .@enchant = 4751; //Luck2
-			else if (.@i < 321) .@enchant = 4701; //Strength2
-			else if (.@i < 351) .@enchant = 4752; //Luck3
-			else if (.@i < 381) .@enchant = 4702; //Strength3
+			     if (.@i < 101) .@enchant = 4816; //Sharp1
+			else if (.@i < 201) .@enchant = 4703; //Strength1
+			else if (.@i < 261) .@enchant = 4816; //Sharp1
+			else if (.@i < 321) .@enchant = 4703; //Strength2
+			else if (.@i < 351) .@enchant = 4754; //Luck3
+			else if (.@i < 381) .@enchant = 4703; //Strength3
 			else if (.@i < 411) .@enchant = 4764; //Critical5
-			else if (.@i < 441) .@enchant = 4818; //Sharp1
-			else if (.@i < 471) .@enchant = 4752; //Luck3
-			else if (.@i < 571) .@enchant = 0;
-			else if (.@i < 586) .@enchant = 4753; //Luck4
+			else if (.@i < 441) .@enchant = 4816; //Sharp1
+			else if (.@i < 471) .@enchant = 4754; //Luck3
+			//else if (.@i < 571) .@enchant = 0;
+			else if (.@i < 586) .@enchant = 4754; //Luck4
 			else if (.@i < 601) .@enchant = 4754; //Luck5
 			else if (.@i < 606) .@enchant = 4765; //Critical7
-			else if (.@i < 611) .@enchant = 4817; //Sharp2
+			else if (.@i < 611) .@enchant = 4816; //Sharp2
 			else if (.@i < 616) .@enchant = 4703; //Strength4
 			else if (.@i < 618) .@enchant = 4816; //Sharp3
 			else .@enchant = 9;
@@ -831,25 +816,25 @@ L_Socket:
 		case 3: //Evasion
 			     if (.@slot == 4) .@i = rand(1,525);
 			else if (.@slot == 3) .@i = rand(301,670);
-			else if (.@slot == 2) .@i = rand(451,800);
+			else if (.@slot == 2) .@i = rand(451,682);
 			else {
 				mes "[Artifact Researcher]";
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 101) .@enchant = 4859; //Evasion1
-			else if (.@i < 201) .@enchant = 4750; //Luck1
-			else if (.@i < 301) .@enchant = 4730; //Agility1
-			else if (.@i < 351) .@enchant = 4860; //Evasion3
-			else if (.@i < 401) .@enchant = 4751; //Luck2
-			else if (.@i < 451) .@enchant = 4731; //Agility2
-			else if (.@i < 476) .@enchant = 4731; //Agility2
-			else if (.@i < 501) .@enchant = 4752; //Luck3
-			else if (.@i < 526) .@enchant = 4732; //Agility3
-			else if (.@i < 626) .@enchant = 0;
-			else if (.@i < 641) .@enchant = 4762; //Evasion6
-			else if (.@i < 656) .@enchant = 4753; //Luck4
-			else if (.@i < 671) .@enchant = 4733; //Agility4
+			     if (.@i < 101) .@enchant = 4763; //Evasion1
+			else if (.@i < 201) .@enchant = 4754; //Luck1
+			else if (.@i < 301) .@enchant = 4734; //Agility1
+			else if (.@i < 351) .@enchant = 4763; //Evasion3
+			else if (.@i < 401) .@enchant = 4754; //Luck2
+			else if (.@i < 451) .@enchant = 4734; //Agility2
+			else if (.@i < 476) .@enchant = 4734; //Agility2
+			else if (.@i < 501) .@enchant = 4754; //Luck3
+			else if (.@i < 526) .@enchant = 4734; //Agility3
+			//else if (.@i < 626) .@enchant = 0;
+			else if (.@i < 641) .@enchant = 4763; //Evasion6
+			else if (.@i < 656) .@enchant = 4754; //Luck4
+			else if (.@i < 671) .@enchant = 4734; //Agility4
 			else if (.@i < 676) .@enchant = 4763; //Evasion12
 			else if (.@i < 681) .@enchant = 4754; //Luck5
 			else if (.@i < 683) .@enchant = 4734; //Agility5
@@ -858,26 +843,26 @@ L_Socket:
 		case 4: //Healer
 			     if (.@slot == 4) .@i = rand(1,375);
 			else if (.@slot == 3) .@i = rand(201,535);
-			else if (.@slot == 2) .@i = rand(301,650);
+			else if (.@slot == 2) .@i = rand(301,549);
 			else {
 				mes "[Artifact Researcher]";
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 101) .@enchant = 4710; //Inteligence1
-			else if (.@i < 201) .@enchant = 4720; //Dexterity1
-			else if (.@i < 251) .@enchant = 4711; //Inteligence2
-			else if (.@i < 301) .@enchant = 4721; //Dexterity2
-			else if (.@i < 326) .@enchant = 4805; //Heal_Amount2
-			else if (.@i < 351) .@enchant = 4712; //Inteligence3
-			else if (.@i < 376) .@enchant = 4722; //Dexterity3
-			else if (.@i < 476) .@enchant = 0;
-			else if (.@i < 491) .@enchant = 4760; //Matk1
-			else if (.@i < 506) .@enchant = 4850; //Heal_Amount3
+			     if (.@i < 101) .@enchant = 4713; //Inteligence1
+			else if (.@i < 201) .@enchant = 4723; //Dexterity1
+			else if (.@i < 251) .@enchant = 4713; //Inteligence2
+			else if (.@i < 301) .@enchant = 4723; //Dexterity2
+			else if (.@i < 326) .@enchant = 4852; //Heal_Amount2
+			else if (.@i < 351) .@enchant = 4713; //Inteligence3
+			else if (.@i < 376) .@enchant = 4723; //Dexterity3
+			//else if (.@i < 476) .@enchant = 0;
+			else if (.@i < 491) .@enchant = 4806; //Matk1
+			else if (.@i < 506) .@enchant = 4852; //Heal_Amount3
 			else if (.@i < 521) .@enchant = 4713; //Inteligence4
 			else if (.@i < 536) .@enchant = 4723; //Dexterity4
-			else if (.@i < 541) .@enchant = 4761; //Matk2
-			else if (.@i < 546) .@enchant = 4851; //Heal_Amount4
+			else if (.@i < 541) .@enchant = 4806; //Matk2
+			else if (.@i < 546) .@enchant = 4852; //Heal_Amount4
 			else if (.@i < 548) .@enchant = 4806; //Matk3
 			else if (.@i < 550) .@enchant = 4852; //Heal_Amount5
 			else .@enchant = 9;
@@ -891,19 +876,19 @@ L_Socket:
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 101) .@enchant = 4710; //Inteligence1
-			else if (.@i < 201) .@enchant = 4720; //Dexterity1
-			else if (.@i < 301) .@enchant = 4795; //HP100
-			else if (.@i < 401) .@enchant = 4815; //Spell1
-			else if (.@i < 451) .@enchant = 4711; //Inteligence2
-			else if (.@i < 501) .@enchant = 4721; //Dexterity2
-			else if (.@i < 551) .@enchant = 4796; //HP200
-			else if (.@i < 601) .@enchant = 4814; //Spell2
-			else if (.@i < 701) .@enchant = 0;
-			else if (.@i < 716) .@enchant = 4712; //Inteligence3
-			else if (.@i < 731) .@enchant = 4722; //Dexterity3
+			     if (.@i < 101) .@enchant = 4713; //Inteligence1
+			else if (.@i < 201) .@enchant = 4723; //Dexterity1
+			else if (.@i < 301) .@enchant = 4797; //HP100
+			else if (.@i < 401) .@enchant = 4812; //Spell1
+			else if (.@i < 451) .@enchant = 4713; //Inteligence2
+			else if (.@i < 501) .@enchant = 4723; //Dexterity2
+			else if (.@i < 551) .@enchant = 4797; //HP200
+			else if (.@i < 601) .@enchant = 4812; //Spell2
+			//else if (.@i < 701) .@enchant = 0;
+			else if (.@i < 716) .@enchant = 4713; //Inteligence3
+			else if (.@i < 731) .@enchant = 4723; //Dexterity3
 			else if (.@i < 746) .@enchant = 4797; //HP300
-			else if (.@i < 761) .@enchant = 4813; //Spell3
+			else if (.@i < 761) .@enchant = 4812; //Spell3
 			else if (.@i < 763) .@enchant = 4713; //Inteligence4
 			else if (.@i < 765) .@enchant = 4723; //Dexterity4
 			else if (.@i < 767) .@enchant = 4812; //Spell4
@@ -912,21 +897,21 @@ L_Socket:
 		case 6: //Assist 1
 			     if (.@slot == 4) .@i = rand(1,520);
 			else if (.@slot == 3) .@i = rand(321,720);
-			else if (.@slot == 2) .@i = rand(521,850);
+			else if (.@slot == 2) .@i = rand(521,750);
 			else {
 				mes "[Artifact Researcher]";
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 81)  .@enchant = 4792; //Def6
-			else if (.@i < 161) .@enchant = 4787; //Mdef4
-			else if (.@i < 241) .@enchant = 4801; //SP100
-			else if (.@i < 321) .@enchant = 4796; //HP200
-			else if (.@i < 371) .@enchant = 4700; //Strength1
-			else if (.@i < 421) .@enchant = 4720; //Dexterity1
-			else if (.@i < 471) .@enchant = 4730; //Agility1
+			     if (.@i < 81)  .@enchant = 4793; //Def6
+			else if (.@i < 161) .@enchant = 4788; //Mdef4
+			else if (.@i < 241) .@enchant = 4802; //SP100
+			else if (.@i < 321) .@enchant = 4797; //HP200
+			else if (.@i < 371) .@enchant = 4701; //Strength1
+			else if (.@i < 421) .@enchant = 4721; //Dexterity1
+			else if (.@i < 471) .@enchant = 4731; //Agility1
 			else if (.@i < 521) .@enchant = 4740; //Vitality1
-			else if (.@i < 621) .@enchant = 0;
+			//else if (.@i < 621) .@enchant = 0;
 			else if (.@i < 646) .@enchant = 4793; //Def9
 			else if (.@i < 671) .@enchant = 4788; //Mdef6
 			else if (.@i < 696) .@enchant = 4802; //SP150
@@ -939,21 +924,21 @@ L_Socket:
 		case 7: //Assist 2
 			     if (.@slot == 4) .@i = rand(1,520);
 			else if (.@slot == 3) .@i = rand(321,720);
-			else if (.@slot == 2) .@i = rand(521,850);
+			else if (.@slot == 2) .@i = rand(521,750);
 			else {
 				mes "[Artifact Researcher]";
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 81)  .@enchant = 4792; //Def6
-			else if (.@i < 161) .@enchant = 4787; //Mdef4
-			else if (.@i < 241) .@enchant = 4801; //SP100
-			else if (.@i < 321) .@enchant = 4796; //HP200
-			else if (.@i < 371) .@enchant = 4710; //Inteligence1
-			else if (.@i < 421) .@enchant = 4720; //Dexterity1
-			else if (.@i < 471) .@enchant = 4730; //Agility1
-			else if (.@i < 521) .@enchant = 4740; //Vitality1
-			else if (.@i < 621) .@enchant = 0;
+			     if (.@i < 81)  .@enchant = 4793; //Def6
+			else if (.@i < 161) .@enchant = 4788; //Mdef4
+			else if (.@i < 241) .@enchant = 4802; //SP100
+			else if (.@i < 321) .@enchant = 4797; //HP200
+			else if (.@i < 371) .@enchant = 4711; //Inteligence1
+			else if (.@i < 421) .@enchant = 4721; //Dexterity1
+			else if (.@i < 471) .@enchant = 4731; //Agility1
+			else if (.@i < 521) .@enchant = 4741; //Vitality1
+			//else if (.@i < 621) .@enchant = 0;
 			else if (.@i < 646) .@enchant = 4793; //Def9
 			else if (.@i < 671) .@enchant = 4788; //Mdef6
 			else if (.@i < 696) .@enchant = 4802; //SP150
@@ -966,24 +951,24 @@ L_Socket:
 		case 8: //Strength
 			     if (.@slot == 4) .@i = rand(1,525);
 			else if (.@slot == 3) .@i = rand(301,685);
-			else if (.@slot == 2) .@i = rand(451,800);
+			else if (.@slot == 2) .@i = rand(451,687);
 			else {
 				mes "[Artifact Researcher]";
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 101) .@enchant = 4740; //Vitality1
-			else if (.@i < 201) .@enchant = 4797; //HP300
-			else if (.@i < 301) .@enchant = 4791; //Def3
-			else if (.@i < 351) .@enchant = 4741; //Vitality2
-			else if (.@i < 401) .@enchant = 4798; //HP400
-			else if (.@i < 451) .@enchant = 4792; //Def6
-			else if (.@i < 476) .@enchant = 4742; //Vitality3
-			else if (.@i < 501) .@enchant = 4793; //Def9
+			     if (.@i < 101) .@enchant = 4744; //Vitality1
+			else if (.@i < 201) .@enchant = 4799; //HP300
+			else if (.@i < 301) .@enchant = 4794; //Def3
+			else if (.@i < 351) .@enchant = 4744; //Vitality2
+			else if (.@i < 401) .@enchant = 4799; //HP400
+			else if (.@i < 451) .@enchant = 4794; //Def6
+			else if (.@i < 476) .@enchant = 4744; //Vitality3
+			else if (.@i < 501) .@enchant = 4794; //Def9
 			else if (.@i < 526) .@enchant = 4799; //HP500
-			else if (.@i < 626) .@enchant = 0;
-			else if (.@i < 641) .@enchant = 4742; //Vitality3
-			else if (.@i < 656) .@enchant = 4743; //Vitality4
+			//else if (.@i < 626) .@enchant = 0;
+			else if (.@i < 641) .@enchant = 4744; //Vitality3
+			else if (.@i < 656) .@enchant = 4744; //Vitality4
 			else if (.@i < 671) .@enchant = 4794; //Def12
 			//else if (.@i < 686) .@enchant = 01; // ??
 			else if (.@i < 688) .@enchant = 4744; //Vitality5
@@ -993,26 +978,26 @@ L_Socket:
 		case 9: //Range
 			     if (.@slot == 4) .@i = rand(1,470);
 			else if (.@slot == 3) .@i = rand(201,610);
-			else if (.@slot == 2) .@i = rand(321,750);
+			else if (.@slot == 2) .@i = rand(321,617);
 			else {
 				mes "[Artifact Researcher]";
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 101) .@enchant = 4750; //Luck1
-			else if (.@i < 201) .@enchant = 4720; //Dexterity1
-			else if (.@i < 261) .@enchant = 4751; //Luck2
-			else if (.@i < 321) .@enchant = 4721; //Dexterity2
-			else if (.@i < 351) .@enchant = 4752; //Luck3
-			else if (.@i < 381) .@enchant = 4722; //Dexterity3
-			else if (.@i < 411) .@enchant = 4764; //Critical5
-			else if (.@i < 441) .@enchant = 4832; //Expert_Archer1
+			     if (.@i < 101) .@enchant = 4835; //Expert_Archer4
+			else if (.@i < 201) .@enchant = 4724; //Dexterity1
+			else if (.@i < 261) .@enchant = 4835; //Expert_Archer4
+			else if (.@i < 321) .@enchant = 4724; //Dexterity2
+			else if (.@i < 351) .@enchant = 4753; //Luck3
+			else if (.@i < 381) .@enchant = 4724; //Dexterity3
+			else if (.@i < 411) .@enchant = 4765; //Critical5
+			else if (.@i < 441) .@enchant = 4835; //Expert_Archer1
 			else if (.@i < 471) .@enchant = 4753; //Luck4
-			else if (.@i < 571) .@enchant = 0;
-			else if (.@i < 586) .@enchant = 4723; //Dexterity4
-			else if (.@i < 601) .@enchant = 4833; //Expert_Archer2
+			//else if (.@i < 571) .@enchant = 0;
+			else if (.@i < 586) .@enchant = 4724; //Dexterity4
+			else if (.@i < 601) .@enchant = 4835; //Expert_Archer2
 			else if (.@i < 606) .@enchant = 4765; //Critical7
-			else if (.@i < 611) .@enchant = 4834; //Expert_Archer3
+			else if (.@i < 611) .@enchant = 4835; //Expert_Archer3
 			else if (.@i < 616) .@enchant = 4724; //Dexterity5
 			else if (.@i < 618) .@enchant = 4835; //Expert_Archer4
 			else .@enchant = 9;
@@ -1020,28 +1005,28 @@ L_Socket:
 		case 10: //Physical
 			     if (.@slot == 4) .@i = rand(1,600);
 			else if (.@slot == 3) .@i = rand(401,800);
-			else if (.@slot == 2) .@i = rand(601,930);
+			else if (.@slot == 2) .@i = rand(601,832);
 			else {
 				mes "[Artifact Researcher]";
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 101) .@enchant = 4791; //Def3
-			else if (.@i < 201) .@enchant = 4730; //Agility1
-			else if (.@i < 301) .@enchant = 4750; //Luck1
-			else if (.@i < 401) .@enchant = 4795; //HP100
-			else if (.@i < 451) .@enchant = 4792; //Def6
-			else if (.@i < 501) .@enchant = 4731; //Agility2
-			else if (.@i < 551) .@enchant = 4751; //Luck2
-			else if (.@i < 601) .@enchant = 4796; //HP200
-			else if (.@i < 701) .@enchant = 0;
+			     if (.@i < 101) .@enchant = 4793; //Def3
+			else if (.@i < 201) .@enchant = 4733; //Agility1
+			else if (.@i < 301) .@enchant = 4753; //Luck1
+			else if (.@i < 401) .@enchant = 4797; //HP100
+			else if (.@i < 451) .@enchant = 4793; //Def6
+			else if (.@i < 501) .@enchant = 4733; //Agility2
+			else if (.@i < 551) .@enchant = 4753; //Luck2
+			else if (.@i < 601) .@enchant = 4797; //HP200
+			//else if (.@i < 701) .@enchant = 0;
 			else if (.@i < 726) .@enchant = 4793; //Def9
-			else if (.@i < 751) .@enchant = 4732; //Agility3
-			else if (.@i < 776) .@enchant = 4752; //Luck3
+			else if (.@i < 751) .@enchant = 4733; //Agility3
+			else if (.@i < 776) .@enchant = 4753; //Luck3
 			else if (.@i < 801) .@enchant = 4797; //HP300
 			else if (.@i < 816) .@enchant = 4733; //Agility4
 			else if (.@i < 831) .@enchant = 4753; //Luck4
-			else if (.@i < 833) .@enchant = 4807; //Atk_Speed1
+			else if (.@i < 833) .@enchant = 4824; //Atk_Speed1
 			else .@enchant = 9;
 			break;
 		case 11: //Spell 2
@@ -1053,18 +1038,18 @@ L_Socket:
 				mes "An unknown error has occurred.";
 				close;
 			}
-			     if (.@i < 101) .@enchant = 4711; //Inteligence2
-			else if (.@i < 201) .@enchant = 4721; //Dexterity2
+			     if (.@i < 101) .@enchant = 4714; //Inteligence2
+			else if (.@i < 201) .@enchant = 4724; //Dexterity2
 			else if (.@i < 301) .@enchant = 4796; //HP200
-			else if (.@i < 401) .@enchant = 4814; //Spell2
-			else if (.@i < 451) .@enchant = 4712; //Inteligence3
-			else if (.@i < 501) .@enchant = 4722; //Dexterity3
-			else if (.@i < 551) .@enchant = 4760; //Matk1
-			else if (.@i < 601) .@enchant = 4813; //Spell3
-			else if (.@i < 701) .@enchant = 0;
-			else if (.@i < 716) .@enchant = 4713; //Inteligence4
-			else if (.@i < 731) .@enchant = 4723; //Dexterity4
-			else if (.@i < 746) .@enchant = 4761; //Matk2
+			else if (.@i < 401) .@enchant = 4812; //Spell2
+			else if (.@i < 451) .@enchant = 4714; //Inteligence3
+			else if (.@i < 501) .@enchant = 4724; //Dexterity3
+			else if (.@i < 551) .@enchant = 4806; //Matk1
+			else if (.@i < 601) .@enchant = 4812; //Spell3
+			//else if (.@i < 701) .@enchant = 0;
+			else if (.@i < 716) .@enchant = 4714; //Inteligence4
+			else if (.@i < 731) .@enchant = 4724; //Dexterity4
+			else if (.@i < 746) .@enchant = 4806; //Matk2
 			else if (.@i < 761) .@enchant = 4812; //Spell4
 			else if (.@i < 763) .@enchant = 4714; //Inteligence5
 			else if (.@i < 765) .@enchant = 4724; //Dexterity5
@@ -1151,7 +1136,7 @@ L_Socket:
 
 // Arch Bishop & Warlock Empowering :: relic_change
 //============================================================
-mora,124,82,4	script	Artifact Collector#blan	4_M_RAFLE_OR,{
+prontera,139,169,5	script	Arch Bishop, Warlock	4_M_RAFLE_OR,{
 	if (checkweight(1201,1) == 0) {
 		mes "Reduce the amount of items that you have in your inventory before continuing.";
 		close;
@@ -1162,9 +1147,6 @@ mora,124,82,4	script	Artifact Collector#blan	4_M_RAFLE_OR,{
 	}
 	disable_items;
 	emotion e_ho;
-	mes "Those Mora Artifacts look so perfect!";
-	mes "But I know you want them to be even better!";
-	next;
 	mes "[Artifact Collector]";
 	mes "Greetings Adventurer. We will be great friends in a moment after I tell you how to Empower your Artifacts!";
 	next;
@@ -1477,7 +1459,7 @@ function	script	F_Mora_Enchant	{
 	progressbar "ffff00",3;
 	delitem 6380,5; //Mora_Coin
 	delitem getarg(0),1;
-	.@i = rand(1,4568);
+	.@i = rand(1,3196);
 	if (.@i <= 3168) {
 		// Basic combinations
 		// (raw: .@i increments by 11)
