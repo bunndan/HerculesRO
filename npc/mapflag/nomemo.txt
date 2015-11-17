@@ -477,7 +477,7 @@ arug_cas05	mapflag	nomemo
 n_castle	mapflag	nomemo
 
 // GvG Arenas ================
-guild_vs1	mapflag	nomemo
+// guild_vs1	mapflag	nomemo
 guild_vs2	mapflag	nomemo
 guild_vs3	mapflag	nomemo
 guild_vs4	mapflag	nomemo

@@ -66,7 +66,7 @@ kh_kiehl02	mapflag	nosave	SavePoint
 que_bingo	mapflag	nosave	SavePoint
 
 // GvG Arenas ==========================
-guild_vs1	mapflag	nosave	SavePoint
+// guild_vs1	mapflag	nosave	SavePoint
 guild_vs2	mapflag	nosave	SavePoint
 guild_vs3	mapflag	nosave	SavePoint
 guild_vs4	mapflag	nosave	SavePoint

@@ -204,7 +204,7 @@ nguild_pay	mapflag	noteleport
 nguild_prt	mapflag	noteleport
 
 // GvG Arenas ===================
-guild_vs1	mapflag	noteleport
+// guild_vs1	mapflag	noteleport
 guild_vs2	mapflag	noteleport
 guild_vs3	mapflag	noteleport
 guild_vs4	mapflag	noteleport

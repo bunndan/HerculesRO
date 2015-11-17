@@ -186,7 +186,7 @@ nguild_pay	mapflag	nobranch
 nguild_prt	mapflag	nobranch
 
 // GvG Arenas ==================
-guild_vs1	mapflag	nobranch
+// guild_vs1	mapflag	nobranch
 guild_vs2	mapflag	nobranch
 guild_vs3	mapflag	nobranch
 guild_vs4	mapflag	nobranch
