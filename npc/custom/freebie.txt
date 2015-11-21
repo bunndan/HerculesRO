@@ -1,0 +1,66 @@
+//===== Hercules Script =======================================
+//= Item giver/deleter script
+//===== By: ==================================================
+//= bunndan
+//===== Current Version: =====================================
+//= 1.0
+//===== Description: =========================================
+//= This script allows players to input an item ID and it 
+//= generate the item. Used for those hard-to-get or 
+//= impossible quest items, and to delete any cash items 
+//= that you cannot sell or drop.
+//============================================================
+
+prontera,163,190,4	script	Item Generator	4_F_GENIE,{
+	
+	set .@n$,"^0000FF[ Generator ]^000000";
+	
+	mes .@n$;
+	mes "I can generate any item in the game for you. Just give me the ID of the item.";
+	mes " ";
+	mes "You can find the ID from either using the '@ii <ITEM NAME>' command or by using www.ratemyserver.com.";
+	next;
+	
+	input .@ItemID;
+	
+	mes .@n$;
+	mes "How many do you want?";
+	next;
+	
+	input .@Amount;
+	
+	getitem .@ItemID, .@Amount;
+	
+	mes .@n$;
+	mes "Thank you for your patronage!";
+	close;
+}
+
+prontera,165,192,4	script	Item Deleter	4_M_GENIE,{
+	
+	set .@n$,"^0000FF[ Deleter ]^000000";
+	
+	mes .@n$;
+	mes "I can remove an item from your inventory that you can't yourself Just give me the item ID.";
+	next;
+	
+	input .@ItemID;
+	
+	if (countitem (.@ItemID) < 1) {
+		mes .@n$;
+		mes "You do not own any items with ID " + .@ItemID + ".";
+		close;
+	}
+	
+	mes .@n$;
+	mes "How many do you want deleted?";
+	next;
+	
+	input .@Amount;
+	
+	delitem .@ItemID, .@Amount;
+	
+	mes .@n$;
+	mes "Thank you for your patronage!";
+	close;
+}
